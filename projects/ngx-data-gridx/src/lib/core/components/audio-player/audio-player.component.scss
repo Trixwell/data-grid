@@ -1,0 +1,142 @@
+@use '../../../../tokens' as token;
+
+.custom-audio {
+  display: flex;
+  align-items: center;
+  gap: token.$margin-4;
+
+  .round-button {
+    background: none;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease-in-out;
+
+    img {
+      width: 24px;
+      height: 24px;
+    }
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .progress-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .progress-bar {
+    position: relative;
+    width: 150px;
+    height: 5px;
+    background-color: token.$primary-50;
+    overflow: hidden;
+    cursor: pointer;
+    border: none;
+  }
+
+  .progress {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background-color: token.$primary-500;
+    transition: width 0.2s ease-in-out;
+  }
+
+  .volume-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+
+    .volume-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      mat-icon{
+        color: token.$neutral-800;
+      }
+
+      img {
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    input[type="range"] {
+      width: 80px;
+      cursor: pointer;
+      -webkit-appearance: none;
+      background: transparent;
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease-in-out;
+
+      &::-webkit-slider-runnable-track {
+        height: 4px;
+        background: token.$primary-50;
+      }
+
+      &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 12px;
+        height: 12px;
+        background: token.$primary-500;
+        border-radius: 50%;
+        margin-top: -4px;
+        transition: background 0.2s;
+      }
+
+      &:hover::-webkit-slider-thumb {
+        background: token.$primary-500;
+      }
+    }
+
+    &:hover input[type="range"] {
+      opacity: 1;
+      bottom: -5px;
+      pointer-events: all;
+    }
+  }
+
+  .menu-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease-in-out;
+
+    img, mat-icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+  }
+}

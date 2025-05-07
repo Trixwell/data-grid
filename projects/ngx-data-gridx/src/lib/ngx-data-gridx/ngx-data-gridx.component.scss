@@ -1,5 +1,8 @@
-@use './tokens' as token;
+@use '../../tokens' as token;
 
+.grid__container {
+  font-family: Roboto, sans-serif;
+}
 
 mat-icon{
   color: token.$neutral-800;
@@ -248,7 +251,7 @@ tr.example-detail-row {
   transform-origin: center;
   transition: transform 0.2s ease;
 
-  background: url("/assets/icons/swap-vert.svg") no-repeat center / contain;
+  background: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8.404 12.6538V5.373L5.56925 8.20775L4.5 7.15375L9.15375 2.5L13.8077 7.15375L12.7385 8.20775L9.90375 5.373V12.6538H8.404ZM14.8365 21.5L10.1828 16.8462L11.252 15.7923L14.0865 18.627V11.3463H15.5865V18.627L18.4212 15.7923L19.4902 16.8462L14.8365 21.5Z' fill='%23343A40'/%3E%3C/svg%3E") no-repeat center / contain;
 }
 
 ::ng-deep .mat-sort-header-sorted.mat-sort-header-arrow-direction-asc .mat-sort-header-arrow::before {

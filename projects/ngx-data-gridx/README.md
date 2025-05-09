@@ -57,11 +57,6 @@ export class AppModule {}
 
 ---
 
-## Outputs (`@Output`)
-
-
----
-
 ## Key Methods
 
 * `loadData(page, limit)` — Fetches data from `url` with filters, sorting, and pagination applied.

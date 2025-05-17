@@ -10,6 +10,9 @@
 
 To use `NgxDataGridx`, ensure you have Angular and Angular Material installed. Then, import the component into your module:
 
+📦 NPM Package:
+https://www.npmjs.com/package/@trixwell/ngx-data-gridx
+
 ```bash
 npm install ngx-data-gridx
 ```

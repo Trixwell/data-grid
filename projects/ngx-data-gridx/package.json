@@ -1,11 +1,25 @@
 {
-  "name": "ngx-data-gridx",
-  "version": "0.1.9",
+  "name": "@trixwell/ngx-data-gridx",
+  "version": "0.1.12",
+  "description": "Highly customizable Angular Material data grid component",
+  "keywords": [
+    "angular",
+    "data-grid",
+    "datatable",
+    "table",
+    "ngx",
+    "material",
+    "data-table",
+    "filter",
+    "pagination",
+    "export",
+    "subgrid"
+  ],
   "peerDependencies": {
-    "@angular/common": "^19.2.0",
-    "@angular/core": "^19.2.0",
-    "@angular/material": "^19.1.4",
-    "@angular/animations": "^19.1.6"
+    "@angular/common": ">=19.0.0",
+    "@angular/core": ">=19.0.0",
+    "@angular/material": ">=19.0.0",
+    "@angular/animations": ">=19.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

@@ -2,8 +2,9 @@
 
 ## Overview
 
-**NgxDataGridx** is a Angular component that renders data in a highly customizable and interactive data table. It supports features such as filtering, sorting, pagination, CSV export, expandable sub-grids, and integration with Angular Material components.
+**NgxDataGridx** is an Angular component that renders data in a highly customizable and interactive data table. It supports features such as filtering, sorting, pagination, CSV export, expandable sub-grids, and integration with Angular Material components.
 
+🔗 **GitHub Repository**: [Trixwell/data-grid](https://github.com/Trixwell/data-grid)
 ---
 
 ## Installation

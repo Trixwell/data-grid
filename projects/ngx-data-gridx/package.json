@@ -1,6 +1,7 @@
 {
   "name": "@trixwell/ngx-data-gridx",
   "version": "0.1.12",
+  "license": "LGPL-3.0",
   "description": "Highly customizable Angular Material data grid component",
   "keywords": [
     "angular",

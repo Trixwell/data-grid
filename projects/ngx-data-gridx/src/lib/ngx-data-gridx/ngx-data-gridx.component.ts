@@ -137,6 +137,15 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
     });
   }
 
+
+  showLoader(){
+    this.loading = true;
+  }
+
+  hideLoader(){
+    this.loading = false;
+  }
+
   executeAction(action: Action, row: object | null | undefined) {
     if(action.action) {
       const result = action.action(row);
@@ -612,7 +621,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
           this.total = 1;
         }
 
-        this.loading = false;
+        this.hideLoader();
         this.openFilterColumn = null;
       },
       complete: () => {
@@ -620,7 +629,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
       },
       error: (error: HttpErrorResponse) => {
         console.error(error.message);
-        this.loading = false;
+        this.hideLoader();
         this.openFilterColumn = null;
       }
     });
@@ -849,10 +858,14 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
 
 
   @HostListener('document:click', ['$event'])
-  onDocumentClick() {
-    if (this.openFilterColumn) {
-      this.openFilterColumn = null;
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+
+    if (target.closest('.filter-dropdown')) {
+      return;
     }
+
+    this.openFilterColumn = null;
   }
 
   protected readonly GridPropertyType = GridPropertyType;

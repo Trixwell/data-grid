@@ -31,7 +31,6 @@ export class GridProperty{
   callback?: (row: object | null | undefined) => string | undefined;
   columnSortIndex?: string;
   constructor(params: GridPropertiesDTO) {
-    console.log(params);
     this.name = params.name;
     this.displayName = params.displayName;
     this.type = params.type;

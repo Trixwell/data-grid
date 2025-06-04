@@ -343,6 +343,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
         this.dateFilters[column.name] = new FormGroup({
           start: new FormControl<Date | null>(null),
           end: new FormControl<Date | null>(null),
+          date: new FormControl<Date | null>(null)
         });
         this.subscribeDateFilter(column);
       }
@@ -368,7 +369,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
     });
 
     Object.keys(this.dateFilters).forEach((key) => {
-      this.dateFilters[key].patchValue({ start: null, end: null });
+      this.dateFilters[key].patchValue({ start: null, end: null, date: null });
       this.dateFilters[key].reset();
     });
 
@@ -574,17 +575,21 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
           this.setFilterValue(params, columnName, value);
 
         } else if (this.checkFilterType(filterType, 'date') && this.checkDateFilterValues(columnName) ) {
-          const formattedStart = this.formatDate(this.dateFilters[columnName].value.start);
-          const formattedEnd = this.formatDate(this.dateFilters[columnName].value.end);
+          const formattedStart = this.dateFilters[columnName].value.start ? this.formatDate(this.dateFilters[columnName].value.start) : null;
+          const formattedEnd   = this.dateFilters[columnName].value.end ? this.formatDate(this.dateFilters[columnName].value.end) : null;
+          const formattedDate  = this.dateFilters[columnName].value.date ? this.formatDate(this.dateFilters[columnName].value.date) : null;
 
-          this.setFilterValue(params, columnName, `${formattedStart},${formattedEnd}`);
+          const date = formattedStart && formattedEnd
+            ? `${formattedStart},${formattedEnd}`
+            : formattedDate;
+          this.setFilterValue(params, columnName, `${date}`);
         }
       });
     });
   }
 
   private checkDateFilterValues(columnName: string){
-    return this.dateFilters[columnName]?.value.start && this.dateFilters[columnName]?.value.end
+    return (this.dateFilters[columnName]?.value.start && this.dateFilters[columnName]?.value.end) || this.dateFilters[columnName]?.value?.date
   }
 
   private setFilterValue(params: URLSearchParams,
@@ -697,15 +702,18 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
   onDateRangeChange(columnName: string, dateGroup: FormGroup) {
     const start = dateGroup.value.start ? this.formatDate(dateGroup.value.start) : null;
     const end = dateGroup.value.end ? this.formatDate(dateGroup.value.end) : null;
+    const date = dateGroup.value.date ? this.formatDate(dateGroup.value.date) : null;
 
-    if (start && end) {
+    if ((start && end) || date) {
       if (!this.appliedFilters[columnName]) {
         this.appliedFilters[columnName] = {};
       }
 
+      const value = date ? date : `${start},${end}`;
+
       this.appliedFilters[columnName]['date'] = {
-        label: `Дата ${start} - ${end}`,
-        value: `${start},${end}`
+        label: `Дата ${value}`,
+        value: value
       };
 
       this.loadData(1, this.limit);

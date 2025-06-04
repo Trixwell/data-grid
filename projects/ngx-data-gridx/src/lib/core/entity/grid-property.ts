@@ -10,6 +10,9 @@ export class GridProperty{
   filter?: {
     label: string;
     type: "multi-search" | "text" | "checkbox" | "select" | "multi-select" | "date" | "input";
+    dateOptions?:{
+      range: boolean;
+    }
     multiSearchOptions?:{
       url:string;
       id: string;
@@ -28,6 +31,7 @@ export class GridProperty{
   callback?: (row: object | null | undefined) => string | undefined;
   columnSortIndex?: string;
   constructor(params: GridPropertiesDTO) {
+    console.log(params);
     this.name = params.name;
     this.displayName = params.displayName;
     this.type = params.type;
@@ -44,6 +48,22 @@ export class GridProperty{
     this.subGridSettings = params.subGridSettings || null;
     this.callback = params.callback || undefined;
     this.columnSortIndex = params.columnSortIndex || '';
+
+    this.setDateOptionsByDefault(params);
+  }
+
+  setDateOptionsByDefault(params: GridPropertiesDTO){
+    this.filter = (params.filter || []).map(f => {
+      const rangeValue = f.dateOptions?.range ?? true;
+
+      return {
+        label: f.label,
+        type: f.type,
+        callback: f.callback,
+        multiSearchOptions: f.multiSearchOptions,
+        dateOptions: { range: rangeValue }
+      };
+    });
   }
 }
 //grid property ident(settings)
@@ -69,6 +89,9 @@ export interface GridPropertiesDTO{
     label: string;
     type: "multi-search" | "text" | "checkbox" | "select" | "multi-select" | "date" | "input";
     callback?: (columnName: string, filterType: string, value: string | number | string[]) => void;
+    dateOptions?:{
+      range: boolean;
+    },
     multiSearchOptions?:{
       url:string;
       id: string;

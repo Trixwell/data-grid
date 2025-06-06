@@ -1,0 +1,160 @@
+@use './tokens' as token;
+@use '../theme' as common;
+
+.grid-theme-broad {
+  @include common.grid-theme-common;
+
+  font-family: Roboto, sans-serif;
+
+  mat-icon {
+    color: token.$neutral-800;
+  }
+
+  ::ng-deep .mdc-checkbox__background {
+    border: 2px solid token.$neutral-800;
+  }
+
+  .grid__container .grid__name {
+    font: token.$font-h1;
+    color: token.$neutral-950;
+    font-weight: 500;
+  }
+
+  .grid__th {
+    background: token.$primary-200 !important;
+    border: 1px solid token.$primary-100;
+    color: token.$neutral-950;
+    font-weight: token.$font-weight-h !important;
+    line-height: 16px;
+    font: token.$font-body-s;
+    border-bottom-color: transparent;
+    overflow: visible;
+    position: relative;
+  }
+
+  .grid__checkbox {
+    width: 56px;
+  }
+
+  .grid__th:first-child {
+    border-top-left-radius: token.$border-radius-small;
+  }
+
+  .grid__th:last-child {
+    border-top-right-radius: token.$border-radius-small;
+  }
+
+  .grid__td {
+    border-bottom: 1px solid token.$primary-100;
+    background: transparent;
+    max-width: 70px;
+
+    .column-content span {
+      color: token.$neutral-800;
+    }
+  }
+
+  .grid__container__wrapper {
+    box-shadow: 0 2px 4px token.$shadow-medium;
+    border-radius: token.$border-radius-small;
+  }
+
+  ::ng-deep mat-paginator .mat-mdc-select-trigger {
+    gap: token.$margin-1;
+  }
+
+  .grid__header {
+    margin-top: token.$space-6;
+
+    .grid__filter_selected_options {
+      display: flex;
+      gap: token.$space-4;
+    }
+
+    .grid__filters {
+      display: flex;
+      gap: token.$space-6;
+      align-items: center;
+      margin-bottom: token.$space-4;
+      justify-content: space-between;
+
+      .grid__options {
+        display: flex;
+      }
+    }
+
+    .grid__filter_option {
+      display: flex;
+      align-items: center;
+      gap: token.$space-1;
+      color: token.$neutral-800;
+      font: token.$font-table-header-m;
+      font-weight: token.$font-weight-b;
+    }
+
+    .grid__filter_option .mat-icon {
+      cursor: pointer;
+    }
+
+    .grid__filter_actions span:first-child {
+      color: token.$primary-600;
+      text-decoration: underline;
+      cursor: pointer;
+      font: token.$font-table-header-m;
+      font-weight: token.$font-weight-b;
+    }
+
+    .grid__filter_actions {
+      background: transparent;
+      border: none;
+    }
+  }
+
+  .sub-grid-accordion-btn {
+    width: 24px;
+    height: 24px;
+    background-color: token.$primary-50;
+    border-radius: token.$border-radius-small;
+  }
+
+  .sub-grid-container {
+    .grid__td {
+      background: token.$primary-50;
+      border-bottom: 1px solid token.$primary-100;
+    }
+
+    .grid__paginator {
+      background: token.$primary-50;
+    }
+
+    .grid__header {
+      margin-top: 0;
+    }
+
+    .grid__th {
+      border-radius: 0;
+    }
+  }
+
+  ::ng-deep
+  .grid__paginator
+  .mat-mdc-paginator-outer-container
+  .mat-mdc-paginator-container {
+    justify-content: flex-end !important;
+  }
+
+  ::ng-deep .mat-mdc-paginator .mat-mdc-select {
+    border-bottom: 1px solid token.$primary-100;
+  }
+
+  .sub-grid-accordion-btn,
+  .sub-grid-accordion-btn:hover,
+  .sub-grid-accordion-btn:focus {
+    box-shadow: none !important;
+  }
+
+
+  ::ng-deep .grid__paginator .mdc-notched-outline > * {
+    border: none !important;
+  }
+}

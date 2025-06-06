@@ -1,0 +1,177 @@
+$space-0: 0px;
+$space-1: 4px;
+$space-2: 8px;
+$space-3: 12px;
+$space-4: 16px;
+$space-5: 20px;
+$space-6: 24px;
+$space-7: 32px;
+$space-8: 40px;
+$space-9: 48px;
+$space-10: 56px;
+$space-11: 64px;
+$space-12: 72px;
+$space-220: 220px;
+
+$margin-0: 0px;
+$margin-1: 4px;
+$margin-2: 8px;
+$margin-3: 12px;
+$margin-4: 16px;
+$margin-5: 20px;
+$margin-6: 24px;
+$margin-7: 32px;
+$margin-8: 40px;
+$margin-9: 48px;
+$margin-10: 56px;
+$margin-11: 64px;
+$margin-12: 72px;
+
+// $font: (font-size && line spacing)
+$font-h1: 32px / 38px Roboto, sans-serif;
+$font-h2: 24px / 32px Roboto, sans-serif;
+$font-h3: 20px / 28px Roboto, sans-serif;
+$font-h4: 16px / 24px Roboto, sans-serif;
+
+$font-table-header-m: bold 14px / 16px Roboto, sans-serif;
+$font-table-header-s: bold 12px / 16px Roboto, sans-serif;
+
+$font-body-l: 18px / 28px Roboto, sans-serif;
+$font-body-m: 16px / 24px Roboto, sans-serif;
+$font-body-m-bold: bold 16px / 24px Roboto, sans-serif;
+$font-body-s: 14px / 18px Roboto, sans-serif;
+$font-body-xs: 12px / 14px Roboto, sans-serif;
+
+$font-button-l: 16px / 24px Roboto, sans-serif;
+$font-button-m: 14px / 16px Roboto, sans-serif;
+$font-button-m-light: 14px / 16px Roboto, sans-serif;
+$font-button-s: 12px / 16px Roboto, sans-serif;
+
+$font-caption-s: 12px / 16px Roboto, sans-serif;
+$font-caption-m: 14px / 16px Roboto, sans-serif;
+
+$radius-small: 4px;
+$radius-medium: 8px;
+$radius-large: 16px;
+$radius-round: 1000px;
+
+$border-1: 1px;
+$border-2: 2px;
+$border-3: 3px;
+$border-4: 4px;
+$border-5: 5px;
+$border-6: 6px;
+
+$font-weight-h: 700;
+$font-weight-b: 400;
+$font-weight-m: 300;
+
+$shadow-light: 0px 2px 4px 0px #0000001A;
+$shadow-medium: rgba(0, 0, 0, 0.15);
+$shadow-dark: rgba(0, 0, 0, 0.2);
+
+$z-index-base: 1;
+$z-index-dropdown: 10;
+$z-index-modal: 100;
+$z-index-overlay: 1000;
+
+$primary-50: #F5F7FD;
+$primary-100: #E1E7F8;
+$primary-200: #C9D4F4;
+$primary-300: #A5B9EB;
+$primary-400: #7A95E0;
+$primary-500: #5A72D7;
+$primary-600: #4656CA;
+$primary-700: #3C46B9;
+$primary-800: #363B97;
+$primary-900: #303578;
+$primary-950: #21234A;
+
+$neutral-50: #FFFFFF;
+$neutral-100: #F8F9FA;
+$neutral-200: #E9ECEF;
+$neutral-300: #DEE2E6;
+$neutral-400: #CED4DA;
+$neutral-500: #ADB5BD;
+$neutral-600: #6C757D;
+$neutral-700: #495057;
+$neutral-800: #343A40;
+$neutral-900: #212529;
+$neutral-950: #0E1012;
+
+$secondary-500: #6C757D;
+
+$success-200: #B8E9BC;
+$success-500: #28A745;
+$success-700: #1A6E2E;
+
+$danger-200: #F7B7B9;
+$danger-500: #DC3545;
+$danger-700: #A71D28;
+
+$warning-200: #FFE082;
+$warning-500: #FFC107;
+$warning-700: #FFA000;
+
+$info-200: #9BD9E7;
+$info-500: #17A2B8;
+$info-700: #0D7180;
+
+$spacing-space-1: $space-1;
+$spacing-space-2: $space-2;
+$spacing-space-3: $space-3;
+$spacing-space-4: $space-4;
+$spacing-space-5: $space-5;
+$spacing-space-6: $space-6;
+$spacing-space-7: $space-7;
+$spacing-space-8: $space-8;
+$spacing-space-9: $space-9;
+$spacing-space-10: $space-10;
+$spacing-space-11: $space-11;
+$spacing-space-12: $space-12;
+
+$font-sizes-font-h1: $font-h1;
+$font-sizes-font-h2: $font-h2;
+$font-sizes-font-h3: $font-h3;
+$font-sizes-font-h4: $font-h4;
+
+$font-sizes-font-table-header-m: $font-table-header-m;
+$font-sizes-font-table-header-s: $font-table-header-s;
+
+$font-sizes-font-body-l: $font-body-l;
+$font-sizes-font-body-m: $font-body-m;
+$font-sizes-font-body-s: $font-body-s;
+
+$font-sizes-font-button-l: $font-button-l;
+$font-sizes-font-button-m: $font-button-m;
+$font-sizes-font-button-s: $font-button-s;
+
+$font-sizes-font-caption-s: $font-caption-s;
+$font-sizes-font-caption-m: $font-caption-m;
+
+$font-weights-font-weight-h: $font-weight-h;
+$font-weights-font-weight-b: $font-weight-b;
+$font-weights-font-weight-m: $font-weight-m;
+
+$border-radius-small: $radius-small;
+$border-radius-medium: $radius-medium;
+$border-radius-large: $radius-large;
+$border-radius-round: $radius-round;
+
+$shadows-light: $shadow-light;
+$shadows-medium: $shadow-medium;
+$shadows-dark: $shadow-dark;
+
+$z-index-base: $z-index-base;
+$z-index-dropdown: $z-index-dropdown;
+$z-index-modal: $z-index-modal;
+$z-index-overlay: $z-index-overlay;
+
+$scrollbar-color: $neutral-500;
+$scrollbar-radius: $radius-medium;
+$scrollbar-color-hover: $neutral-600;
+
+$scrollbar-track-color: $neutral-100;
+$scrollbar-track-radius: $radius-medium;
+
+$select-input-space-10: 10px;

@@ -1,0 +1,250 @@
+@use './tokens' as token;
+@use '../theme' as common;
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+
+.grid-theme-flat {
+  @include common.grid-theme-common;
+
+  font-family: 'Manrope', sans-serif;
+
+  ::ng-deep
+  .mdc-checkbox__native-control:enabled:checked~.mdc-checkbox__background,
+  .mdc-checkbox__native-control:enabled:indeterminate~.mdc-checkbox__background {
+    border-color: token.$violet-700 !important;
+    background-color: token.$violet-700 !important;
+  }
+
+  h1, h2, h3, h4, h5, h6,
+  p, span, a, li, label, button, input, textarea {
+    font-family: 'Manrope', sans-serif;
+  }
+
+  mat-icon {
+    color: token.$default-400;
+  }
+
+  ::ng-deep .mdc-checkbox__background {
+    border: 2px solid token.$violet-700;
+  }
+
+  .grid__container .grid__name {
+    font: token.$font-h1;
+    color: token.$violet-900;
+  }
+
+  .grid__th {
+    background: token.$violet-50 !important;
+    border: token.$border-1 solid token.$violet-100;
+    color: token.$default-900;
+    font: token.$font-subtitle-m;
+    overflow: visible;
+    position: relative;
+  }
+
+  .grid__checkbox {
+    width: 56px;
+  }
+
+  .grid__th:first-child {
+    border-top-left-radius: token.$radius-32;
+  }
+
+  .grid__th:last-child {
+    border-top-right-radius: token.$radius-32;
+  }
+
+  .grid__td:first-child {
+    border-left: token.$border-1 solid token.$violet-100;
+  }
+
+  .grid__td:last-child {
+    border-right: token.$border-1 solid token.$violet-100;
+  }
+
+  tr.example-element-row:nth-last-of-type(2) {
+    .grid__td:first-child {
+      border-bottom-left-radius: token.$radius-32;
+    }
+    .grid__td:last-child {
+      border-bottom-right-radius: token.$radius-32;
+    }
+  }
+
+  .sub-grid-container {
+    tr.example-element-row:nth-last-of-type(2) {
+      .grid__td:first-child {
+        border-bottom-left-radius: 0 !important;
+      }
+      .grid__td:last-child {
+        border-bottom-right-radius: 0 !important;
+      }
+    }
+  }
+
+  .grid__td {
+    border-bottom: 1px solid token.$violet-100;
+    background: transparent;
+    max-width: 70px;
+
+    .column-content span {
+      color: token.$default-800;
+      font: token.$font-body-m;
+    }
+  }
+
+  .grid__container__wrapper {
+    box-shadow: 0 2px 4px var(--shadow-md);
+    border-radius: token.$radius-4;
+  }
+
+  ::ng-deep mat-paginator .mat-mdc-select-trigger {
+    gap: token.$space-4;
+  }
+
+  .grid__header {
+    margin-top: token.$space-8;
+
+    .grid__filter_selected_options {
+      display: flex;
+      gap: token.$space-4;
+    }
+
+    .grid__filters {
+      display: flex;
+      gap: token.$space-8;
+      align-items: center;
+      margin-bottom: token.$space-16;
+      justify-content: space-between;
+
+      .grid__options {
+        display: flex;
+      }
+    }
+
+    .grid__filter_option {
+      display: flex;
+      align-items: center;
+      gap: token.$space-4;
+      color: token.$default-900;
+      font: token.$font-body-m;
+    }
+
+    .grid__filter_option .mat-icon {
+      cursor: pointer;
+    }
+
+    .grid__filter_actions span:first-child {
+      color: token.$violet-700;
+      text-decoration: underline;
+      cursor: pointer;
+      font: token.$font-body-m;
+    }
+
+    .grid__filter_actions {
+      background: transparent;
+      border: none;
+    }
+  }
+
+  .sub-grid-accordion-btn {
+    width: 24px;
+    height: 24px;
+    background-color: token.$violet-50;
+    border-radius: token.$radius-4;
+  }
+
+  .sub-grid-container {
+    .grid__td {
+      background: token.$violet-50;
+      border-bottom: 1px solid token.$violet-100;
+    }
+
+    .grid__paginator {
+      background: token.$violet-50;
+    }
+
+    .grid__header {
+      margin-top: 0;
+    }
+
+    .grid__th {
+      border-radius: 0;
+    }
+  }
+
+  ::ng-deep{
+    .mat-mdc-paginator-icon{
+      fill: token.$default-400;
+    }
+  }
+
+  ::ng-deep .mdc-checkbox__native-control:enabled:checked ~ .mdc-checkbox__background,
+  ::ng-deep .mdc-checkbox__native-control:enabled:indeterminate ~ .mdc-checkbox__background {
+    border-color: token.$violet-700;
+    background-color: token.$violet-700;
+  }
+
+  ::ng-deep{
+    .mat-mdc-icon-button[aria-disabled] .mat-mdc-paginator-icon{
+      fill: token.$default-200 !important;
+    }
+  }
+
+  ::ng-deep .grid__paginator .mdc-notched-outline > * {
+    border: none !important;
+  }
+
+  ::ng-deep .mat-mdc-paginator .mat-mdc-select {
+    border-bottom: 1px solid token.$violet-100;
+  }
+
+  .sub-grid-accordion-btn,
+  .sub-grid-accordion-btn:hover,
+  .sub-grid-accordion-btn:focus {
+    box-shadow: none !important;
+  }
+
+  ::ng-deep{
+
+    .sub-grid-container{
+      mat-paginator{
+        margin-top: 0 !important;
+      }
+    }
+
+    mat-paginator{
+      margin-top: token.$space-12;
+
+      .mat-mdc-paginator-container{
+        justify-content: center;
+      }
+
+      .g-square-container {
+        display: flex;
+        gap: token.$space-4;
+      }
+
+      .g-square {
+        border-radius: token.$radius-8;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: token.$default-800;
+        font-size: token.$font-body-l;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .g-square:hover {
+        background-color: token.$violet-100;
+      }
+
+      .g-square__active {
+        background-color: token.$violet-700;
+        color: white;
+      }
+    }
+  }
+}

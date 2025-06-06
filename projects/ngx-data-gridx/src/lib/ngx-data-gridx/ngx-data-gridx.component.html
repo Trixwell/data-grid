@@ -1,5 +1,5 @@
-<div class="grid__container">
-  <div class="grid__header">
+<div class="grid__container" [ngClass]="'grid-theme-' + theme">
+  <div class="grid__header" *ngIf="showHistoryFilters || grid_name">
     <div class="grid__filters" [ngClass]="{'sub__grid_filter': isSubGrid()}">
       <div class="grid-title">
         <span class="grid__name" *ngIf="grid_name">{{ grid_name }}</span>
@@ -261,6 +261,7 @@
                   *ngFor="let o of [currentGridColumn]; trackBy: trackByKey"
                   [url]="currentGridColumn?.subGridSettings?.suburl"
                   [data]="currentGridColumn?.subGridPropertyList || []"
+                  [theme]="getCurrentTheme()"
                   [subUrlParams]="currentGridColumn?.subGridSettings?.subUrlParams"
                   [currentRow]  = "expandedElement"
                   [parentGridFilters] = "{ filters: appliedFilters, search: searchValues}"
@@ -306,11 +307,26 @@
         </tr>
       </table>
 
-      <mat-paginator [pageSizeOptions]="uniquePageSizeOptions()"
-                     [pageSize]="limit"
-                     [length]="total"
-                     class="grid__paginator">
-      </mat-paginator>
+      <ng-container *ngIf="getCurrentTheme() === GridTheme.FLAT && !isSubGrid(); else broadPaginator">
+        <mat-paginator
+          appSquarePagination
+          [appCustomLength]="total"
+          [showFirstLastButtons]="true"
+          [pageSizeOptions]="uniquePageSizeOptions()"
+          [pageSize]="limit"
+          [length]="total"
+          class="grid__paginator">
+        </mat-paginator>
+      </ng-container>
+
+      <ng-template #broadPaginator>
+        <mat-paginator
+          [pageSizeOptions]="uniquePageSizeOptions()"
+          [pageSize]="limit"
+          [length]="total"
+          class="grid__paginator">
+        </mat-paginator>
+      </ng-template>
     </div>
   </div>
 </div>

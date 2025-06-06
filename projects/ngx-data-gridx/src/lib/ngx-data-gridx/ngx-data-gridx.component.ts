@@ -28,6 +28,7 @@ import {animate, state, style, transition, trigger} from '@angular/animations';
 import {SelectionModel} from '@angular/cdk/collections';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {AudioPlayerComponent} from '../core/components/audio-player/audio-player.component';
+import {SquarePaginatorDirective} from '../directives/square-paginator.directive';
 
 @Component({
   selector: 'ngx-data-gridx',
@@ -49,6 +50,7 @@ import {AudioPlayerComponent} from '../core/components/audio-player/audio-player
     ReactiveFormsModule,
     MatProgressBarModule,
     AudioPlayerComponent,
+    SquarePaginatorDirective
   ],
   providers: [provideNativeDateAdapter()],
   animations: [
@@ -79,6 +81,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
   @Input() showHistoryFilters?: boolean = true;
   @Input() key?: string | null = null;
   @Input() expandedElement: object | null | undefined;
+  @Input() theme: GridTheme  = GridTheme.BROAD;
   @Input() noDataPlaceholder = 'Даних поки що немає, але не хвилюйтесь вони скоро з\'являться.';
   @Input() parentGridFilters: {
     search: Record<string, string>,
@@ -92,7 +95,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
 
   currentGridColumn: GridProperty | null = null;
 
-  total?: number = 0;
+  total: number = 0;
   displayedColumns: string[] = [];
 
   searchValues: Record<string, string> = {};
@@ -165,6 +168,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
         });
       }
     }
+  }
+
+  getCurrentTheme(){
+    return this.theme;
   }
 
   exportCsvAction() {
@@ -328,7 +335,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
       next: (response) => {
         if (response && Array.isArray(response.response.list)) {
           this.rows.data = response.response.list;
-          this.total = response.response.total;
+          this.total = response?.response?.total || 0;
         }
       },
       error: (error: HttpErrorResponse) => {
@@ -873,10 +880,21 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
       return;
     }
 
+    if (
+      target.closest('.cdk-overlay-pane') instanceof HTMLElement &&
+      (
+        target.closest('.mat-datepicker-content') ||
+        target.closest('.mat-calendar')
+      )
+    ) {
+      return;
+    }
+
     this.openFilterColumn = null;
   }
 
   protected readonly GridPropertyType = GridPropertyType;
+  protected readonly GridTheme = GridTheme;
 }
 
 export interface GridResponseDTO {
@@ -905,4 +923,9 @@ export interface SearchItem {
 interface SearchQuery {
   term: string;
   multiSearch: {url:string; id: string; label: string; }
+}
+
+export enum GridTheme{
+  BROAD = 'broad',
+  FLAT  = 'flat'
 }

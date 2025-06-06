@@ -1,0 +1,92 @@
+$primary-violet: #6C7DE6;
+
+$violet-50: #F3F4FF;
+$violet-100: #E0E4FF;
+$violet-200: #BCC8FF;
+$violet-300: #B9C2FA;
+$violet-500: #99A6F9;
+$violet-700: #6C7DE6;
+$violet-900: #4955B6;
+
+$default-50: #FEFEFE;
+$default-100: #EFEFEF;
+$default-200: #DCDCDC;
+$default-300: #BDBDBD;
+$default-400: #989898;
+$default-500: #7C7C7C;
+$default-600: #656565;
+$default-700: #525252;
+$default-800: #464646;
+$default-900: #303030;
+$default-950: #121212;
+
+$success-50: #F0FFF5;
+$success-100: #D3F9D8;
+$success-500: #4BB543;
+$success-700: #2F9E44;
+
+$warning-50: #FFFBE6;
+$warning-100: #FFF1B8;
+$warning-500: #FAAD14;
+$warning-700: #D48806;
+
+$error-50: #FFF1F0;
+$error-100: #FFE0DC;
+$error-500: #FF4D4F;
+$error-700: #D9363E;
+
+$space-0: 0px;
+$space-4: 4px;
+$space-8: 8px;
+$space-12: 12px;
+$space-16: 16px;
+$space-20: 20px;
+$space-24: 24px;
+$space-32: 32px;
+$space-40: 40px;
+$space-48: 48px;
+$space-56: 56px;
+$space-64: 64px;
+$space-72: 72px;
+
+
+$font-h1: 700 40px/48px 'Manrope';
+$font-h2: 700 32px/40px 'Manrope';
+$font-h3: 700 24px/32px 'Manrope';
+$font-h4: 700 20px/24px 'Manrope';
+$font-h5: 500 20px/24px 'Manrope';
+
+$font-subtitle-l: 700 16px/20px 'Manrope';
+$font-subtitle-m: 600 16px/20px 'Manrope';
+$font-subtitle-s: 600 14px/18px 'Manrope';
+
+$font-body-l: 400 16px/20px 'Manrope';
+$font-body-m: 300 16px/20px 'Manrope';
+$font-body-s: 400 14px/18px 'Manrope';
+
+$font-button-l: 600 16px/24px 'Manrope';
+$font-button-m: 600 14px/20px 'Manrope';
+
+$font-caption-l: 500 12px/16px 'Manrope';
+$font-caption-m: 400 12px/16px 'Manrope';
+$font-caption-s: 400 10px/14px 'Manrope';
+
+
+$radius-4: 4px;
+$radius-8: 8px;
+$radius-16: 16px;
+$radius-24: 24px;
+$radius-32: 32px;
+$radius-1000: 1000px;
+
+$border-1: 1px;
+$border-2: 2px;
+$border-3: 3px;
+$border-4: 4px;
+
+
+:root {
+  --shadow-sm: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0px 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0px 8px 24px rgba(0, 0, 0, 0.12);
+}

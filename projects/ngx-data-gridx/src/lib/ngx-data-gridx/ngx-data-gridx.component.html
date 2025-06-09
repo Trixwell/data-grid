@@ -266,6 +266,7 @@
                   [currentRow]  = "expandedElement"
                   [parentGridFilters] = "{ filters: appliedFilters, search: searchValues}"
                   [expandedElement] = "expandedElement"
+                  [autoRefreshIntervalSec]="currentGridColumn?.subGridSettings?.autoRefreshIntervalSec || null"
                   [limit]="currentGridColumn?.subGridSettings?.subGridProps?.limit || 10"
                   [showFilters] = "currentGridColumn?.subGridSettings?.subGridProps?.showFilters || false"
                   [multiselect] = "currentGridColumn?.subGridSettings?.subGridProps?.multiselect">

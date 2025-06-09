@@ -1,7 +1,7 @@
 import {
   AfterViewInit, ChangeDetectorRef,
   Component, ElementRef, HostListener,
-  Input, OnInit,
+  Input, OnDestroy, OnInit,
   ViewChild
 } from '@angular/core';
 import {GridProperty, GridPropertyType} from '../core/entity/grid-property';
@@ -19,7 +19,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
 import {MatMenuModule} from '@angular/material/menu';
-import {isObservable, map, Observable, of, Subject, Subscription, takeUntil} from 'rxjs';
+import {interval, isObservable, map, Observable, of, Subject, Subscription, takeUntil} from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import {MatOptionSelectionChange, provideNativeDateAdapter} from '@angular/material/core';
 import {MatDatepickerModule} from '@angular/material/datepicker';
@@ -66,7 +66,7 @@ import {SquarePaginatorDirective} from '../directives/square-paginator.directive
   styleUrl: './ngx-data-gridx.component.scss',
 })
 
-export class NgxDataGridx implements OnInit, AfterViewInit {
+export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   @Input() url?: string;
   @Input() exportCsvUrl?: string;
   @Input() data: GridProperty[] = [];
@@ -87,6 +87,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
     search: Record<string, string>,
     filters: Record<string, Record<string, AppliedFiltersDTO>>
   } = { search: {}, filters: {} };
+  @Input() autoRefreshIntervalSec: number | null = null;
 
   @ViewChild('searchField') searchField!: ElementRef<HTMLInputElement>;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -94,6 +95,9 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
   @ViewChild('audioPlayer') audioPlayerRef!: ElementRef<HTMLAudioElement>;
 
   currentGridColumn: GridProperty | null = null;
+
+  private autoRefreshSub: Subscription | null = null;
+  private autoRefreshDestroy$ = new Subject<void>();
 
   total: number = 0;
   displayedColumns: string[] = [];
@@ -132,6 +136,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
     this.rows.sort = this.sortTable;
     this.createDateFilter();
     this.initCustomFilterSearch();
+    this.startAutoRefresh();
   }
 
   ngAfterViewInit() {
@@ -140,6 +145,17 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
     });
   }
 
+  private startAutoRefresh(): void {
+    console.log(this.autoRefreshIntervalSec);
+    if (this.autoRefreshIntervalSec && this.autoRefreshIntervalSec > 0) {
+      this.autoRefreshSub = interval(this.autoRefreshIntervalSec * 1000)
+        .pipe(takeUntil(this.autoRefreshDestroy$))
+        .subscribe(() => {
+          console.log('Refreshing data...');
+          this.loadData(this.paginator?.pageIndex + 1 || 1, this.limit);
+        });
+    }
+  }
 
   showLoader(){
     this.loading = true;
@@ -892,6 +908,19 @@ export class NgxDataGridx implements OnInit, AfterViewInit {
 
     this.openFilterColumn = null;
   }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+
+    this.autoRefreshDestroy$.next();
+    this.autoRefreshDestroy$.complete();
+
+    if (this.autoRefreshSub) {
+      this.autoRefreshSub.unsubscribe();
+    }
+  }
+
 
   protected readonly GridPropertyType = GridPropertyType;
   protected readonly GridTheme = GridTheme;

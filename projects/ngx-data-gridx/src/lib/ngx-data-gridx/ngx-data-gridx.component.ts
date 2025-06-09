@@ -146,7 +146,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private startAutoRefresh(): void {
-    console.log(this.autoRefreshIntervalSec);
     if (this.autoRefreshIntervalSec && this.autoRefreshIntervalSec > 0) {
       this.autoRefreshSub = interval(this.autoRefreshIntervalSec * 1000)
         .pipe(takeUntil(this.autoRefreshDestroy$))

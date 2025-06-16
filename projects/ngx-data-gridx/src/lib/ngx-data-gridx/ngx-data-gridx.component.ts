@@ -342,7 +342,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
       switchMap(() => {
         this.destroy$.next();
-        return this.http.get<GridResponseDTO>(this.getRequestUrl(1, this.limit)).pipe(
+        return this.http.get<any>(this.getRequestUrl(1, this.limit)).pipe(
           takeUntil(this.destroy$)
         );
       })
@@ -351,6 +351,9 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
         if (response && Array.isArray(response.response.list)) {
           this.rows.data = response.response.list;
           this.total = response?.response?.total || 0;
+        } else if (response && Array.isArray(response.response)) {
+          this.rows.data = response.response;
+          this.total = response?.response.length || 0;
         }
       },
       error: (error: HttpErrorResponse) => {
@@ -634,18 +637,25 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
     this.destroy$ = new Subject<void>();
 
-    this.http.get<GridResponseDTO>(this.getRequestUrl(page, pageSize)).pipe(
+    this.http.get<any>(this.getRequestUrl(page, pageSize)).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
       next: (response) => {
-        const { list, total, ...singleObject } = response.response;
+        const resp = response.response;
 
-        if (Array.isArray(list)) {
-          this.rows.data = list;
-          this.total = total ?? list.length;
+        if (Array.isArray(resp)) {
+          this.rows.data = resp;
+          this.total = resp.length;
         } else {
-          this.rows.data = [singleObject];
-          this.total = 1;
+          const { list, total, ...singleObject } = resp;
+
+          if (Array.isArray(list)) {
+            this.rows.data = list;
+            this.total = total ?? list.length;
+          } else {
+            this.rows.data = [singleObject];
+            this.total = 1;
+          }
         }
 
         this.hideLoader();
@@ -923,13 +933,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
   protected readonly GridPropertyType = GridPropertyType;
   protected readonly GridTheme = GridTheme;
-}
-
-export interface GridResponseDTO {
-  response: {
-    list: object[],
-    total?:number
-  }
 }
 
 export interface AppliedFiltersDTO {

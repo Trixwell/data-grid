@@ -13,6 +13,12 @@
           </div>
         </div>
 
+        @for(button of actionButtons; track button.title) {
+          <button class="grid__filter_actions" (click)="button.action()" type="button">
+            <span>{{ button.title }}</span>
+          </button>
+        }
+
         <button class="grid__filter_actions" (click)="clearAllFilters()" type="button">
           <span>Очистити фільтри</span>
         </button>

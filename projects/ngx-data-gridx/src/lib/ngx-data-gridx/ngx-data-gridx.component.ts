@@ -88,6 +88,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     filters: Record<string, Record<string, AppliedFiltersDTO>>
   } = { search: {}, filters: {} };
   @Input() autoRefreshIntervalSec: number | null = null;
+  @Input() disablePagination: boolean = false;
 
   @ViewChild('searchField') searchField!: ElementRef<HTMLInputElement>;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -140,6 +141,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    if (this.disablePagination) return;
+
     this.paginator.page.subscribe((event) => {
       this.loadData(event.pageIndex + 1, event.pageSize);
     });

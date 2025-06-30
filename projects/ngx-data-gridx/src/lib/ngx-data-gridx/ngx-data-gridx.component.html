@@ -310,7 +310,7 @@
         </tr>
       </table>
 
-      <ng-container *ngIf="getCurrentTheme() === GridTheme.FLAT && !isSubGrid(); else broadPaginator">
+      <ng-container *ngIf="!disablePagination && getCurrentTheme() === GridTheme.FLAT && !isSubGrid(); else broadPaginator">
         <mat-paginator
           appSquarePagination
           [appCustomLength]="total"
@@ -324,6 +324,7 @@
 
       <ng-template #broadPaginator>
         <mat-paginator
+          *ngIf="!disablePagination"
           [pageSizeOptions]="uniquePageSizeOptions()"
           [pageSize]="limit"
           [length]="total"

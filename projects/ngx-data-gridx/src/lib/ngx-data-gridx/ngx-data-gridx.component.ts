@@ -29,7 +29,6 @@ import {SelectionModel} from '@angular/cdk/collections';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {AudioPlayerComponent} from '../core/components/audio-player/audio-player.component';
 import {SquarePaginatorDirective} from '../directives/square-paginator.directive';
-import { GridActionButton } from '../core/entity/grid-action-button';
 
 @Component({
   selector: 'ngx-data-gridx',
@@ -51,7 +50,7 @@ import { GridActionButton } from '../core/entity/grid-action-button';
     ReactiveFormsModule,
     MatProgressBarModule,
     AudioPlayerComponent,
-    SquarePaginatorDirective
+    SquarePaginatorDirective,
   ],
   providers: [provideNativeDateAdapter()],
   animations: [
@@ -89,7 +88,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     filters: Record<string, Record<string, AppliedFiltersDTO>>
   } = { search: {}, filters: {} };
   @Input() autoRefreshIntervalSec: number | null = null;
-  @Input() actionButtons?: GridActionButton[];
 
   @ViewChild('searchField') searchField!: ElementRef<HTMLInputElement>;
   @ViewChild(MatPaginator) paginator!: MatPaginator;

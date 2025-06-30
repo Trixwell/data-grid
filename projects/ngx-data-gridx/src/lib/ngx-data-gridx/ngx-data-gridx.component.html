@@ -310,25 +310,27 @@
         </tr>
       </table>
 
-      <ng-container *ngIf="!disablePagination && getCurrentTheme() === GridTheme.FLAT && !isSubGrid(); else broadPaginator">
-        <mat-paginator
-          appSquarePagination
-          [appCustomLength]="total"
-          [showFirstLastButtons]="true"
-          [pageSizeOptions]="uniquePageSizeOptions()"
-          [pageSize]="limit"
-          [length]="total"
-          class="grid__paginator">
-        </mat-paginator>
+      <ng-container *ngIf="!disablePagination">
+        <ng-container *ngIf="getCurrentTheme() === GridTheme.FLAT && !isSubGrid(); else broadPaginator">
+          <mat-paginator
+            appSquarePagination
+            [appCustomLength]="total"
+            [showFirstLastButtons]="true"
+            [pageSizeOptions]="uniquePageSizeOptions()"
+            [pageSize]="limit"
+            [length]="total"
+            class="grid__paginator">
+          </mat-paginator>
+        </ng-container>
       </ng-container>
 
       <ng-template #broadPaginator>
         <mat-paginator
           *ngIf="!disablePagination"
-          [pageSizeOptions]="uniquePageSizeOptions()"
-          [pageSize]="limit"
-          [length]="total"
-          class="grid__paginator">
+        [pageSizeOptions]="uniquePageSizeOptions()"
+        [pageSize]="limit"
+        [length]="total"
+        class="grid__paginator">
         </mat-paginator>
       </ng-template>
     </div>

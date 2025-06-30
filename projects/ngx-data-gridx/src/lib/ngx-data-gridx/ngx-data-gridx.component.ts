@@ -50,7 +50,7 @@ import {SquarePaginatorDirective} from '../directives/square-paginator.directive
     ReactiveFormsModule,
     MatProgressBarModule,
     AudioPlayerComponent,
-    SquarePaginatorDirective
+    SquarePaginatorDirective,
   ],
   providers: [provideNativeDateAdapter()],
   animations: [

@@ -2,6 +2,9 @@
 
 ## Overview
 
+![img.png](img.png)
+![img_1.png](img_1.png)
+
 **NgxDataGridx** is a Angular component that renders data in a highly customizable and interactive data table. It supports features such as filtering, sorting, pagination, CSV export, expandable sub-grids, and integration with Angular Material components.
 
 ---

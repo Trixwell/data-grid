@@ -16,11 +16,11 @@
         <ng-content select=".action-buttons"></ng-content>
 
         <button class="grid__filter_actions" (click)="clearAllFilters()" type="button">
-          <span>Очистити фільтри</span>
+          <mat-icon matTooltip="Очистити фільтри">filter_list_off</mat-icon>
         </button>
 
         <button *ngIf="exportCsvUrl" class="grid__filter_actions" (click)="exportCsvAction()" type="button">
-          <span>Експорт CSV</span>
+          <mat-icon matTooltip="Експорт CSV">description</mat-icon>
         </button>
       </div>
     </div>

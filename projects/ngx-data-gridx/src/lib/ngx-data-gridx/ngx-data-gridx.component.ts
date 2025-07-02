@@ -658,6 +658,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
           }
         }
 
+        this.selection.clear();
         this.hideLoader();
         this.openFilterColumn = null;
       },

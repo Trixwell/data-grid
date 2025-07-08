@@ -498,6 +498,22 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   toggleFilter(columnName: string, event: Event) {
     event.stopPropagation()
     this.openFilterColumn = this.openFilterColumn === columnName ? null : columnName;
+
+    this.setInputFocus(event);
+  }
+
+
+  private setInputFocus(event: Event){
+    setTimeout(() => {
+      const th = (event.target as HTMLElement).closest('th');
+      if (!th) return;
+      const input = th.querySelector<HTMLInputElement>('input');
+      if (input) {
+        input.focus();
+      }
+    });
+
+    return this;
   }
 
   setDisplayedColumns(){
@@ -663,15 +679,18 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
         this.selection.clear();
         this.hideLoader();
-        this.openFilterColumn = null;
+
+        // this.openFilterColumn = null;
       },
       complete: () => {
         this.rollbackExpandedElement();
       },
       error: (error: HttpErrorResponse) => {
+        console.log(this.openFilterColumn);
+
         console.error(error.message);
         this.hideLoader();
-        this.openFilterColumn = null;
+        // this.openFilterColumn = null;
       }
     });
   }
@@ -759,7 +778,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       }
     }
   }
-
 
   onInputFilterChange(columnName: string,
                       filterType: string,
@@ -863,7 +881,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     return this.selection.selected ?? [];
   }
 
-
   IsCustomCallbackExist(column: GridProperty): boolean {
     return column && typeof column.callback === 'function';
   }
@@ -886,7 +903,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     return classes;
   }
 
-
   trackByColumn(index: number, column: GridProperty): string {
     return column.name || index.toString();
   }
@@ -900,12 +916,11 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     return pathRegex.test(path);
   }
 
-
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
 
-    if (target.closest('.filter-dropdown')) {
+    if (target.closest('.filter-container')) {
       return;
     }
 
@@ -919,8 +934,13 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
+    if (target.closest('.cdk-overlay-pane')) {
+      return;
+    }
+
     this.openFilterColumn = null;
   }
+
 
   ngOnDestroy(): void {
     this.destroy$.next();

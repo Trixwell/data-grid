@@ -66,6 +66,7 @@
     .filter-options {
       display: flex;
       flex-direction: column;
+      gap: token.$space-4;
     }
   }
 

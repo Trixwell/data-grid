@@ -89,6 +89,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   } = { search: {}, filters: {} };
   @Input() autoRefreshIntervalSec: number | null = null;
   @Input() disablePagination: boolean = false;
+  @Input() lazyLoad: boolean = false;
+  private static loadedUrls = new Set<string>();
 
   @ViewChild('searchField') searchField!: ElementRef<HTMLInputElement>;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -117,7 +119,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   multiSearchControl = new FormControl<number[]>([]);
   private searchTermSubject = new Subject<SearchQuery>();
   private destroySearch$ = new Subject<void>();
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(private http: HttpClient,
+              private cdr: ChangeDetectorRef,
+              private elementRef: ElementRef
+  ) {}
 
   rows: MatTableDataSource<object> = new MatTableDataSource<object>([]);
   dateFilters: Record<string, FormGroup> = {};
@@ -131,7 +136,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   selectedItems: number[] = [];
 
   ngOnInit(){
-    this.loadData();
+    if(!this.lazyLoad) {
+      this.loadData();
+    }
+
     this.setDisplayedColumns();
     this.initSearch();
     this.rows.sort = this.sortTable;
@@ -141,6 +149,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
+    if (this.lazyLoad && this.url && !NgxDataGridx.loadedUrls.has(this.url)) {
+      this.runLazyLoad();
+    }
+
     if (this.disablePagination) return;
 
     this.paginator.page.subscribe((event) => {
@@ -157,6 +169,23 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
           this.loadData(this.paginator?.pageIndex + 1 || 1, this.limit);
         });
     }
+  }
+
+  runLazyLoad(){
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          this.loadData();
+          NgxDataGridx.loadedUrls.add(this.url!);
+          observer.disconnect();
+        }
+      });
+    }, {
+      rootMargin: '100px',
+      threshold: 0.1
+    });
+
+    observer.observe(this.elementRef.nativeElement);
   }
 
   showLoader(){
@@ -686,8 +715,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
         this.rollbackExpandedElement();
       },
       error: (error: HttpErrorResponse) => {
-        console.log(this.openFilterColumn);
-
         console.error(error.message);
         this.hideLoader();
         // this.openFilterColumn = null;
@@ -943,6 +970,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
 
   ngOnDestroy(): void {
+    if (this.url) {
+      NgxDataGridx.loadedUrls.delete(this.url);
+    }
+
     this.destroy$.next();
     this.destroy$.complete();
 

@@ -14,13 +14,13 @@
     display: flex;
   }
 
-  .cdk-column-expandedDetail {
+  .cdk-column-expandedDetail, .detail-row {
     height: 0;
     border: none;
     padding: 0;
   }
 
-  tr.example-detail-row {
+  tr.example-detail-row, tr.detail-row {
     height: 0;
   }
 

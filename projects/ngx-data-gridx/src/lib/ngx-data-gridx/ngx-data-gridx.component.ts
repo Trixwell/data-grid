@@ -1,8 +1,8 @@
 import {
   AfterViewInit, ChangeDetectorRef,
-  Component, ElementRef, HostListener,
-  Input, OnDestroy, OnInit,
-  ViewChild
+  Component, ContentChild, ElementRef, HostListener,
+  Input, OnDestroy, OnInit, QueryList, TemplateRef, Type,
+  ViewChild, ViewChildren, ViewContainerRef
 } from '@angular/core';
 import {GridProperty, GridPropertyType} from '../core/entity/grid-property';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
@@ -90,6 +90,15 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   @Input() autoRefreshIntervalSec: number | null = null;
   @Input() disablePagination: boolean = false;
   @Input() lazyLoad: boolean = false;
+  @Input() detailComponent?: Type<any>;
+
+  /** detail accordion (dblclick) */
+  detailExpandedElement: any | null = null;
+
+  @ContentChild(TemplateRef) detailTemplate?: TemplateRef<any>;
+  @ViewChildren('detailContainer', { read: ViewContainerRef })
+  detailContainers!: QueryList<ViewContainerRef>;
+
   private static loadedUrls = new Set<string>();
 
   @ViewChild('searchField') searchField!: ElementRef<HTMLInputElement>;
@@ -195,6 +204,40 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   hideLoader(){
     this.loading = false;
   }
+
+  toggleDetail(row: any) {
+    // clear out any existing
+    this.detailContainers.forEach(c => c.clear());
+
+    if (this.detailExpandedElement === row) {
+      this.detailExpandedElement = null;
+      return;
+    }
+
+    this.detailExpandedElement = row;
+    const idx = this.rows.data.indexOf(row);
+    const container = this.detailContainers.toArray()[idx];
+
+    if (container && this.detailComponent) {
+      const cmpRef = container.createComponent(this.detailComponent);
+      const inst: any = cmpRef.instance;
+
+      if (typeof inst.row === 'function' && typeof inst.row.set === 'function') {
+        inst.row.set(row);
+      } else {
+        inst.row = row;
+      }
+
+      if (typeof inst.rows === 'function' && typeof inst.rows.set === 'function') {
+        inst.rows.set(this.rows.data);
+      } else {
+        inst.rows = this.rows.data;
+      }
+
+      cmpRef.changeDetectorRef.detectChanges();
+    }
+  }
+
 
   executeAction(action: Action, row: object | null | undefined) {
     if(action.action) {

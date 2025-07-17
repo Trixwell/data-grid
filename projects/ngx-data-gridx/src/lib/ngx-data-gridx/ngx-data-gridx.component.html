@@ -271,12 +271,32 @@
                   [autoRefreshIntervalSec]="currentGridColumn?.subGridSettings?.autoRefreshIntervalSec || null"
                   [limit]="currentGridColumn?.subGridSettings?.subGridProps?.limit || 10"
                   [showFilters] = "currentGridColumn?.subGridSettings?.subGridProps?.showFilters || false"
+                  [detailComponent]="currentGridColumn?.subGridSettings?.detailComponent"
                   [multiselect] = "currentGridColumn?.subGridSettings?.subGridProps?.multiselect">
                 </ngx-data-gridx>
               </ng-container>
             </div>
           </td>
         </ng-container>
+
+        <ng-container matColumnDef="detailRow">
+          <td class="detail-row" mat-cell *matCellDef="let row" [attr.colspan]="displayedColumns.length">
+            <div class="detail-accordion"
+                 [@detailExpand]="detailExpandedElement === row ? 'expanded' : 'collapsed'">
+
+              <ng-container *ngIf="detailTemplate">
+                <ng-container
+                  *ngTemplateOutlet="detailTemplate;
+                             context: { $implicit: row, rows: rows.data }">
+                </ng-container>
+              </ng-container>
+
+              <ng-template #detailContainer></ng-template>
+
+            </div>
+          </td>
+        </ng-container>
+
 
         <!-- Second header row -->
         <ng-container matColumnDef="header-row-group" *ngIf="loading">
@@ -288,9 +308,12 @@
 
         <!-- primary row -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+
         <tr class="grid__row__loader" [ngClass]="{'grid__no-loading': !loading}"
             mat-header-row *matHeaderRowDef="loading ? ['header-row-group'] : []"></tr>
+
         <tr mat-row *matRowDef="let element; columns: displayedColumns;"
+            (dblclick)="toggleDetail(element)"
             class="example-element-row"
             [class.example-expanded-row]="expandedElement === element">
         </tr>
@@ -299,6 +322,11 @@
         <tr mat-row *matRowDef="let element; columns: ['expandedDetail']"
             class="example-detail-row"
         >
+        </tr>
+
+        <tr mat-row
+            *matRowDef="let row; columns: ['detailRow']"
+            class="detail-row">
         </tr>
 
         <tr class="mat-row" *matNoDataRow>

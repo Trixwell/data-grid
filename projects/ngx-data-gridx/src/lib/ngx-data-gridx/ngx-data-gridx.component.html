@@ -212,25 +212,26 @@
               <div class="column-content">
                 <div *ngSwitchCase="GridPropertyType.Actions" class="actions">
                   <ng-container *ngFor="let action of column.actions">
-
-                    <button mat-icon-button *ngIf="!action.customHtml && action"
-                            (click)="executeAction(action, row)"
-                            matTooltip="{{ action.tooltip }}">
+                    <button
+                      mat-icon-button
+                      *ngIf="(!action.customHtml && action && (!action.visible || action.visible(row)))"
+                      (click)="executeAction(action, row)"
+                      matTooltip="{{ action.tooltip }}">
                       <mat-icon *ngIf="!isPath(action.icon)" class="material-icons-outlined">
                         {{ action.icon }}
                       </mat-icon>
-                      <img *ngIf="isPath(action.icon)" [src]="action.icon" [alt]="action.tooltip">
+                      <img *ngIf="isPath(action.icon)" [src]="action.icon" [alt]="action.tooltip" />
                     </button>
 
-                    <button class="btn-custom-html"
-                            mat-icon-button *ngIf="action.customHtml"
-                            matTooltip="{{ action.tooltip }}">
-
-                                                <span [innerHTML]="action.customHtml(row)">
-                                                </span>
+                    <button
+                      class="btn-custom-html"
+                      mat-icon-button
+                      *ngIf="action.customHtml && (!action.visible || action.visible(row))"
+                      matTooltip="{{ action.tooltip }}">
+                      <span [innerHTML]="action.customHtml(row)"></span>
                     </button>
-
                   </ng-container>
+
                 </div>
                 <span *ngSwitchCase="GridPropertyType.Hidden"></span>
                 <span *ngSwitchDefault

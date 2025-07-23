@@ -24,7 +24,7 @@ export class GridProperty{
   sort?: boolean;
   classes?: string;
   style_formatter?: (value: string | number | undefined | object, index: number) => string;
-  actions?: { icon: string; tooltip: string; customHtml?: (row: object | null | undefined) => string; action?: (row: object | null | undefined) => void | Subscription | Promise<void> | Observable<void> }[];
+  actions?: { icon: string; visible?: (row: object | null | undefined) => boolean; tooltip: string; customHtml?: (row: object | null | undefined) => string; action?: (row: object | null | undefined) => void | Subscription | Promise<void> | Observable<void> }[];
   ident?: boolean = false;
   subGridPropertyList: GridProperty[] | null = null;
   subGridSettings: SubGridSettings | null  = null;
@@ -103,7 +103,7 @@ export interface GridPropertiesDTO{
   callback?: (row: object | null | undefined) => string | undefined;
   style_formatter?: (value: string | number | undefined | object, index:number) => string;
   select?:false,
-  actions?: { icon: string; tooltip: string; customHtml?: (row: object | null | undefined) => string; action?: (row: object | null | undefined) => void | Subscription | Promise<void> | Observable<void> }[];
+  actions?: { icon: string; visible?: (row: object | null | undefined) => boolean; tooltip: string; customHtml?: (row: object | null | undefined) => string; action?: (row: object | null | undefined) => void | Subscription | Promise<void> | Observable<void> }[];
   subGridPropertyList?: GridProperty[] | null;
   ident?: boolean;
   subGridSettings?: SubGridSettings | null;

@@ -150,4 +150,8 @@
   .mat-sort-header-arrow::before {
     transform: rotate(180deg) !important;
   }
+
+  .example-expanded-row {
+    background-color: token.$primary-50;
+  }
 }

@@ -136,6 +136,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   rows: MatTableDataSource<object> = new MatTableDataSource<object>([]);
   dateFilters: Record<string, FormGroup> = {};
   filterInputValues: Record<string, string> = {};
+  filterMultiSelectValues: Record<string, string[]> = {};
 
   loading = true;
 
@@ -145,6 +146,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   selectedItems: number[] = [];
 
   ngOnInit(){
+    this.loadFilters();
+
     if(!this.lazyLoad) {
       this.loadData();
     }
@@ -153,6 +156,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     this.initSearch();
     this.rows.sort = this.sortTable;
     this.createDateFilter();
+    this.restoreFilters();
     this.initCustomFilterSearch();
     this.startAutoRefresh();
   }
@@ -203,6 +207,96 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
   hideLoader(){
     this.loading = false;
+  }
+
+  private get storageKey(): string {
+    if (this.grid_name) {
+      return `grid-state-${this.grid_name}`;
+    }
+
+    return `grid-state-auto-${this.data.map(c => c.name).join('-')}`;
+  }
+
+  private loadFilters(): void {
+    if (!this.showHistoryFilters) return;
+    const raw = localStorage.getItem(this.storageKey);
+    if (!raw) return;
+
+    try {
+      const state: {
+        filters?: Record<string, Record<string,AppliedFiltersDTO>>,
+        search?: Record<string,string>
+      } = JSON.parse(raw);
+
+      this.appliedFilters = state.filters  ?? {};
+      this.searchValues   = state.search   ?? {};
+
+    } catch {
+      this.appliedFilters = {};
+      this.searchValues   = {};
+    }
+  }
+
+  restoreFilters(){
+    Object.entries(this.appliedFilters).forEach(([col, byType]) => {
+      const column = this.data.find(c => c.name === col);
+      if (!column?.filterValues) return;
+
+      Object.entries(byType).forEach(([type, dto]) => {
+
+        if (type === 'checkbox') {
+          const vals = Array.isArray(dto.value) ? dto.value : [dto.value];
+          column.filterValues!.forEach(group =>
+            group.forEach(item => {
+              // @ts-ignore
+              item.selected = vals.includes(item.value) ? true : undefined;
+            })
+          );
+        }
+
+        if (type === 'select') {
+          this.filterInputValues[col] = String(dto.value);
+        }
+
+        if (type === 'multi-select') {
+          const values = Array.isArray(dto.value)
+            ? dto.value.map(String)
+            : [String(dto.value)];
+
+          this.filterMultiSelectValues[col] = values;
+        }
+
+        if (type === 'date') {
+          const rawVal = String(dto.value);
+          if (rawVal.includes(',')) {
+            const [s, e] = rawVal.split(',');
+            this.dateFilters[col].patchValue({
+              start: new Date(s),
+              end:   new Date(e),
+              date:  null
+            });
+          } else {
+            this.dateFilters[col].patchValue({
+              start: null,
+              end:   null,
+              date:  new Date(rawVal)
+            });
+          }
+        }
+
+      });
+    });
+  }
+
+  private saveFilters(): void {
+    if (!this.showHistoryFilters) return;
+    const state = {
+      filters: this.appliedFilters,
+      search:  this.searchValues
+    };
+    try {
+      localStorage.setItem(this.storageKey, JSON.stringify(state));
+    } catch {}
   }
 
   toggleDetail(row: any) {
@@ -350,6 +444,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
     if (filterType === 'input' && columnName && this.searchValues[columnName]) {
       delete this.searchValues[columnName];
+      this.saveFilters();
       this.searchSubject.next({ ...this.searchValues });
     }
 
@@ -392,7 +487,9 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       this.dateFilters[columnName].reset();
     }
 
+
     this.uncheckedCheckbox(column, filterType, optionValue);
+    this.saveFilters();
     this.loadData(1, this.limit);
   }
 
@@ -473,6 +570,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       this.dateFilters[key].reset();
     });
 
+    this.saveFilters();
     this.loadData();
   }
 
@@ -564,6 +662,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       delete this.searchValues[columnName];
     }
 
+    this.saveFilters();
     this.searchSubject.next({ ...this.searchValues });
   }
 
@@ -821,6 +920,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       callback(columnName, filterType, value);
     }
 
+    if(filterType !== 'multi-search') {
+      this.saveFilters();
+    }
+
     this.loadData(1, this.limit);
   }
 
@@ -841,10 +944,12 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
         value: value
       };
 
+      this.saveFilters();
       this.loadData(1, this.limit);
     } else {
       if (this.appliedFilters[columnName]) {
         delete this.appliedFilters[columnName]['date'];
+        this.saveFilters();
       }
     }
   }

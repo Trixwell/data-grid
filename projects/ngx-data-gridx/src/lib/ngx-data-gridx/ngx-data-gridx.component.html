@@ -95,7 +95,9 @@
                   <!-- Select -->
                   <mat-form-field *ngIf="filter.type === 'select'" appearance ="outline">
                     <mat-label>{{ filter.label }}</mat-label>
-                    <mat-select (selectionChange)="onFilterChange(column.name, filter.type, filter.label, $event.value, filter.callback)">
+                    <mat-select
+                      [(ngModel)]="filterInputValues[column.name]"
+                      (selectionChange)="onFilterChange(column.name, filter.type, filter.label, $event.value, filter.callback)">
                       <mat-option *ngFor="let item of column.filterValues?.[i]" [value]="item.value">
                         {{ item.label }}
                       </mat-option>
@@ -106,6 +108,7 @@
                   <mat-form-field *ngIf="filter.type === 'multi-select'" appearance ="outline">
                     <mat-label>{{ filter.label }}</mat-label>
                     <mat-select multiple
+                                [(ngModel)]="filterMultiSelectValues[column.name]"
                                 (selectionChange)="onFilterChange(
                                                 column.name,
                                                 filter.type,
@@ -133,7 +136,7 @@
                                                       filter.callback
                                                     )"
                                 multiple>
-                      <mat-option class="no-checkbox">
+                      <mat-option class="no-checkbox" >
                         <div>
                           <input
                             #searchField
@@ -157,7 +160,6 @@
                       </mat-option>
                     </mat-select>
                   </mat-form-field>
-
 
                   <!-- Date Range -->
                   <mat-form-field (click)="$event.stopPropagation()" *ngIf="filter.type === 'date' && filter.dateOptions?.range" appearance ="outline">
@@ -315,7 +317,7 @@
         <tr mat-row *matRowDef="let element; columns: displayedColumns;"
             (dblclick)="toggleDetail(element)"
             class="example-element-row"
-            [class.example-expanded-row]="expandedElement === element">
+            [class.example-expanded-row]="detailExpandedElement === element">
         </tr>
 
         <!-- expand row -->

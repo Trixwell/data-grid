@@ -1005,7 +1005,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       this.sort = sortEvent.direction;
     }
 
-    this.loadData(1, this.limit);
+    const pageSize = this.paginator?.pageSize || this.limit;
+    this.loadData(1, pageSize);
   }
 
   /** Whether the number of selected elements matches the total number of rows. */

@@ -20,6 +20,10 @@
     font-weight: 500;
   }
 
+  tr.accordion:hover{
+    background: token.$primary-200;
+  }
+
   .grid__th {
     background: token.$primary-200 !important;
     border: 1px solid token.$primary-100;

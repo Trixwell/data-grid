@@ -91,6 +91,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   @Input() disablePagination: boolean = false;
   @Input() lazyLoad: boolean = false;
   @Input() detailComponent?: Type<any>;
+  @Input() openAllToggleDetails = false;
 
   /** detail accordion (dblclick) */
   detailExpandedElement: any | null = null;
@@ -110,6 +111,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
   private autoRefreshSub: Subscription | null = null;
   private autoRefreshDestroy$ = new Subject<void>();
+  private expandedDetailIds = new Set<string>();
 
   total: number = 0;
   displayedColumns: string[] = [];
@@ -170,6 +172,11 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
     this.paginator.page.subscribe((event) => {
       this.loadData(event.pageIndex + 1, event.pageSize);
+
+      if (this.openAllToggleDetails) {
+        this.cdr.detectChanges();
+        this.rows.data.forEach(r => this.toggleDetail(r));
+      }
     });
   }
 
@@ -300,38 +307,48 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   toggleDetail(row: any) {
-    // clear out any existing
-    this.detailContainers.forEach(c => c.clear());
-
-    if (this.detailExpandedElement === row) {
-      this.detailExpandedElement = null;
-      return;
-    }
-
-    this.detailExpandedElement = row;
+    const rowId = this.getRowId(row);
     const idx = this.rows.data.indexOf(row);
     const container = this.detailContainers.toArray()[idx];
 
-    if (container && this.detailComponent) {
-      const cmpRef = container.createComponent(this.detailComponent);
-      const inst: any = cmpRef.instance;
+    if (!container || !this.detailComponent) return;
 
-      if (typeof inst.row === 'function' && typeof inst.row.set === 'function') {
-        inst.row.set(row);
-      } else {
-        inst.row = row;
-      }
-
-      if (typeof inst.rows === 'function' && typeof inst.rows.set === 'function') {
-        inst.rows.set(this.rows.data);
-      } else {
-        inst.rows = this.rows.data;
-      }
-
-      cmpRef.changeDetectorRef.detectChanges();
+    if (this.expandedDetailIds.has(rowId)) {
+      this.expandedDetailIds.delete(rowId);
+      container.clear();
+      return;
     }
+
+    this.expandedDetailIds.add(rowId);
+    container.clear();
+    const cmpRef = container.createComponent(this.detailComponent);
+    const inst: any = cmpRef.instance;
+
+    if (typeof inst.row === 'function' && typeof inst.row.set === 'function') {
+      inst.row.set(row);
+    } else {
+      inst.row = row;
+    }
+
+    if (typeof inst.rows === 'function' && typeof inst.rows.set === 'function') {
+      inst.rows.set(this.rows.data);
+    } else {
+      inst.rows = this.rows.data;
+    }
+
+    cmpRef.changeDetectorRef.detectChanges();
   }
 
+  private getRowId(row: any): string {
+    if (this.sidx && row && Object.prototype.hasOwnProperty.call(row, this.sidx)) {
+      return String(row[this.sidx as keyof typeof row]);
+    }
+    return JSON.stringify(row);
+  }
+
+  isDetailExpanded(row: any): boolean {
+    return this.expandedDetailIds.has(this.getRowId(row));
+  }
 
   executeAction(action: Action, row: object | null | undefined) {
     if(action.action) {
@@ -850,6 +867,11 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
         this.selection.clear();
         this.hideLoader();
+
+        if (this.openAllToggleDetails) {
+          this.cdr.detectChanges();
+          this.rows.data.forEach(r => this.toggleDetail(r));
+        }
 
         // this.openFilterColumn = null;
       },

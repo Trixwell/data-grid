@@ -24,6 +24,10 @@
     height: 0;
   }
 
+  tr.accordion{
+    cursor: pointer;
+  }
+
   ::ng-deep mat-paginator .mat-mdc-select {
     width: auto !important;
   }

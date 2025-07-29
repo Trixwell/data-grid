@@ -63,7 +63,7 @@
             {{ column.displayName }}
 
             <div *ngIf="showFilters" class="filter-container">
-              <button *ngIf="checkColumnFilters(column)"  mat-icon-button (click)="toggleFilter(column.name, $event); $event.stopPropagation();">
+              <button *ngIf="checkColumnFilters(column)" type="button"  mat-icon-button (click)="toggleFilter(column.name, $event); $event.stopPropagation();">
                 <svg width="15" height="16" viewBox="0 0 15 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M6.88465 15.5C6.63331 15.5 6.42306 15.4153 6.2539 15.246C6.08456 15.0768 5.9999 14.8666 5.9999 14.6152V8.827L0.401897 1.7155C0.209564 1.459 0.181647 1.19233 0.318147 0.9155C0.454813 0.6385 0.685314 0.5 1.00965 0.5H13.9901C14.3145 0.5 14.545 0.6385 14.6816 0.9155C14.8181 1.19233 14.7902 1.459 14.5979 1.7155L8.9999 8.827V14.6152C8.9999 14.8666 8.91523 15.0768 8.7459 15.246C8.57673 15.4153 8.36648 15.5 8.11515 15.5H6.88465ZM7.4999 8.3L12.4499 2H2.5499L7.4999 8.3Z" fill="#343A40"/>
                 </svg>
@@ -213,6 +213,7 @@
                 <div *ngSwitchCase="GridPropertyType.Actions" class="actions">
                   <ng-container *ngFor="let action of column.actions">
                     <button
+                      type="button"
                       mat-icon-button
                       *ngIf="(!action.customHtml && action && (!action.visible || action.visible(row)))"
                       (click)="executeAction(action, row)"
@@ -225,6 +226,7 @@
 
                     <button
                       class="btn-custom-html"
+                      type="button"
                       mat-icon-button
                       *ngIf="action.customHtml && (!action.visible || action.visible(row))"
                       matTooltip="{{ action.tooltip }}">
@@ -246,6 +248,7 @@
                 </app-audio-player>
 
                 <button mat-mini-fab
+                        type="button"
                         class="sub-grid-accordion-btn"
                         *ngIf="checkIsCurrentColumnSubGrid(column)"
                         (click)="setCurrentGridColumn(column?.name, row)">
@@ -285,7 +288,7 @@
         <ng-container matColumnDef="detailRow">
           <td class="detail-row" mat-cell *matCellDef="let row" [attr.colspan]="displayedColumns.length">
             <div class="detail-accordion"
-                 [@detailExpand]="detailExpandedElement === row ? 'expanded' : 'collapsed'">
+                 [@detailExpand]="isDetailExpanded(row) ? 'expanded' : 'collapsed'">
 
               <ng-container *ngIf="detailTemplate">
                 <ng-container
@@ -318,7 +321,8 @@
         <tr mat-row *matRowDef="let element; columns: displayedColumns;"
             (dblclick)="toggleDetail(element)"
             class="example-element-row"
-            [class.example-expanded-row]="detailExpandedElement === element">
+            [class.accordion]="detailComponent"
+            [class.example-expanded-row]="expandedElement === element">
         </tr>
 
         <!-- expand row -->

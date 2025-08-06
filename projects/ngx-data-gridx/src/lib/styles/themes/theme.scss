@@ -9,6 +9,16 @@
     background-color: transparent;
   }
 
+  .date-range{
+    display: flex;
+    gap: token.$space-4;
+    max-width: 350px;
+  }
+
+  .date-icons{
+    cursor: pointer;
+  }
+
   .example-element-detail {
     overflow: hidden;
     display: flex;

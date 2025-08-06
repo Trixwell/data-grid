@@ -591,10 +591,13 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     this.loadData();
   }
 
-  private formatDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
+  private formatDate(date: Date | string | null): string {
+    if (!date) return '';
+
+    const d = typeof date === 'string' ? new Date(date) : date;
+    const year  = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day   = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
 
@@ -835,6 +838,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadData(page = 1, pageSize = this.limit) {
+    this.showLoader();
+
     if (!this.url) return;
 
     if (!this.destroy$.closed) {
@@ -918,6 +923,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     value: string | number | string[],
     callback?: (columnName: string, filterType: string, value: string | number | string[]) => void
   ) {
+    this.showLoader();
     if ((filterType === 'checkbox' || filterType === 'multi-select' || filterType === 'multi-search') && !Array.isArray(label)) {
       label = [label];
     }
@@ -981,6 +987,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
                       label: string,
                       value: string,
                       callback?: (columnName: string, filterType: string, value: string) => void) {
+    this.showLoader();
     if (!this.appliedFilters[columnName]) {
       this.appliedFilters[columnName] = {};
     }
@@ -1006,6 +1013,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     index: number,
     callback?: (columnName: string, filterType: string, value: string | number | string[]) => void
   ) {
+    this.showLoader();
     const column = this.data.find(col => col.name === columnName);
     if (!column || !column.filterValues || !column.filterValues[index]) return;
 

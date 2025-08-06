@@ -162,32 +162,56 @@
                   </mat-form-field>
 
                   <!-- Date Range -->
-                  <mat-form-field (click)="$event.stopPropagation()" *ngIf="filter.type === 'date' && filter.dateOptions?.range" appearance ="outline">
-                    <mat-label>Оберіть період</mat-label>
-                    <mat-date-range-input  [formGroup]="dateFilters[column.name]" [rangePicker]="picker">
-                      <input matStartDate formControlName="start" placeholder="Start date">
-                      <input matEndDate formControlName="end" placeholder="End date">
-                    </mat-date-range-input>
-                    <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
-                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                    <mat-date-range-picker #picker></mat-date-range-picker>
+                  <div class="date-range" *ngIf="filter.type==='date' && filter.dateOptions?.range" [formGroup]="dateFilters[column.name]">
+                    <mat-form-field appearance="outline">
+                      <mat-label>From</mat-label>
+                      <input
+                        matInput
+                        type="date"
+                        formControlName="start"
+                        #startInput
+                        (click)="$event.stopPropagation()"
+                        (focus)="startInput.showPicker?.()"
+                      />
+                      <mat-icon class="date-icons" matSuffix (click)="startInput.showPicker(); $event.stopPropagation()">
+                        calendar_today
+                      </mat-icon>
+                    </mat-form-field>
 
-                    <mat-error *ngIf="dateFilters[column.name]?.get('start')?.hasError('matStartDateInvalid')">
-                      Invalid start date
-                    </mat-error>
-                    <mat-error *ngIf="dateFilters[column.name]?.get('end')?.hasError('matEndDateInvalid')">
-                      Invalid end date
-                    </mat-error>
-                  </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>To</mat-label>
+                      <input
+                        matInput
+                        type="date"
+                        formControlName="end"
+                        #endInput
+                        (click)="$event.stopPropagation()"
+                        (focus)="endInput.showPicker()"
+                      />
+                      <mat-icon class="date-icons" matSuffix (click)="endInput.showPicker(); $event.stopPropagation()">
+                        calendar_today
+                      </mat-icon>
+                    </mat-form-field>
+                  </div>
+
 
                   <!-- Date -->
-                  <mat-form-field [formGroup]="dateFilters[column.name]" (click)="$event.stopPropagation()"
-                                  *ngIf="filter.type === 'date' && !filter.dateOptions?.range" appearance ="outline">
-                    <mat-label>Оберіть дату</mat-label>
-                    <input matInput formControlName="date" [matDatepicker]="picker">
-                    <mat-hint>MM/DD/YYYY</mat-hint>
-                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                    <mat-datepicker #picker></mat-datepicker>
+                  <mat-form-field appearance="outline" [formGroup]="dateFilters[column.name]" (click)="$event.stopPropagation()"
+                                  *ngIf="filter.type === 'date' && !filter.dateOptions?.range">
+                    <input
+                      matInput
+                      type="date"
+                      formControlName="date"
+                      #dateInput
+                      (click)="$event.stopPropagation()"
+                      (focus)="dateInput.showPicker()"
+                    />
+
+                    <mat-icon
+                      matSuffix
+                      class="date-icons"
+                      (click)="dateInput.showPicker(); $event.stopPropagation()"
+                    >calendar_today</mat-icon>
                   </mat-form-field>
 
                   <!-- Input -->

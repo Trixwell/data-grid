@@ -356,16 +356,16 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
       if (isObservable(result)) {
         result.subscribe({
-          complete: () => this.loadData(),
+          complete: () => this.loadData(this.paginator?.pageIndex + 1 || 1, this.limit),
           error: (error) => console.error(error)
         });
       } else if (result instanceof Promise) {
         result
-          .then(() => this.loadData())
+          .then(() => this.loadData(this.paginator?.pageIndex + 1 || 1, this.limit))
           .catch((error) => console.error(error));
       } else if (result instanceof Subscription) {
         result.add(() => {
-          this.loadData();
+          this.loadData(this.paginator?.pageIndex + 1 || 1, this.limit);
         });
       }
     }

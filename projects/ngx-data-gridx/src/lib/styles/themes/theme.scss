@@ -93,6 +93,8 @@
   .grid__row__loader {
     border: 0;
     height: 4px;
+    padding: token.$space-0;
+    position: absolute;
   }
 
   .grid__row__loader th {
@@ -169,7 +171,15 @@
     background-color: token.$primary-50;
   }
 
-  ::ng-deep .mdc-linear-progress{
-    position: absolute;
+  .grid__container__wrapper { padding-top: 0; }
+
+  .grid__row__tr__loader{
+    height: 4px !important;
+    padding: token.$space-0;
+  }
+
+  .grid__row__loader .mat-mdc-progress-bar {
+    --mdc-linear-progress-track-height: 4px;
+    padding: token.$space-0;
   }
 }

@@ -394,22 +394,21 @@
           </td>
         </ng-container>
 
-
-        <!-- Second header row -->
-        @if(loading){
-          <ng-container matColumnDef="header-row-group">
-            <th mat-header-cell *matHeaderCellDef [attr.colspan]="displayedColumns.length">
-              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-            </th>
-          </ng-container>
-        }
-
+        <ng-container matColumnDef="loader">
+          <th mat-header-cell *matHeaderCellDef
+              [attr.colspan]="displayedColumns.length"
+              class="grid__row__loader">
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+          </th>
+        </ng-container>
 
         <!-- primary row -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-
-        <tr class="grid__row__loader" [ngClass]="{'grid__no-loading': !loading}"
-            mat-header-row *matHeaderRowDef="loading ? ['header-row-group'] : []"></tr>
+        <tr mat-header-row
+            *matHeaderRowDef="['loader']; sticky: true"
+            class="grid__row__tr__loader"
+            [style.display]="loading ? '' : 'none'">
+        </tr>
 
         <tr mat-row *matRowDef="let element; columns: displayedColumns;"
             (dblclick)="toggleDetail(element)"

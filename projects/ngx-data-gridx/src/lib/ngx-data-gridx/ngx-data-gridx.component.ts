@@ -19,7 +19,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
 import {MatMenuModule} from '@angular/material/menu';
-import {interval, isObservable, map, Observable, of, Subject, Subscription, takeUntil} from 'rxjs';
+import {finalize, interval, isObservable, map, Observable, of, Subject, Subscription, takeUntil} from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import {MatOptionSelectionChange, provideNativeDateAdapter} from '@angular/material/core';
 import {MatDatepickerModule} from '@angular/material/datepicker';
@@ -852,10 +852,11 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     this.destroy$ = new Subject<void>();
 
     this.http.get<any>(this.getRequestUrl(page, pageSize)).pipe(
-      takeUntil(this.destroy$)
+      takeUntil(this.destroy$),
+      finalize(() => this.hideLoader())
     ).subscribe({
-      next: (response) => {
-        const resp = response.response;
+      next: (data) => {
+        const resp = data.response;
 
         if (Array.isArray(resp)) {
           this.rows.data = resp;

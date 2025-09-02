@@ -168,4 +168,8 @@
   .example-expanded-row {
     background-color: token.$primary-50;
   }
+
+  ::ng-deep .mdc-linear-progress{
+    position: absolute;
+  }
 }

@@ -20,13 +20,19 @@
     font-weight: 500;
   }
 
+  tr{
+    transition: background-color 200ms ease-in-out;
+    height: 40px;
+  }
+
   tr.accordion:hover{
     background: token.$primary-200;
   }
 
   .grid__th {
-    background: token.$primary-200 !important;
-    border: 1px solid token.$primary-100;
+    background: token.$primary-50 !important;
+    border-right: 1px solid token.$primary-100;
+    border-left: none !important;
     color: token.$neutral-950;
     font-weight: token.$font-weight-h !important;
     line-height: 16px;
@@ -34,6 +40,11 @@
     border-bottom-color: transparent;
     overflow: visible;
     position: relative;
+
+    .mat-mdc-icon-button svg{
+      height: 16px;
+      width: 16px;
+    }
   }
 
   .grid__checkbox {
@@ -46,12 +57,20 @@
 
   .grid__th:last-child {
     border-top-right-radius: token.$border-radius-small;
+    border-right: none !important;
   }
 
   .grid__td {
-    border-bottom: 1px solid token.$primary-100;
+    border-bottom: token.$border-1 solid token.$primary-100;
+    border-right: token.$border-1 solid token.$primary-100;
     background: transparent;
     max-width: 70px;
+    max-height: 40px;
+    height: 100%;
+
+    &:last-child{
+      border-right: none !important;
+    }
 
     .column-content span {
       color: token.$neutral-800;
@@ -161,5 +180,61 @@
 
   ::ng-deep .grid__paginator .mdc-notched-outline > * {
     border: none !important;
+  }
+
+  ::ng-deep .mat-mdc-checkbox {
+    .mat-mdc-checkbox .mat-mdc-checkbox-ripple, .mdc-checkbox__ripple {
+      background: none;
+    }
+
+    .mdc-checkbox__checkmark {
+      color: token.$primary-600;
+    }
+
+    .mdc-checkbox__background {
+      background: none !important;
+      border: 2px solid token.$neutral-700;
+    }
+
+    .mdc-checkbox__native-control:enabled:checked ~ .mdc-checkbox__background, .mdc-checkbox__native-control:enabled:indeterminate ~ .mdc-checkbox__background {
+      border-color: token.$primary-600;
+
+      svg {
+        width: 12px;
+        margin: auto;
+      }
+    }
+
+    .mdc-checkbox:active > .mdc-checkbox__native-control + .mdc-checkbox__ripple {
+      background-color: token.$neutral-50 !important;
+    }
+
+    .mdc-checkbox__ripple {
+      display: none !important;
+    }
+  }
+
+  ::ng-deep .mdc-data-table__header-row{
+    height: 100%;
+    max-height: 40px;
+  }
+
+  th.grid__th .mat-mdc-icon-button{
+    padding: token.$space-0;
+    height: 32px;
+    width: 32px;
+  }
+
+  .grid__table {
+    width: max-content;
+  }
+
+  @media screen and (max-width: 700px) {
+    .grid__container__wrapper {
+      overflow-x: scroll;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      max-width: 100vw;
+    }
   }
 }

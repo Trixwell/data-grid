@@ -29,6 +29,7 @@ import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {AudioPlayerComponent} from '../core/components/audio-player/audio-player.component';
 import {SquarePaginatorDirective} from '../directives/square-paginator.directive';
 import {InvokeBtnComponent} from '../core/components/invoke-btn/invoke-btn.component';
+import {GridFooterSettingsComponent} from '../core/components/grid-footer-settings/grid-footer-settings.component';
 
 @Component({
   selector: 'ngx-data-gridx',
@@ -52,6 +53,7 @@ import {InvokeBtnComponent} from '../core/components/invoke-btn/invoke-btn.compo
     AudioPlayerComponent,
     SquarePaginatorDirective,
     InvokeBtnComponent,
+    GridFooterSettingsComponent,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './ngx-data-gridx.component.html',
@@ -61,7 +63,7 @@ import {InvokeBtnComponent} from '../core/components/invoke-btn/invoke-btn.compo
 export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   url = input<string | undefined>("");
   exportCsvUrl = input<string | undefined>();
-  data = input<GridProperty[]>([]);
+  data = model<GridProperty[]>([]);
   limit = input<number>(10);
   sort = model<string>('asc');
   grid_name = input<string | undefined>();
@@ -170,7 +172,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
       if (this.openAllToggleDetails()) {
         this.cdr.detectChanges();
-        this.rows.data.forEach(r => this.toggleDetail(r));
+        this.setAllDetailsOpened();
       }
     });
   }
@@ -213,8 +215,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private get storageKey(): string {
-    if (this.grid_name) {
-      return `grid-state-${this.grid_name}`;
+    if (this.grid_name()) {
+      return `grid-state-${this.grid_name()}`;
     }
 
     return `grid-state-auto-${this.data().map(c => c.name).join('-')}`;
@@ -335,6 +337,47 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
     cmpRef.changeDetectorRef.detectChanges();
   }
+
+  setAllDetailsOpened(): void {
+    const detailComponent = this.detailComponent();
+    if (!detailComponent) return;
+
+    const currentIds = new Set(this.rows.data.map(r => this.getRowId(r)));
+
+    this.expandedDetailIds.forEach(id => { if (!currentIds.has(id)) this.expandedDetailIds.delete(id); });
+    this.cdr.detectChanges();
+
+    const containers = this.detailContainers.toArray();
+
+    this.rows.data.forEach((row, idx) => {
+      const rowId = this.getRowId(row);
+      const container = containers[idx];
+      if (!container) return;
+
+      if (this.expandedDetailIds.has(rowId) && container.length > 0) return;
+
+      this.expandedDetailIds.add(rowId);
+      container.clear();
+
+      const cmpRef = container.createComponent(detailComponent);
+      const inst: any = cmpRef.instance;
+
+      if (typeof inst.row === 'function' && typeof inst.row.set === 'function') {
+        inst.row.set(row);
+      } else {
+        inst.row = row;
+      }
+
+      if (typeof inst.rows === 'function' && typeof inst.rows.set === 'function') {
+        inst.rows.set(this.rows.data);
+      } else {
+        inst.rows = this.rows.data;
+      }
+
+      cmpRef.changeDetectorRef.detectChanges();
+    });
+  }
+
 
   private getRowId(row: any): string {
     const sidx = this.sidx();
@@ -880,7 +923,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
         if (this.openAllToggleDetails()) {
           this.cdr.detectChanges();
-          this.rows.data.forEach(r => this.toggleDetail(r));
+          this.setAllDetailsOpened();
         }
 
         // this.openFilterColumn = null;

@@ -1,0 +1,41 @@
+<!--  target=_blank for old billing | target=_self for new ui  -->
+
+<button
+  class="btn button"
+  [matMenuTriggerFor]="dropdownItems.length ? dropdownMenu : null"
+  [ngStyle]="additionalStyles"
+  [disabled]="isDisabled"
+  [ngClass]="{ hidden: isHidden, loading: isLoading }"
+  (click)="!dropdownItems.length && target !== '_self' ? openLink(link, target) : null"
+>
+  <a
+    class="full-link"
+    [routerLink]="!dropdownItems.length && target === '_self' ? link : null">
+  </a>
+
+  @if(isLoading){
+    <div class="btn-spinner">
+      <mat-progress-spinner
+        diameter="18"
+        mode="indeterminate"
+      ></mat-progress-spinner>
+    </div>
+  }
+
+  <span class="button-content">
+        <ng-content></ng-content>
+        @if (iconName && !isLoading) {
+          <mat-icon [fontSet]="outlined ? 'material-symbols-outlined' : 'material-symbols-outlined'">
+            {{ iconName }}
+          </mat-icon>
+        }
+      </span>
+</button>
+
+<mat-menu #dropdownMenu="matMenu">
+  @for(item of dropdownItems; track $index){
+    <button class="btn btn__dropdown" (click)="openLink(item.path, item.target, item.modalId)">
+      {{ item.label }}
+    </button>
+  }
+</mat-menu>

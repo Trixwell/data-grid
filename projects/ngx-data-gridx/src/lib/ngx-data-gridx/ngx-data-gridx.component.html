@@ -67,6 +67,14 @@
           </ng-container>
         }
 
+        <ng-container matColumnDef="loader">
+          <th mat-header-cell *matHeaderCellDef
+              [attr.colspan]="displayedColumns.length"
+              class="grid__row__loader">
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+          </th>
+        </ng-container>
+
         <!-- primary cols -->
         @for(column of data(); track trackByColumn($index, column)){
           <ng-container [matColumnDef]="column.name">
@@ -257,10 +265,10 @@
                           <mat-label>{{ filter.label }}</mat-label>
                           <input matInput [(ngModel)]="filterInputValues[column.name]"
                                  (input)="onInputFilterChange(column.name,
-                                                                              filter.type,
-                                                                              filter.label,
-                                                                              filterInputValues[column.name],
-                                                                              filter.callback)">
+                                                              filter.type,
+                                                              filter.label,
+                                                              filterInputValues[column.name],
+                                                              filter.callback)">
                         </mat-form-field>
                         }
                       </ng-container>
@@ -398,20 +406,14 @@
           </td>
         </ng-container>
 
-        <ng-container matColumnDef="loader">
-          <th mat-header-cell *matHeaderCellDef
-              [attr.colspan]="displayedColumns.length"
-              class="grid__row__loader">
-            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-          </th>
-        </ng-container>
+
 
         <!-- primary row -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-header-row
             *matHeaderRowDef="['loader']; sticky: true"
             class="grid__row__tr__loader"
-            [style.display]="loading ? '' : 'none'">
+            [style.visibility]="loading ? '' : 'hidden'">
         </tr>
 
         <tr mat-row *matRowDef="let element; columns: displayedColumns;"
@@ -441,28 +443,35 @@
           </td>
         </tr>
       </table>
-
-      @if (!disablePagination() && !isSubGrid()) {
-        @if (getCurrentTheme() === GridTheme.FLAT) {
-          <mat-paginator
-            appSquarePagination
-            [appCustomLength]="total"
-            [showFirstLastButtons]="true"
-            [pageSizeOptions]="uniquePageSizeOptions()"
-            [pageSize]="limit()"
-            [length]="total"
-            class="grid__paginator">
-          </mat-paginator>
-        } @else {
-          <mat-paginator
-            [showFirstLastButtons]="true"
-            [pageSizeOptions]="uniquePageSizeOptions()"
-            [pageSize]="limit()"
-            [length]="total"
-            class="grid__paginator">
-          </mat-paginator>
+      <div class="grid__footer">
+        @if(rows.data.length > 0){
+        <div class="grid__footer__settings">
+          <grid-footer-settings [(columns)]="data"></grid-footer-settings>
+        </div>
         }
-      }
+
+        @if (!disablePagination() && !isSubGrid()) {
+          @if (getCurrentTheme() === GridTheme.FLAT) {
+            <mat-paginator
+              appSquarePagination
+              [appCustomLength]="total"
+              [showFirstLastButtons]="true"
+              [pageSizeOptions]="uniquePageSizeOptions()"
+              [pageSize]="limit()"
+              [length]="total"
+              class="grid__paginator">
+            </mat-paginator>
+          } @else {
+            <mat-paginator
+              [showFirstLastButtons]="true"
+              [pageSizeOptions]="uniquePageSizeOptions()"
+              [pageSize]="limit()"
+              [length]="total"
+              class="grid__paginator">
+            </mat-paginator>
+          }
+        }
+      </div>
 
     </div>
   </div>

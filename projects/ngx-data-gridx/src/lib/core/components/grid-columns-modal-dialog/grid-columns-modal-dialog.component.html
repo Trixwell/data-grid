@@ -1,0 +1,71 @@
+<section class="grid-columns-settings">
+  <header class="grid-columns-settings__header">
+    <div class="grid-columns-settings__title"><h2>Налаштування колонок</h2>
+      <mat-icon
+        [matTooltip]="'Перетягуйте колонки, щоб змінити їх порядок або приховати. Колонки з правого списку відображаються в таблиці. Деякі колонки (наприклад, Дії) не можна приховати.'"
+        matTooltipPosition="below" fontSet="material-symbols-outlined"> error
+      </mat-icon>
+    </div>
+    <button mat-icon-button class="grid-columns-settings__close"
+            [mat-dialog-close]="true"
+            type="button"
+            aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="grid-columns-settings__body">
+    <div class="grid-columns-settings__body__wrapper">
+
+      <div class="grid-columns-settings__body__wrapper__active">
+        <p> Неактивні колонки </p>
+        <div class="columns"
+             cdkDropList
+             #inactiveList="cdkDropList"
+             [cdkDropListData]="inactive()"
+             [cdkDropListConnectedTo]="[activeList]"
+             (cdkDropListDropped)="onDropInactive($event)">
+          @for (column of inactive(); track $index) {
+            <div class="column" cdkDrag [cdkDragData]="column">
+              <mat-icon cdkDragHandle>reorder</mat-icon>
+              <span class="label">{{ column.displayName }}</span>
+            </div>
+          }
+        </div>
+
+        <button type="button">
+          Вибрати всі
+        </button>
+      </div>
+
+
+      <div class="grid-columns-settings__body__wrapper__not__active">
+        <p>Активні колонки </p>
+        <div class="columns"
+             cdkDropList
+             #activeList="cdkDropList"
+             [cdkDropListData]="active()"
+             [cdkDropListConnectedTo]="[inactiveList]"
+             (cdkDropListDropped)="onDropActive($event)">
+          @for (column of active(); track $index) {
+            <div class="column" cdkDrag [cdkDragData]="column">
+              <mat-icon cdkDragHandle>reorder</mat-icon>
+              <span class="label">{{ column.displayName }}</span>
+            </div>
+          }
+        </div>
+
+        <button type="button">
+          Прибрати всі
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="grid-columns-settings__actions">
+    <button type="button" mat-flat-button>
+      Зберегти зміни
+    </button>
+  </div>
+</section>

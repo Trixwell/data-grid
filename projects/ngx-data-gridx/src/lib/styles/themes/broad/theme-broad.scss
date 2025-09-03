@@ -91,7 +91,7 @@
 
     .grid__filter_selected_options {
       display: flex;
-      gap: token.$space-4;
+      gap: token.$space-3;
     }
 
     .grid__filters {
@@ -103,6 +103,7 @@
 
       .grid__options {
         display: flex;
+        gap: token.$space-3;
       }
     }
 
@@ -110,9 +111,15 @@
       display: flex;
       align-items: center;
       gap: token.$space-1;
-      color: token.$neutral-800;
-      font: token.$font-table-header-m;
-      font-weight: token.$font-weight-b;
+      color: token.$neutral-700;
+      font: token.$font-button-m-light;
+
+      ::ng-deep mat-icon{
+        color: token.$neutral-500;
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+      }
     }
 
     .grid__filter_option .mat-icon {
@@ -229,11 +236,8 @@
     width: max-content;
   }
 
-  @media screen and (max-width: 700px) {
-    .grid__container__wrapper {
-      overflow-x: scroll;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
+  ::ng-deep .mat-sort-header-content{
+    color: token.$neutral-900;
+    font: token.$font-table-header-m1;
   }
 }

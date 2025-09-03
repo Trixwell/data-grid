@@ -28,6 +28,7 @@ import {SelectionModel} from '@angular/cdk/collections';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {AudioPlayerComponent} from '../core/components/audio-player/audio-player.component';
 import {SquarePaginatorDirective} from '../directives/square-paginator.directive';
+import {InvokeBtnComponent} from '../core/components/invoke-btn/invoke-btn.component';
 
 @Component({
   selector: 'ngx-data-gridx',
@@ -50,6 +51,7 @@ import {SquarePaginatorDirective} from '../directives/square-paginator.directive
     MatProgressBarModule,
     AudioPlayerComponent,
     SquarePaginatorDirective,
+    InvokeBtnComponent,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './ngx-data-gridx.component.html',

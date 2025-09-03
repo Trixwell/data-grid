@@ -20,15 +20,19 @@
               }
             </div>
 
-            <button class="grid__filter_actions" (click)="clearAllFilters()" type="button">
-              <mat-icon matTooltip="Очистити фільтри">filter_list_off</mat-icon>
-            </button>
+            <app-invoke-btn (click)="clearAllFilters()" iconName="delete" [outlined]="true">
+              Очистити фільтри
+            </app-invoke-btn>
+
+            <app-invoke-btn (click)="loadData()" iconName="autorenew" [outlined]="true">
+              Оновити дані
+            </app-invoke-btn>
 
             @if(exportCsvUrl()){
-              <button class="grid__filter_actions" (click)="exportCsvAction()" type="button">
-                <mat-icon matTooltip="Експорт CSV">description</mat-icon>
-              </button>
-            }
+              <app-invoke-btn (click)="exportCsvAction()" iconName="file_export" [outlined]="true">
+                Експорт CSV
+              </app-invoke-btn>
+          }
           </div>
         }
       </div>
@@ -438,34 +442,28 @@
         </tr>
       </table>
 
-      @if(!disablePagination()){
-        <ng-container>
-          @if(getCurrentTheme() === GridTheme.FLAT && !isSubGrid()){
-            <ng-container>
-              <mat-paginator
-                appSquarePagination
-                [appCustomLength]="total"
-                [showFirstLastButtons]="true"
-                [pageSizeOptions]="uniquePageSizeOptions()"
-                [pageSize]="limit()"
-                [length]="total"
-                class="grid__paginator">
-              </mat-paginator>
-            </ng-container>
-          }
-        </ng-container>
-      } @else{
-        <ng-template #broadPaginator>
-          @if(!disablePagination){
+      @if (!disablePagination() && !isSubGrid()) {
+        @if (getCurrentTheme() === GridTheme.FLAT) {
           <mat-paginator
+            appSquarePagination
+            [appCustomLength]="total"
+            [showFirstLastButtons]="true"
             [pageSizeOptions]="uniquePageSizeOptions()"
-            [pageSize]="limit"
+            [pageSize]="limit()"
             [length]="total"
             class="grid__paginator">
           </mat-paginator>
-          }
-        </ng-template>
+        } @else {
+          <mat-paginator
+            [showFirstLastButtons]="true"
+            [pageSizeOptions]="uniquePageSizeOptions()"
+            [pageSize]="limit()"
+            [length]="total"
+            class="grid__paginator">
+          </mat-paginator>
+        }
       }
+
     </div>
   </div>
 </div>

@@ -77,7 +77,12 @@
             align-items: center;
             gap: tokens.$space-2;
             min-height: 36px;
+            margin-top: tokens.$space-2;
             border-bottom: tokens.$border-1 solid tokens.$primary-100;
+
+            &:first-child{
+              margin-top: tokens.$space-0 !important;
+            }
 
             mat-icon{
               width: 20px;
@@ -131,6 +136,8 @@
 
 ::ng-deep{
   .mat-mdc-tooltip-surface{
+    width: 100% !important;
+    max-width: 350px !important;
     padding: tokens.$space-3 !important;
     background-color: tokens.$neutral-100 !important;
     box-shadow: 0 2px 4px tokens.$shadow-medium;
@@ -155,6 +162,8 @@
   display: flex;
   align-items: center;
   gap: tokens.$space-2;
+  border-bottom: tokens.$border-1 solid tokens.$primary-100;
+
 
   span {
     color: tokens.$neutral-900;

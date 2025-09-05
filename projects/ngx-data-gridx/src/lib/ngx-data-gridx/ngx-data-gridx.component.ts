@@ -1,7 +1,7 @@
 import {
   AfterViewInit, ChangeDetectorRef,
-  Component, ContentChild, ElementRef, HostListener, input,
-  Input, model, OnDestroy, OnInit, QueryList, signal, TemplateRef, Type,
+  Component, ContentChild, effect, ElementRef, HostListener, input,
+  model, OnDestroy, OnInit, QueryList, TemplateRef, Type,
   ViewChild, ViewChildren, ViewContainerRef
 } from '@angular/core';
 import {GridProperty, GridPropertyType} from '../core/entity/grid-property';
@@ -129,7 +129,22 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   constructor(private http: HttpClient,
               private cdr: ChangeDetectorRef,
               private elementRef: ElementRef
-  ) {}
+  ) {
+    effect(() => {
+      const data = this.data();
+
+      let items: GridProperty[] | undefined = undefined;
+      try {
+        const raw = localStorage.getItem(this.storageKey);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          items = parsed?.columns as GridProperty[] | undefined;
+        }
+      } catch {}
+
+      this.reorderColumnsData(items ?? data);
+    });
+  }
 
   rows: MatTableDataSource<object> = new MatTableDataSource<object>([]);
   dateFilters: Record<string, FormGroup> = {};
@@ -214,13 +229,23 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     this.loading = false;
   }
 
-  private get storageKey(): string {
-    if (this.grid_name()) {
-      return `grid-state-${this.grid_name()}`;
-    }
+  get storageKey(): string {
+    const name = this.grid_name();
+    if (name) return `grid-state-${name}`;
 
-    return `grid-state-auto-${this.data().map(c => c.name).join('-')}`;
+    const cols = this.data();
+    if (!cols || cols.length === 0) return 'grid-state-auto';
+
+    const names = [...new Set(cols
+      .map(c => c?.name ?? '')
+      .filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+
+    return names.length
+      ? `grid-state-auto-${names.join('-')}`
+      : 'grid-state-auto';
   }
+
 
   private loadFilters(): void {
     if (!this.showHistoryFilters) return;
@@ -294,35 +319,26 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private saveFilters(): void {
-    if (!this.showHistoryFilters) return;
-    const state = {
-      filters: this.appliedFilters,
-      search:  this.searchValues
-    };
+    if (!this.showHistoryFilters()) return;
+
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify(state));
-    } catch {}
+      const raw = localStorage.getItem(this.storageKey);
+      const prev = raw ? JSON.parse(raw) : {};
+
+      const next = {
+        ...prev,
+        filters: this.appliedFilters,
+        search:  this.searchValues,
+      };
+
+      localStorage.setItem(this.storageKey, JSON.stringify(next));
+    } catch (e) {
+      console.error(e);
+    }
   }
 
-  toggleDetail(row: any) {
-    const rowId = this.getRowId(row);
-    const idx = this.rows.data.indexOf(row);
-    const container = this.detailContainers.toArray()[idx];
-    const detailComponent = this.detailComponent();
 
-    if (!container || !detailComponent) return;
-
-    if (this.expandedDetailIds.has(rowId)) {
-      this.expandedDetailIds.delete(rowId);
-      container.clear();
-      return;
-    }
-
-    this.expandedDetailIds.add(rowId);
-    container.clear();
-    const cmpRef = container.createComponent(detailComponent);
-    const inst: any = cmpRef.instance;
-
+  private setDetailInputs(inst: any, row: any) {
     if (typeof inst.row === 'function' && typeof inst.row.set === 'function') {
       inst.row.set(row);
     } else {
@@ -334,16 +350,45 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     } else {
       inst.rows = this.rows.data;
     }
+  }
 
+  private mountDetail(row: any, container: ViewContainerRef, detailComponent: Type<any>) {
+    container.clear();
+    const cmpRef = container.createComponent(detailComponent);
+    this.setDetailInputs(cmpRef.instance, row);
     cmpRef.changeDetectorRef.detectChanges();
   }
 
+  private expandRow(row: any, container: ViewContainerRef, dc: Type<any>) {
+    this.mountDetail(row, container, dc);
+    this.expandedDetailIds.add(this.getRowId(row));
+  }
+
+  private collapseRow(rowId: string, container: ViewContainerRef) {
+    container.clear();
+    this.expandedDetailIds.delete(rowId);
+  }
+
+  toggleDetail(row: any) {
+    const rowId = this.getRowId(row);
+    const idx = this.rows.data.indexOf(row);
+    const container = this.detailContainers.toArray()[idx];
+    const dc = this.detailComponent();
+
+    if (!container || !dc) return;
+
+    if (this.expandedDetailIds.has(rowId)) {
+      this.collapseRow(rowId, container);
+    } else {
+      this.expandRow(row, container, dc);
+    }
+  }
+
   setAllDetailsOpened(): void {
-    const detailComponent = this.detailComponent();
-    if (!detailComponent) return;
+    const dc = this.detailComponent();
+    if (!dc) return;
 
     const currentIds = new Set(this.rows.data.map(r => this.getRowId(r)));
-
     this.expandedDetailIds.forEach(id => { if (!currentIds.has(id)) this.expandedDetailIds.delete(id); });
     this.cdr.detectChanges();
 
@@ -355,29 +400,9 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       if (!container) return;
 
       if (this.expandedDetailIds.has(rowId) && container.length > 0) return;
-
-      this.expandedDetailIds.add(rowId);
-      container.clear();
-
-      const cmpRef = container.createComponent(detailComponent);
-      const inst: any = cmpRef.instance;
-
-      if (typeof inst.row === 'function' && typeof inst.row.set === 'function') {
-        inst.row.set(row);
-      } else {
-        inst.row = row;
-      }
-
-      if (typeof inst.rows === 'function' && typeof inst.rows.set === 'function') {
-        inst.rows.set(this.rows.data);
-      } else {
-        inst.rows = this.rows.data;
-      }
-
-      cmpRef.changeDetectorRef.detectChanges();
+      this.expandRow(row, container, dc);
     });
   }
-
 
   private getRowId(row: any): string {
     const sidx = this.sidx();
@@ -792,6 +817,29 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  private reorderColumnsData(data: GridProperty[]) {
+    if (!Array.isArray(data) || data.length === 0) return this;
+
+    const withOrigIdx = data.map((c, i) => ({ c, i }));
+    withOrigIdx.sort((a, b) => {
+      const ai = a.c.columnIndex ?? a.i;
+      const bi = b.c.columnIndex ?? b.i;
+      if (ai === bi) return 0;
+      return ai < bi ? -1 : 1;
+    });
+
+    const sorted = withOrigIdx.map(x => x.c);
+
+    const visibleCols = sorted.filter(
+      c => c.visible !== false && c.type !== GridPropertyType.Hidden
+    );
+
+    const names = visibleCols.map(c => c.name);
+    this.displayedColumns = this.multiselect() ? ['select', ...names] : names;
+
+    return this;
+  }
+
 
   private mappingParentGridFiltersParams(params: URLSearchParams) {
     if (!this.isSubGrid() || !this.parentGridFilters()) return;
@@ -1156,10 +1204,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     }
 
     return classes;
-  }
-
-  trackByColumn(index: number, column: GridProperty): string {
-    return column.name || index.toString();
   }
 
   uniquePageSizeOptions(): number[] {

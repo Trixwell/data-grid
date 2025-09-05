@@ -24,6 +24,7 @@
 @mixin grid-theme-common {
   .grid__table {
     background: transparent;
+    width: max-content;
   }
 
   .grid__container {
@@ -199,7 +200,6 @@
   }
 
   .grid__row__loader .mat-mdc-progress-bar {
-    --mdc-linear-progress-track-height: 4px;
     padding: token.$space-0;
   }
 
@@ -233,10 +233,6 @@
       -ms-overflow-style: none;
     }
 
-    .grid__footer{
-      width: max-content;
-    }
-
     .grid__filters{
       max-width: max-content;
       overflow-x: scroll;
@@ -249,6 +245,42 @@
     .grid__header{
       display: flex;
       justify-content: flex-end;
+    }
+
+    .grid__footer {
+      align-items: stretch;
+      flex-wrap: wrap;
+    }
+
+    ::ng-deep
+    .grid__paginator
+    .mat-mdc-paginator-outer-container
+    .mat-mdc-paginator-container {
+      justify-content: flex-start !important;
+    }
+
+    ::ng-deep .grid__paginator .mat-mdc-paginator-outer-container { width: 100%; }
+
+    ::ng-deep .grid__paginator .mat-mdc-paginator-page-size-label {
+      display: none;
+    }
+
+    ::ng-deep .grid__paginator .mat-mdc-form-field-infix { min-width: 0; }
+    ::ng-deep .grid__paginator .mat-mdc-select { width: auto; min-width: 64px; }
+
+    ::ng-deep .grid__paginator .mat-mdc-paginator-range-label {
+      order: 3;
+      width: 100%;
+      text-align: center;
+    }
+
+    ::ng-deep .mat-mdc-paginator-outer-container{
+      display: block;
+    }
+
+    ::ng-deep .grid__paginator .mat-mdc-paginator-navigation {
+      order: 4;
+      margin-left: auto;
     }
   }
 }

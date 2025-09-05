@@ -77,7 +77,7 @@
     }
   }
 
-  .grid__container__wrapper {
+  .grid__container__data {
     box-shadow: 0 2px 4px token.$shadow-medium;
     border-radius: token.$border-radius-small;
   }
@@ -171,7 +171,7 @@
   .grid__paginator
   .mat-mdc-paginator-outer-container
   .mat-mdc-paginator-container {
-    justify-content: flex-end !important;
+    justify-content: flex-end
   }
 
   ::ng-deep .mat-mdc-paginator .mat-mdc-select {

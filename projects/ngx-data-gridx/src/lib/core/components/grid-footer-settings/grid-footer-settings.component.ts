@@ -35,4 +35,9 @@ export class GridFooterSettingsComponent {
 
     return this;
   }
+
+  print(){
+    window.print();
+    return this;
+  }
 }

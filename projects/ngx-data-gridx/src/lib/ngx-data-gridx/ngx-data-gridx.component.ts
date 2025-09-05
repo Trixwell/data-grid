@@ -61,19 +61,19 @@ import {GridFooterSettingsComponent} from '../core/components/grid-footer-settin
 })
 
 export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
-  url = input<string | undefined>("");
-  exportCsvUrl = input<string | undefined>();
+  url = model<string | undefined>("");
+  exportCsvUrl = model<string | undefined>();
   data = model<GridProperty[]>([]);
-  limit = input<number>(10);
+  limit = model<number>(10);
   sort = model<string>('asc');
-  grid_name = input<string | undefined>();
+  grid_name = model<string | undefined>();
   sidx = model<string | undefined>();
-  multiselect = input<boolean>(false);
-  showFilters = input<boolean>(true);
-  subUrlParams = input<{ paramName: string; columnName: string }[] | null>();
-  currentRow = input<object | null | undefined>();
-  showHistoryFilters = input<boolean>(true);
-  key = input<string | null>(null);
+  multiselect = model<boolean>(false);
+  showFilters = model<boolean>(true);
+  subUrlParams = model<{ paramName: string; columnName: string }[] | null>();
+  currentRow = model<object | null | undefined>();
+  showHistoryFilters = model<boolean>(true);
+  key = model<string | null>(null);
   expandedElement = model<object | null | undefined>();
   theme = input<GridTheme>(GridTheme.BROAD);
   noDataPlaceholder = input<string>(

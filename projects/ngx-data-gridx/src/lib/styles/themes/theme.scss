@@ -213,9 +213,13 @@
 
   .sub-grid-container {
     ::ng-deep ngx-data-gridx{
-      .grid__container__wrapper{
+      .grid__container__data{
         box-shadow: none !important;
         overflow-x: unset !important;
+      }
+
+      .grid__footer{
+        margin-bottom: token.$space-4;
       }
     }
   }

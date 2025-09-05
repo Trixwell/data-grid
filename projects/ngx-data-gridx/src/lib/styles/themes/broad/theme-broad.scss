@@ -20,13 +20,19 @@
     font-weight: 500;
   }
 
+  tr{
+    transition: background-color 200ms ease-in-out;
+    height: 40px;
+  }
+
   tr.accordion:hover{
     background: token.$primary-200;
   }
 
   .grid__th {
-    background: token.$primary-200 !important;
-    border: 1px solid token.$primary-100;
+    background: token.$primary-50 !important;
+    border-right: 1px solid token.$primary-100;
+    border-left: none !important;
     color: token.$neutral-950;
     font-weight: token.$font-weight-h !important;
     line-height: 16px;
@@ -34,6 +40,11 @@
     border-bottom-color: transparent;
     overflow: visible;
     position: relative;
+
+    .mat-mdc-icon-button svg{
+      height: 16px;
+      width: 16px;
+    }
   }
 
   .grid__checkbox {
@@ -46,19 +57,27 @@
 
   .grid__th:last-child {
     border-top-right-radius: token.$border-radius-small;
+    border-right: none !important;
   }
 
   .grid__td {
-    border-bottom: 1px solid token.$primary-100;
+    border-bottom: token.$border-1 solid token.$primary-100;
+    border-right: token.$border-1 solid token.$primary-100;
     background: transparent;
     max-width: 70px;
+    max-height: 40px;
+    height: 100%;
+
+    &:last-child{
+      border-right: none !important;
+    }
 
     .column-content span {
       color: token.$neutral-800;
     }
   }
 
-  .grid__container__wrapper {
+  .grid__container__data {
     box-shadow: 0 2px 4px token.$shadow-medium;
     border-radius: token.$border-radius-small;
   }
@@ -72,7 +91,7 @@
 
     .grid__filter_selected_options {
       display: flex;
-      gap: token.$space-4;
+      gap: token.$space-3;
     }
 
     .grid__filters {
@@ -84,6 +103,7 @@
 
       .grid__options {
         display: flex;
+        gap: token.$space-3;
       }
     }
 
@@ -91,9 +111,15 @@
       display: flex;
       align-items: center;
       gap: token.$space-1;
-      color: token.$neutral-800;
-      font: token.$font-table-header-m;
-      font-weight: token.$font-weight-b;
+      color: token.$neutral-700;
+      font: token.$font-button-m-light;
+
+      ::ng-deep mat-icon{
+        color: token.$neutral-500;
+        width: 20px;
+        height: 20px;
+        font-size: 20px;
+      }
     }
 
     .grid__filter_option .mat-icon {
@@ -145,7 +171,7 @@
   .grid__paginator
   .mat-mdc-paginator-outer-container
   .mat-mdc-paginator-container {
-    justify-content: flex-end !important;
+    justify-content: flex-end
   }
 
   ::ng-deep .mat-mdc-paginator .mat-mdc-select {
@@ -161,5 +187,57 @@
 
   ::ng-deep .grid__paginator .mdc-notched-outline > * {
     border: none !important;
+  }
+
+  ::ng-deep .mat-mdc-checkbox {
+    .mat-mdc-checkbox .mat-mdc-checkbox-ripple, .mdc-checkbox__ripple {
+      background: none;
+    }
+
+    .mdc-checkbox__checkmark {
+      color: token.$primary-600;
+    }
+
+    .mdc-checkbox__background {
+      background: none !important;
+      border: 2px solid token.$neutral-700;
+    }
+
+    .mdc-checkbox__native-control:enabled:checked ~ .mdc-checkbox__background, .mdc-checkbox__native-control:enabled:indeterminate ~ .mdc-checkbox__background {
+      border-color: token.$primary-600;
+
+      svg {
+        width: 12px;
+        margin: auto;
+      }
+    }
+
+    .mdc-checkbox:active > .mdc-checkbox__native-control + .mdc-checkbox__ripple {
+      background-color: token.$neutral-50 !important;
+    }
+
+    .mdc-checkbox__ripple {
+      display: none !important;
+    }
+  }
+
+  ::ng-deep .mdc-data-table__header-row{
+    height: 100%;
+    max-height: 40px;
+  }
+
+  th.grid__th .mat-mdc-icon-button{
+    padding: token.$space-0;
+    height: 32px;
+    width: 32px;
+  }
+
+  .grid__table {
+    width: max-content;
+  }
+
+  ::ng-deep .mat-sort-header-content{
+    color: token.$neutral-900;
+    font: token.$font-table-header-m1;
   }
 }

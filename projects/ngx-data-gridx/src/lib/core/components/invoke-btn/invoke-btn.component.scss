@@ -1,0 +1,109 @@
+@use './../../../styles/tokens' as tokens;
+
+::ng-deep {
+  .mat-mdc-menu-content {
+    background: tokens.$primary-100;
+  }
+}
+
+.btn {
+  user-select: none;
+  height: 24px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: tokens.$primary-100;
+  color: tokens.$neutral-900;
+  cursor: pointer;
+  border-radius: tokens.$space-1;
+  font: tokens.$font-button-s;
+  position: relative;
+  overflow: hidden;
+  min-width: 100px;
+  white-space: nowrap;
+
+  &:disabled {
+    color: tokens.$neutral-500!important;
+    background: tokens.$neutral-600!important;
+  }
+
+  &:hover {
+    background: tokens.$primary-300;
+  }
+
+  &__dropdown {
+    display: flex;
+    margin: tokens.$space-1;
+    width: 172px;
+    border-radius: tokens.$radius-small;
+    padding: tokens.$space-1 tokens.$space-2;
+    height: auto;
+
+    &:hover {
+      background: tokens.$primary-300;
+    }
+  }
+
+  .button-content {
+    position: relative;
+    z-index: tokens.$z-index-base;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    gap: tokens.$space-1;
+    pointer-events: none;
+  }
+
+  &.loading {
+    .button-content {
+      visibility: hidden;
+    }
+  }
+
+  .btn-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: tokens.$z-index-base + 1;
+  }
+
+  .full-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: tokens.$z-index-base;
+    text-decoration: none;
+  }
+
+  ::ng-deep {
+    .mat-mdc-menu-content {
+      display: flex;
+      flex-direction: column;
+      gap: tokens.$space-1;
+    }
+
+    .mat-mdc-menu-panel {
+      margin-top: tokens.$space-1;
+    }
+
+    a {
+      text-decoration: none;
+      color: tokens.$neutral-900;
+      width: 163px;
+      text-align: start;
+    }
+
+    mat-icon{
+      color: tokens.$neutral-800;
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+}

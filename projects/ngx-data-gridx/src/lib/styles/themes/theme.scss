@@ -1,8 +1,30 @@
 @use '../tokens' as token;
 
+::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: token.$scrollbar-color;
+  border-radius: token.$scrollbar-radius;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: token.$scrollbar-color-hover;
+}
+
+::-webkit-scrollbar-track {
+  background-color: token.$scrollbar-track-color;
+  border-radius: token.$scrollbar-track-radius;
+}
+
+
+
 @mixin grid-theme-common {
   .grid__table {
     background: transparent;
+    width: max-content;
   }
 
   .grid__container {
@@ -69,7 +91,7 @@
       background: white;
       padding: token.$space-4;
       border-radius: token.$radius-medium;
-      box-shadow: var(--shadow-md);
+      box-shadow: 0 2px 6px token.$shadow-medium;
       z-index: 99;
     }
 
@@ -80,7 +102,6 @@
     .filter-options {
       display: flex;
       flex-direction: column;
-      gap: token.$space-4;
     }
   }
 
@@ -93,6 +114,8 @@
   .grid__row__loader {
     border: 0;
     height: 4px;
+    padding: token.$space-0;
+    position: absolute;
   }
 
   .grid__row__loader th {
@@ -168,4 +191,116 @@
   .example-expanded-row {
     background-color: token.$primary-50;
   }
+
+  .grid__container__wrapper { padding-top: 0; }
+
+  .grid__row__tr__loader{
+    height: 4px !important;
+    padding: token.$space-0;
+  }
+
+  .grid__row__loader .mat-mdc-progress-bar {
+    padding: token.$space-0;
+  }
+
+  .sub-grid-container.expanded{
+    margin-top: token.$space-4;
+  }
+
+  ::ng-deep .mat-column-expandedDetail{
+    overflow: visible;
+  }
+
+  .sub-grid-container {
+    ::ng-deep ngx-data-gridx{
+      .grid__container__wrapper{
+        box-shadow: none !important;
+        overflow-x: unset !important;
+      }
+    }
+  }
+
+  .grid__footer{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  @media screen and (max-width: 700px) {
+    .grid__container__wrapper {
+      overflow-x: scroll;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .grid__filters{
+      max-width: max-content;
+      overflow-x: scroll;
+    }
+
+    .grid__options{
+      gap: token.$space-2 !important;
+    }
+
+    .grid__header{
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .grid__footer {
+      align-items: stretch;
+      flex-wrap: wrap;
+    }
+
+    ::ng-deep
+    .grid__paginator
+    .mat-mdc-paginator-outer-container
+    .mat-mdc-paginator-container {
+      justify-content: flex-start !important;
+    }
+
+    ::ng-deep .grid__paginator .mat-mdc-paginator-outer-container { width: 100%; }
+
+    ::ng-deep .grid__paginator .mat-mdc-paginator-page-size-label {
+      display: none;
+    }
+
+    ::ng-deep .grid__paginator .mat-mdc-form-field-infix { min-width: 0; }
+    ::ng-deep .grid__paginator .mat-mdc-select { width: auto; min-width: 64px; }
+
+    ::ng-deep .grid__paginator .mat-mdc-paginator-range-label {
+      order: 3;
+      width: 100%;
+      text-align: center;
+    }
+
+    ::ng-deep .mat-mdc-paginator-outer-container{
+      display: block;
+    }
+
+    ::ng-deep .grid__paginator .mat-mdc-paginator-navigation {
+      order: 4;
+      margin-left: auto;
+    }
+  }
+}
+
+
+::ng-deep{
+  .mat-mdc-dialog-surface{
+    border-radius: token.$radius-small !important;
+    padding: token.$space-6;
+  }
+
+  .mdc-icon-button__ripple{
+    display: none !important;
+  }
+}
+
+.progressBarRow {
+  min-height: 5px;
+}
+
+.progressBarRow .progressBarCell {
+  padding: 0;
 }

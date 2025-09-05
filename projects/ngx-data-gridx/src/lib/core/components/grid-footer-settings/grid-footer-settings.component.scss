@@ -1,0 +1,35 @@
+@use './../../../styles/tokens' as tokens;
+
+.settings{
+  display: flex;
+
+  .grid__footer__settings_element{
+    display: flex;
+    align-items: center;
+    gap: tokens.$space-1;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease-in-out;
+
+    ::ng-deep mat-icon{
+      color: tokens.$neutral-500;
+    }
+
+    span{
+      color: tokens.$neutral-950;
+      font: tokens.$font-caption-s;
+    }
+  }
+
+  .grid__footer__settings_element:hover{
+    opacity: 0.7;
+  }
+}
+
+@media screen and (max-width: 700px) {
+  .settings{
+    justify-content: flex-start;
+    margin-top: tokens.$space-4;
+  }
+}

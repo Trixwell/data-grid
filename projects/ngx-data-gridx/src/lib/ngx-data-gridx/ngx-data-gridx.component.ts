@@ -1,7 +1,7 @@
 import {
   AfterViewInit, ChangeDetectorRef,
-  Component, ContentChild, ElementRef, HostListener,
-  Input, OnDestroy, OnInit, QueryList, TemplateRef, Type,
+  Component, ContentChild, effect, ElementRef, HostListener, input,
+  model, OnDestroy, OnInit, QueryList, TemplateRef, Type,
   ViewChild, ViewChildren, ViewContainerRef
 } from '@angular/core';
 import {GridProperty, GridPropertyType} from '../core/entity/grid-property';
@@ -19,16 +19,17 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
 import {MatMenuModule} from '@angular/material/menu';
-import {interval, isObservable, map, Observable, of, Subject, Subscription, takeUntil} from 'rxjs';
+import {finalize, interval, isObservable, map, Observable, of, Subject, Subscription, takeUntil} from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import {MatOptionSelectionChange, provideNativeDateAdapter} from '@angular/material/core';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import {animate, state, style, transition, trigger} from '@angular/animations';
 import {SelectionModel} from '@angular/cdk/collections';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {AudioPlayerComponent} from '../core/components/audio-player/audio-player.component';
 import {SquarePaginatorDirective} from '../directives/square-paginator.directive';
+import {InvokeBtnComponent} from '../core/components/invoke-btn/invoke-btn.component';
+import {GridFooterSettingsComponent} from '../core/components/grid-footer-settings/grid-footer-settings.component';
 
 @Component({
   selector: 'ngx-data-gridx',
@@ -51,47 +52,42 @@ import {SquarePaginatorDirective} from '../directives/square-paginator.directive
     MatProgressBarModule,
     AudioPlayerComponent,
     SquarePaginatorDirective,
+    InvokeBtnComponent,
+    GridFooterSettingsComponent,
   ],
   providers: [provideNativeDateAdapter()],
-  animations: [
-    trigger('detailExpand', [
-      state('collapsed', style({ height: '0px', opacity: 0, visibility: 'hidden' })),
-      state('expanded', style({ height: '*', opacity: 1, visibility: 'visible' })),
-      transition('expanded <=> collapsed', [
-        animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')
-      ])
-    ])
-  ],
   templateUrl: './ngx-data-gridx.component.html',
   styleUrl: './ngx-data-gridx.component.scss',
 })
 
 export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
-  @Input() url?: string;
-  @Input() exportCsvUrl?: string;
-  @Input() data: GridProperty[] = [];
-  @Input() limit = 10;
-  @Input() sort?: string;
-  @Input() grid_name?: string;
-  @Input() sidx?: string;
-  @Input() multiselect?: boolean = false;
-  @Input() showFilters = true;
-  @Input() subUrlParams?: { paramName: string; columnName: string }[] | null;
-  @Input() currentRow?: object | null | undefined;
-  @Input() showHistoryFilters?: boolean = true;
-  @Input() key?: string | null = null;
-  @Input() expandedElement: object | null | undefined;
-  @Input() theme: GridTheme  = GridTheme.BROAD;
-  @Input() noDataPlaceholder = 'Даних поки що немає, але не хвилюйтесь вони скоро з\'являться.';
-  @Input() parentGridFilters: {
-    search: Record<string, string>,
-    filters: Record<string, Record<string, AppliedFiltersDTO>>
-  } = { search: {}, filters: {} };
-  @Input() autoRefreshIntervalSec: number | null = null;
-  @Input() disablePagination: boolean = false;
-  @Input() lazyLoad: boolean = false;
-  @Input() detailComponent?: Type<any>;
-  @Input() openAllToggleDetails = false;
+  url = input<string | undefined>("");
+  exportCsvUrl = input<string | undefined>();
+  data = model<GridProperty[]>([]);
+  limit = input<number>(10);
+  sort = model<string>('asc');
+  grid_name = input<string | undefined>();
+  sidx = model<string | undefined>();
+  multiselect = input<boolean>(false);
+  showFilters = input<boolean>(true);
+  subUrlParams = input<{ paramName: string; columnName: string }[] | null>();
+  currentRow = input<object | null | undefined>();
+  showHistoryFilters = input<boolean>(true);
+  key = input<string | null>(null);
+  expandedElement = model<object | null | undefined>();
+  theme = input<GridTheme>(GridTheme.BROAD);
+  noDataPlaceholder = input<string>(
+    'Даних поки що немає, але не хвилюйтесь вони скоро з\'являться.'
+  );
+  parentGridFilters = input<{
+    search: Record<string, string>;
+    filters: Record<string, Record<string, AppliedFiltersDTO>>;
+  }>({ search: {}, filters: {} });
+  autoRefreshIntervalSec = input<number | null>(null);
+  disablePagination = input<boolean>(false);
+  lazyLoad = input<boolean>(false);
+  detailComponent = input<Type<any> | undefined>();
+  openAllToggleDetails = input<boolean>(false);
 
   /** detail accordion (dblclick) */
   detailExpandedElement: any | null = null;
@@ -133,7 +129,22 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   constructor(private http: HttpClient,
               private cdr: ChangeDetectorRef,
               private elementRef: ElementRef
-  ) {}
+  ) {
+    effect(() => {
+      const data = this.data();
+
+      let items: GridProperty[] | undefined = undefined;
+      try {
+        const raw = localStorage.getItem(this.storageKey);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          items = parsed?.columns as GridProperty[] | undefined;
+        }
+      } catch {}
+
+      this.reorderColumnsData(items ?? data);
+    });
+  }
 
   rows: MatTableDataSource<object> = new MatTableDataSource<object>([]);
   dateFilters: Record<string, FormGroup> = {};
@@ -150,7 +161,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(){
     this.loadFilters();
 
-    if(!this.lazyLoad) {
+    if(!this.lazyLoad()) {
       this.loadData();
     }
 
@@ -164,29 +175,31 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    if (this.lazyLoad && this.url && !NgxDataGridx.loadedUrls.has(this.url)) {
+    const url = this.url();
+    if (this.lazyLoad() && url && !NgxDataGridx.loadedUrls.has(url)) {
       this.runLazyLoad();
     }
 
-    if (this.disablePagination) return;
+    if (this.disablePagination()) return;
 
-    this.paginator.page.subscribe((event) => {
+    this.paginator?.page.subscribe((event) => {
       this.loadData(event.pageIndex + 1, event.pageSize);
 
-      if (this.openAllToggleDetails) {
+      if (this.openAllToggleDetails()) {
         this.cdr.detectChanges();
-        this.rows.data.forEach(r => this.toggleDetail(r));
+        this.setAllDetailsOpened();
       }
     });
   }
 
   private startAutoRefresh(): void {
-    if (this.autoRefreshIntervalSec && this.autoRefreshIntervalSec > 0) {
-      this.autoRefreshSub = interval(this.autoRefreshIntervalSec * 1000)
+    const autoRefreshIntervalSec = this.autoRefreshIntervalSec();
+    if (autoRefreshIntervalSec && autoRefreshIntervalSec > 0) {
+      this.autoRefreshSub = interval(autoRefreshIntervalSec * 1000)
         .pipe(takeUntil(this.autoRefreshDestroy$))
         .subscribe(() => {
           console.log('Refreshing data...');
-          this.loadData(this.paginator?.pageIndex + 1 || 1, this.limit);
+          this.loadData(this.paginator?.pageIndex + 1 || 1, this.limit());
         });
     }
   }
@@ -196,7 +209,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           this.loadData();
-          NgxDataGridx.loadedUrls.add(this.url!);
+          NgxDataGridx.loadedUrls.add(this.url()!);
           observer.disconnect();
         }
       });
@@ -216,13 +229,23 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     this.loading = false;
   }
 
-  private get storageKey(): string {
-    if (this.grid_name) {
-      return `grid-state-${this.grid_name}`;
-    }
+  get storageKey(): string {
+    const name = this.grid_name();
+    if (name) return `grid-state-${name}`;
 
-    return `grid-state-auto-${this.data.map(c => c.name).join('-')}`;
+    const cols = this.data();
+    if (!cols || cols.length === 0) return 'grid-state-auto';
+
+    const names = [...new Set(cols
+      .map(c => c?.name ?? '')
+      .filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+
+    return names.length
+      ? `grid-state-auto-${names.join('-')}`
+      : 'grid-state-auto';
   }
+
 
   private loadFilters(): void {
     if (!this.showHistoryFilters) return;
@@ -246,7 +269,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
   restoreFilters(){
     Object.entries(this.appliedFilters).forEach(([col, byType]) => {
-      const column = this.data.find(c => c.name === col);
+      const column = this.data().find(c => c.name === col);
       if (!column?.filterValues) return;
 
       Object.entries(byType).forEach(([type, dto]) => {
@@ -296,34 +319,26 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private saveFilters(): void {
-    if (!this.showHistoryFilters) return;
-    const state = {
-      filters: this.appliedFilters,
-      search:  this.searchValues
-    };
+    if (!this.showHistoryFilters()) return;
+
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify(state));
-    } catch {}
+      const raw = localStorage.getItem(this.storageKey);
+      const prev = raw ? JSON.parse(raw) : {};
+
+      const next = {
+        ...prev,
+        filters: this.appliedFilters,
+        search:  this.searchValues,
+      };
+
+      localStorage.setItem(this.storageKey, JSON.stringify(next));
+    } catch (e) {
+      console.error(e);
+    }
   }
 
-  toggleDetail(row: any) {
-    const rowId = this.getRowId(row);
-    const idx = this.rows.data.indexOf(row);
-    const container = this.detailContainers.toArray()[idx];
 
-    if (!container || !this.detailComponent) return;
-
-    if (this.expandedDetailIds.has(rowId)) {
-      this.expandedDetailIds.delete(rowId);
-      container.clear();
-      return;
-    }
-
-    this.expandedDetailIds.add(rowId);
-    container.clear();
-    const cmpRef = container.createComponent(this.detailComponent);
-    const inst: any = cmpRef.instance;
-
+  private setDetailInputs(inst: any, row: any) {
     if (typeof inst.row === 'function' && typeof inst.row.set === 'function') {
       inst.row.set(row);
     } else {
@@ -335,13 +350,64 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     } else {
       inst.rows = this.rows.data;
     }
+  }
 
+  private mountDetail(row: any, container: ViewContainerRef, detailComponent: Type<any>) {
+    container.clear();
+    const cmpRef = container.createComponent(detailComponent);
+    this.setDetailInputs(cmpRef.instance, row);
     cmpRef.changeDetectorRef.detectChanges();
   }
 
+  private expandRow(row: any, container: ViewContainerRef, dc: Type<any>) {
+    this.mountDetail(row, container, dc);
+    this.expandedDetailIds.add(this.getRowId(row));
+  }
+
+  private collapseRow(rowId: string, container: ViewContainerRef) {
+    container.clear();
+    this.expandedDetailIds.delete(rowId);
+  }
+
+  toggleDetail(row: any) {
+    const rowId = this.getRowId(row);
+    const idx = this.rows.data.indexOf(row);
+    const container = this.detailContainers.toArray()[idx];
+    const dc = this.detailComponent();
+
+    if (!container || !dc) return;
+
+    if (this.expandedDetailIds.has(rowId)) {
+      this.collapseRow(rowId, container);
+    } else {
+      this.expandRow(row, container, dc);
+    }
+  }
+
+  setAllDetailsOpened(): void {
+    const dc = this.detailComponent();
+    if (!dc) return;
+
+    const currentIds = new Set(this.rows.data.map(r => this.getRowId(r)));
+    this.expandedDetailIds.forEach(id => { if (!currentIds.has(id)) this.expandedDetailIds.delete(id); });
+    this.cdr.detectChanges();
+
+    const containers = this.detailContainers.toArray();
+
+    this.rows.data.forEach((row, idx) => {
+      const rowId = this.getRowId(row);
+      const container = containers[idx];
+      if (!container) return;
+
+      if (this.expandedDetailIds.has(rowId) && container.length > 0) return;
+      this.expandRow(row, container, dc);
+    });
+  }
+
   private getRowId(row: any): string {
-    if (this.sidx && row && Object.prototype.hasOwnProperty.call(row, this.sidx)) {
-      return String(row[this.sidx as keyof typeof row]);
+    const sidx = this.sidx();
+    if (sidx && row && Object.prototype.hasOwnProperty.call(row, sidx)) {
+      return String(row[sidx as keyof typeof row]);
     }
     return JSON.stringify(row);
   }
@@ -354,7 +420,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     if(action.action) {
       const result = action.action(row);
       const page  = this.paginator?.pageIndex + 1 || 1;
-      const size  = this.paginator?.pageSize    || this.limit;
+      const size  = this.paginator?.pageSize    || this.limit();
 
       if (isObservable(result)) {
         result.subscribe({
@@ -374,11 +440,11 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getCurrentTheme(){
-    return this.theme;
+    return this.theme();
   }
 
   exportCsvAction() {
-    if (!this.exportCsvUrl || !this.url){
+    if (!this.exportCsvUrl() || !this.url()){
       return;
     }
 
@@ -388,7 +454,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     this.mappingParentGridFiltersParams(params);
     this.setFiltersValues(params, 1, 1);
 
-    this.http.get(`${this.exportCsvUrl}?${params}`, {
+    this.http.get(`${this.exportCsvUrl()}?${params}`, {
       responseType: 'blob',
     }).subscribe(res => {
       const url = URL.createObjectURL(res);
@@ -472,7 +538,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const filterObj : AppliedFiltersDTO = this.appliedFilters[columnName][filterType];
-    const column: GridProperty | undefined = this.data.find(col => col.name === columnName);
+    const column: GridProperty | undefined = this.data().find(col => col.name === columnName);
 
     if (Array.isArray(filterObj.value) && Array.isArray(filterObj.label)) {
       if (typeof optionValue === "string") {
@@ -509,7 +575,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
     this.uncheckedCheckbox(column, filterType, optionValue);
     this.saveFilters();
-    this.loadData(1, this.limit);
+    this.loadData(1, this.limit());
   }
 
 
@@ -533,7 +599,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
       switchMap(() => {
         this.destroy$.next();
-        return this.http.get<any>(this.getRequestUrl(1, this.limit)).pipe(
+        return this.http.get<any>(this.getRequestUrl(1, this.limit())).pipe(
           takeUntil(this.destroy$)
         );
       })
@@ -554,7 +620,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   createDateFilter() {
-    this.data.forEach((column) => {
+    this.data().forEach((column) => {
       if (column.filter && column.filter.some(f => f.type === 'date')) {
         this.dateFilters[column.name] = new FormGroup({
           start: new FormControl<Date | null>(null),
@@ -576,7 +642,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     this.appliedFilters = {};
     this.searchValues = {};
 
-    this.data.forEach((column) => {
+    this.data().forEach((column) => {
       if (column.filterValues) {
         column.filterValues.forEach((group) => {
           group.forEach((filterItem) => filterItem.selected = false);
@@ -659,7 +725,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     });
 
     Object.keys(this.searchValues).forEach((colName) => {
-      const column = this.data.find(col => col.name === colName);
+      const column = this.data().find(col => col.name === colName);
       if (this.searchValues[colName]) {
         result.push({
           column: colName,
@@ -710,14 +776,15 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setDisplayedColumns(){
-    this.displayedColumns = [...new Set(this.data.map(col => col.name))];
-    if(this.multiselect) this.displayedColumns.unshift('select');
+    this.displayedColumns = [...new Set(this.data().map(col => col.name))];
+    if(this.multiselect()) this.displayedColumns.unshift('select');
   }
 
-  getRequestUrl(page = 1, pageSize = this.limit): string {
-    if (!this.url) return '';
+  getRequestUrl(page = 1, pageSize = this.limit()): string {
+    const url = this.url();
+    if (!url) return '';
 
-    const [baseUrl, queryString] = this.url.split('?');
+    const [baseUrl, queryString] = url.split('?');
     const params = new URLSearchParams(queryString || '');
 
     this.mappingCustomParams(params);
@@ -728,17 +795,18 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   isSubGrid():boolean{
-    return !!this.currentRow;
+    return !!this.currentRow();
   }
 
   private mappingCustomParams(params: URLSearchParams) {
-    if (!this.currentRow || !this.subUrlParams) {
+    const subUrlParams = this.subUrlParams();
+    if (!this.currentRow() || !this.subUrlParams()) {
       return;
     }
 
-    const rowData = this.currentRow as Record<string, unknown>;
+    const rowData = this.currentRow() as Record<string, unknown>;
 
-    this.subUrlParams.forEach(({ paramName, columnName }) => {
+    subUrlParams?.forEach(({ paramName, columnName }) => {
       if (Object.prototype.hasOwnProperty.call(rowData, columnName)) {
         const value = rowData[columnName];
 
@@ -749,11 +817,34 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  private reorderColumnsData(data: GridProperty[]) {
+    if (!Array.isArray(data) || data.length === 0) return this;
+
+    const withOrigIdx = data.map((c, i) => ({ c, i }));
+    withOrigIdx.sort((a, b) => {
+      const ai = a.c.columnIndex ?? a.i;
+      const bi = b.c.columnIndex ?? b.i;
+      if (ai === bi) return 0;
+      return ai < bi ? -1 : 1;
+    });
+
+    const sorted = withOrigIdx.map(x => x.c);
+
+    const visibleCols = sorted.filter(
+      c => c.visible !== false && c.type !== GridPropertyType.Hidden
+    );
+
+    const names = visibleCols.map(c => c.name);
+    this.displayedColumns = this.multiselect() ? ['select', ...names] : names;
+
+    return this;
+  }
+
 
   private mappingParentGridFiltersParams(params: URLSearchParams) {
-    if (!this.isSubGrid() || !this.parentGridFilters) return;
+    if (!this.isSubGrid() || !this.parentGridFilters()) return;
 
-    const { search, filters } = this.parentGridFilters;
+    const { search, filters } = this.parentGridFilters();
 
     Object.keys(search).forEach((searchColumn) => {
       const searchValue = search[searchColumn];
@@ -779,12 +870,14 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  private setFiltersValues(params:URLSearchParams, page = 1, pageSize = this.limit){
+  private setFiltersValues(params:URLSearchParams, page = 1, pageSize = this.limit()){
+    const sidx = this.sidx();
+    const sort = this.sort();
     params.append('page', page.toString());
     params.append('limit', pageSize.toString());
 
-    if (this.sidx) { params.append('sidx', this.sidx.toString()); }
-    if (this.sort) { params.append('sort', this.sort.toString()); }
+    if (sidx) { params.append('sidx', sidx.toString()); }
+    if (sort) { params.append('sort', sort.toString()); }
 
     Object.keys(this.searchValues).forEach(columnName => {
       const value = this.searchValues[columnName];
@@ -839,10 +932,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     return filterType === type;
   }
 
-  loadData(page = 1, pageSize = this.limit) {
+  loadData(page = 1, pageSize = this.limit()) {
     this.showLoader();
 
-    if (!this.url) return;
+    if (!this.url()) return;
 
     if (!this.destroy$.closed) {
       this.destroy$.next();
@@ -852,10 +945,11 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     this.destroy$ = new Subject<void>();
 
     this.http.get<any>(this.getRequestUrl(page, pageSize)).pipe(
-      takeUntil(this.destroy$)
+      takeUntil(this.destroy$),
+      finalize(() => this.hideLoader())
     ).subscribe({
-      next: (response) => {
-        const resp = response.response;
+      next: (data) => {
+        const resp = data.response;
 
         if (Array.isArray(resp)) {
           this.rows.data = resp;
@@ -875,9 +969,9 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
         this.selection.clear();
         this.hideLoader();
 
-        if (this.openAllToggleDetails) {
+        if (this.openAllToggleDetails()) {
           this.cdr.detectChanges();
-          this.rows.data.forEach(r => this.toggleDetail(r));
+          this.setAllDetailsOpened();
         }
 
         // this.openFilterColumn = null;
@@ -894,15 +988,16 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   rollbackExpandedElement(){
-    if(this.expandedElement) {
-      const openId = this.expandedElement[this.sidx as keyof typeof this.expandedElement];
+    const expandedElement = this.expandedElement();
+    if(expandedElement) {
+      const openId = expandedElement[this.sidx() as keyof typeof expandedElement];
 
       if (openId !== undefined) {
         const updatedRow = this.rows.data.find(
-          (row) => row[this.sidx as keyof typeof row] === openId
+          (row) => row[this.sidx() as keyof typeof row] === openId
         );
 
-        this.expandedElement = updatedRow || null;
+        this.expandedElement.set(updatedRow || null);
       }
     }
   }
@@ -954,7 +1049,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       this.saveFilters();
     }
 
-    this.loadData(1, this.limit);
+    this.loadData(1, this.limit());
   }
 
   onDateRangeChange(columnName: string, dateGroup: FormGroup) {
@@ -975,7 +1070,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       };
 
       this.saveFilters();
-      this.loadData(1, this.limit);
+      this.loadData(1, this.limit());
     } else {
       if (this.appliedFilters[columnName]) {
         delete this.appliedFilters[columnName]['date'];
@@ -1016,7 +1111,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     callback?: (columnName: string, filterType: string, value: string | number | string[]) => void
   ) {
     this.showLoader();
-    const column = this.data.find(col => col.name === columnName);
+    const column = this.data().find(col => col.name === columnName);
     if (!column || !column.filterValues || !column.filterValues[index]) return;
 
     const selectedItems = column.filterValues[index].filter(item => item.selected);
@@ -1028,16 +1123,16 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onSortChange(sortEvent: Sort) {
-    const column = this.data.find(col => col.name === sortEvent.active);
-    this.sidx = "id";
-    this.sort = "asc";
+    const column = this.data().find(col => col.name === sortEvent.active);
+    this.sidx.set("id");
+    this.sort.set("asc");
 
     if (sortEvent.direction) {
-      this.sidx = column && column.columnSortIndex ? column.columnSortIndex : sortEvent.active;
-      this.sort = sortEvent.direction;
+      this.sidx.set(column && column.columnSortIndex ? column.columnSortIndex : sortEvent.active);
+      this.sort.set(sortEvent.direction);
     }
 
-    const pageSize = this.paginator?.pageSize || this.limit;
+    const pageSize = this.paginator?.pageSize || this.limit();
     this.loadData(1, pageSize);
   }
 
@@ -1058,17 +1153,17 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setCurrentGridColumn(name: string | undefined | null, row: object): void {
-    const column = this.data.find(col => col.name === name);
+    const column = this.data().find(col => col.name === name);
     if (!column) {
       console.log(`not found ${column}`);
       return;
     }
 
-    if (this.expandedElement === row && this.currentGridColumn?.name === column.name) {
-      this.expandedElement = null;
+    if (this.expandedElement() === row && this.currentGridColumn?.name === column.name) {
+      this.expandedElement.set(null);
       this.currentGridColumn = null;
     } else {
-      this.expandedElement = row;
+      this.expandedElement.set(row);
       this.currentGridColumn = column;
     }
   }
@@ -1078,7 +1173,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   isColumnExpanded(column: GridProperty, row: object): boolean {
-    return this.currentGridColumn?.name === column.name && this.expandedElement === row;
+    return this.currentGridColumn?.name === column.name && this.expandedElement() === row;
   }
 
   checkIsCurrentColumnSubGrid(column = this.currentGridColumn): boolean {
@@ -1111,12 +1206,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     return classes;
   }
 
-  trackByColumn(index: number, column: GridProperty): string {
-    return column.name || index.toString();
-  }
-
   uniquePageSizeOptions(): number[] {
-    return Array.from(new Set([this.limit, 100, 500, 1000]));
+    return Array.from(new Set([this.limit(), 100, 500, 1000]));
   }
 
   isPath(path: string): boolean {
@@ -1151,8 +1242,9 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
 
   ngOnDestroy(): void {
-    if (this.url) {
-      NgxDataGridx.loadedUrls.delete(this.url);
+    const url = this.url();
+    if (url) {
+      NgxDataGridx.loadedUrls.delete(url);
     }
 
     this.destroy$.next();

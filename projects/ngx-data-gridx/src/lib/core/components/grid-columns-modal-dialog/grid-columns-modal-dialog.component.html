@@ -1,0 +1,75 @@
+<section class="grid-columns-settings">
+  <header class="grid-columns-settings__header">
+    <div class="grid-columns-settings__title"><h2>Налаштування колонок</h2>
+      <mat-icon
+        [matTooltip]="'Перетягуйте колонки, щоб змінити їх порядок або приховати. Колонки з правого списку відображаються в таблиці. Деякі колонки (наприклад, Дії) не можна приховати.'"
+        matTooltipPosition="below" fontSet="material-symbols-outlined"> error
+      </mat-icon>
+    </div>
+    <button mat-icon-button class="grid-columns-settings__close"
+            [mat-dialog-close]="true"
+            type="button"
+            aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+  <div class="grid-columns-settings__body">
+    <div class="grid-columns-settings__body__wrapper">
+
+      <div class="grid-columns-settings__body__wrapper__active">
+        <p> Неактивні колонки </p>
+        <div class="columns"
+             cdkDropList
+             #inactiveList="cdkDropList"
+             [cdkDropListData]="inactive()"
+             [cdkDropListEnterPredicate]="canEnterInactive"
+             [cdkDropListConnectedTo]="[activeList]"
+             [@.disabled]="!massMove()"
+             [@staggerList]="inactive().length"
+             (cdkDropListDropped)="onDropInactive($event)">
+          @for (column of inactive(); track $index) {
+            <div class="column" cdkDrag [cdkDragData]="column" [@flyFromLeft]>
+              <mat-icon cdkDragHandle>reorder</mat-icon>
+              <span class="label">{{ GridPropertyType.Actions === column.type ? 'Дії' : column.displayName }}</span>
+            </div>
+          }
+        </div>
+
+        <button type="button" (click)="setAllColumnsActive()">
+          Вибрати всі
+        </button>
+      </div>
+
+
+      <div class="grid-columns-settings__body__wrapper__not__active">
+        <p>Активні колонки </p>
+        <div class="columns"
+             cdkDropList
+             #activeList="cdkDropList"
+             [cdkDropListData]="active()"
+             [cdkDropListConnectedTo]="[inactiveList]"
+             [@.disabled]="!massMove()"
+             [@staggerList]="active().length"
+             (cdkDropListDropped)="onDropActive($event)">
+          @for (column of active(); track $index) {
+            <div class="column" cdkDrag [cdkDragData]="column" [@flyFromRight]>
+              <mat-icon cdkDragHandle>reorder</mat-icon>
+              <span class="label">{{ GridPropertyType.Actions === column.type ? 'Дії' : column.displayName }}</span>
+            </div>
+          }
+        </div>
+
+        <button type="button" (click)="setAllColumnsInactive()">
+          Прибрати всі
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="grid-columns-settings__actions">
+    <button type="button" mat-flat-button (click)="onSaveSettings()">
+      Зберегти зміни
+    </button>
+  </div>
+</section>

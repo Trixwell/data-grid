@@ -1,32 +1,46 @@
-<div class="grid__container" [ngClass]="'grid-theme-' + theme">
-  <div class="grid__header" *ngIf="showHistoryFilters || grid_name">
-    <div class="grid__filters" [ngClass]="{'sub__grid_filter': isSubGrid()}">
-      <div class="grid-title">
-        <span class="grid__name" *ngIf="grid_name">{{ grid_name }}</span>
-      </div>
-
-      <ng-content select=".action-buttons"></ng-content>
-
-      <div *ngIf="showHistoryFilters" class="grid__options" [ngClass]="{'sub__grid_options': isSubGrid()}">
-        <div class="grid__filter_selected_options">
-          <div class="grid__filter_option" *ngFor="let filter of getAppliedFilters()">
-            {{ filter.label }}
-            <mat-icon (click)="clearFilter(filter.column, filter.filterType, filter.value)">close</mat-icon>
-          </div>
+<div class="grid__container" [ngClass]="'grid-theme-' + theme()">
+  @if(showHistoryFilters() || grid_name()){
+    <div class="grid__header">
+      <div class="grid__filters" [ngClass]="{'sub__grid_filter': isSubGrid()}">
+        <div class="grid-title">
+          @if(grid_name()){
+            <span class="grid__name">{{ grid_name() }}</span>
+          }
         </div>
 
-        <button class="grid__filter_actions" (click)="clearAllFilters()" type="button">
-          <mat-icon matTooltip="Очистити фільтри">filter_list_off</mat-icon>
-        </button>
+        <ng-content select=".action-buttons"></ng-content>
+        @if(showHistoryFilters()){
+          <div class="grid__options" [ngClass]="{'sub__grid_options': isSubGrid()}">
+            <div class="grid__filter_selected_options">
+              @for(filter of getAppliedFilters(); track $index){
+                <div class="grid__filter_option">
+                  {{ filter.label }}
+                  <mat-icon (click)="clearFilter(filter.column, filter.filterType, filter.value)">close</mat-icon>
+                </div>
+              }
+            </div>
 
-        <button *ngIf="exportCsvUrl" class="grid__filter_actions" (click)="exportCsvAction()" type="button">
-          <mat-icon matTooltip="Експорт CSV">description</mat-icon>
-        </button>
+            <app-invoke-btn (click)="clearAllFilters()" iconName="delete" [outlined]="true">
+              Очистити фільтри
+            </app-invoke-btn>
+
+            <app-invoke-btn (click)="loadData()" iconName="autorenew" [outlined]="true">
+              Оновити дані
+            </app-invoke-btn>
+
+            @if(exportCsvUrl()){
+              <app-invoke-btn (click)="exportCsvAction()" iconName="file_export" [outlined]="true">
+                Експорт CSV
+              </app-invoke-btn>
+          }
+          </div>
+        }
       </div>
     </div>
-  </div>
+  }
 
   <div class="mat-elevation-z8">
+    <div class="grid__container__data">
     <div class="grid__container__wrapper">
       <table mat-table
              multiTemplateDataRows
@@ -35,276 +49,339 @@
              matSort (matSortChange)="onSortChange($event)"
              class="mat-elevation-z8 grid__table">
 
-        <ng-container matColumnDef="select" *ngIf="multiselect">
-          <th class="grid__th grid__checkbox"
-              mat-header-cell *matHeaderCellDef>
-            <mat-checkbox (change)="$event ? toggleAllRows() : null"
-                          [checked]="selection.hasValue() && isAllSelected()"
-                          [indeterminate]="selection.hasValue() && !isAllSelected()">
-            </mat-checkbox>
+        @if(multiselect()){
+          <ng-container matColumnDef="select">
+            <th class="grid__th grid__checkbox"
+                mat-header-cell *matHeaderCellDef>
+              <mat-checkbox (change)="$event ? toggleAllRows() : null"
+                            [checked]="selection.hasValue() && isAllSelected()"
+                            [indeterminate]="selection.hasValue() && !isAllSelected()">
+              </mat-checkbox>
+            </th>
+            <td class="grid__td"
+                mat-cell *matCellDef="let row">
+              <mat-checkbox (click)="$event.stopPropagation()"
+                            (change)="$event ? selection.toggle(row) : null"
+                            [checked]="selection.isSelected(row)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+        }
+
+        <ng-container matColumnDef="loader">
+          <th mat-header-cell *matHeaderCellDef
+              [attr.colspan]="displayedColumns.length"
+              class="grid__row__loader">
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
           </th>
-          <td class="grid__td"
-              mat-cell *matCellDef="let row">
-            <mat-checkbox (click)="$event.stopPropagation()"
-                          (change)="$event ? selection.toggle(row) : null"
-                          [checked]="selection.isSelected(row)">
-            </mat-checkbox>
-          </td>
         </ng-container>
 
         <!-- primary cols -->
-        <ng-container *ngFor="let column of data; trackBy: trackByColumn" [matColumnDef]="column.name">
-          <th mat-header-cell *matHeaderCellDef
-              class="grid__th"
-              mat-sort-header
-              [disabled]="!column.sort"
-              [style.width]="column.width"
-              [ngClass]="column.classes">
-            {{ column.displayName }}
+        @for(column of data(); track $index){
+          <ng-container [matColumnDef]="column.name">
+            <th mat-header-cell *matHeaderCellDef
+                class="grid__th"
+                mat-sort-header
+                [disabled]="!column.sort"
+                [style.width]="column.width"
+                [ngClass]="column.classes">
+              {{ column.displayName }}
 
-            <div *ngIf="showFilters" class="filter-container">
-              <button *ngIf="checkColumnFilters(column)" type="button"  mat-icon-button (click)="toggleFilter(column.name, $event); $event.stopPropagation();">
-                <svg width="15" height="16" viewBox="0 0 15 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M6.88465 15.5C6.63331 15.5 6.42306 15.4153 6.2539 15.246C6.08456 15.0768 5.9999 14.8666 5.9999 14.6152V8.827L0.401897 1.7155C0.209564 1.459 0.181647 1.19233 0.318147 0.9155C0.454813 0.6385 0.685314 0.5 1.00965 0.5H13.9901C14.3145 0.5 14.545 0.6385 14.6816 0.9155C14.8181 1.19233 14.7902 1.459 14.5979 1.7155L8.9999 8.827V14.6152C8.9999 14.8666 8.91523 15.0768 8.7459 15.246C8.57673 15.4153 8.36648 15.5 8.11515 15.5H6.88465ZM7.4999 8.3L12.4499 2H2.5499L7.4999 8.3Z" fill="#343A40"/>
-                </svg>
-              </button>
+              @if(showFilters()){
+                <div class="filter-container">
+                  @if(checkColumnFilters(column)){
+                    <button type="button" mat-icon-button (click)="toggleFilter(column.name, $event); $event.stopPropagation();">
+                      <svg width="15" height="16" viewBox="0 0 15 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6.88465 15.5C6.63331 15.5 6.42306 15.4153 6.2539 15.246C6.08456 15.0768 5.9999 14.8666 5.9999 14.6152V8.827L0.401897 1.7155C0.209564 1.459 0.181647 1.19233 0.318147 0.9155C0.454813 0.6385 0.685314 0.5 1.00965 0.5H13.9901C14.3145 0.5 14.545 0.6385 14.6816 0.9155C14.8181 1.19233 14.7902 1.459 14.5979 1.7155L8.9999 8.827V14.6152C8.9999 14.8666 8.91523 15.0768 8.7459 15.246C8.57673 15.4153 8.36648 15.5 8.11515 15.5H6.88465ZM7.4999 8.3L12.4499 2H2.5499L7.4999 8.3Z" fill="#343A40"/>
+                      </svg>
+                    </button>
+                  }
+                @if(openFilterColumn === column.name){
+                  <div class="filter-dropdown">
 
-              <div *ngIf="openFilterColumn === column.name"
-                   class="filter-dropdown">
-                <mat-form-field *ngIf="column.search" appearance="outline">
-                  <mat-icon matPrefix (click)="$event.stopPropagation()">search</mat-icon>
-                  <input
-                    matInput
-                    (click)="$event.stopPropagation()"
-                    (keydown.space)="$event.stopPropagation()"
-                    (input)="onSearch(column.name, $event)"
-                    [(ngModel)]="searchValues[column.name]">
-                </mat-form-field>
+                    @if(column.search){
+                      <mat-form-field appearance="outline">
+                        <mat-icon matPrefix (click)="$event.stopPropagation()">search</mat-icon>
+                        <input
+                          matInput
+                          (click)="$event.stopPropagation()"
+                          (keydown.space)="$event.stopPropagation()"
+                          (input)="onSearch(column.name, $event)"
+                          [(ngModel)]="searchValues[column.name]">
+                      </mat-form-field>
+                    }
 
-                <ng-container *ngFor="let filter of column.filter; let i = index">
-                  <!-- Checkbox -->
-                  <div class="filter-options" *ngIf="filter.type === 'checkbox'">
-                    <mat-checkbox *ngFor="let item of column.filterValues?.[i]"
+                    @for(filter of column.filter; track $index){
+                      <ng-container>
+                        <!-- Checkbox -->
+                        @if(filter.type === 'checkbox'){
+                          <div class="filter-options">
+                            @for(item of column.filterValues?.[$index]; track $index){
+                              <mat-checkbox (click)="$event.stopPropagation()"
+                                            (change)="onCheckboxChange(column.name, filter.type, $index, filter.callback)"
+                                            [(ngModel)]="item.selected">
+                                {{ item.label }}
+                              </mat-checkbox>
+                            }
+                          </div>
+                        }
+
+                        <!-- Select -->
+                        @if(filter.type === 'select'){
+                          <mat-form-field appearance ="outline">
+                            <mat-label>{{ filter.label }}</mat-label>
+                            <mat-select
+                              [(ngModel)]="filterInputValues[column.name]"
+                              (selectionChange)="onFilterChange(column.name, filter.type, filter.label, $event.value, filter.callback)">
+                              @for(item of column.filterValues?.[$index]; track $index){
+                                <mat-option [value]="item.value">
+                                  {{ item.label }}
+                                </mat-option>
+                              }
+                            </mat-select>
+                          </mat-form-field>
+                        }
+
+                        <!-- Multi-Select -->
+                        @if(filter.type === 'multi-select'){
+                          <mat-form-field appearance ="outline">
+                            <mat-label>{{ filter.label }}</mat-label>
+                            <mat-select multiple
+                                        [(ngModel)]="filterMultiSelectValues[column.name]"
+                                        (selectionChange)="onFilterChange(
+                                                        column.name,
+                                                        filter.type,
+                                                        getSelectedLabels(column.filterValues?.[$index], $event.value),
+                                                        $event.value,
+                                                        filter.callback
+                                                     )">
+                              @for(item of column.filterValues?.[$index]; track $index){
+                                <mat-option [value]="item.value">
+                                  {{ item.label }}
+                                </mat-option>
+                              }
+                            </mat-select>
+                          </mat-form-field>
+                        }
+                        <!-- Multi-search -->
+                        @if(filter.type === 'multi-search'){
+                          <mat-form-field (click)="$event.stopPropagation()" appearance="outline">
+                          <mat-select placeholder="Пошук..."
+                                      (openedChange)="onSelectOpened($event)"
+                                      [formControl]="multiSearchControl"
+                                      (selectionChange)="
+                                                          onFilterChange(
+                                                            column.name,
+                                                            filter.type,
+                                                            getSelectedLabelsSearch($event.value),
+                                                            $event.value,
+                                                            filter.callback
+                                                          )"
+                                      multiple>
+                            <mat-option class="no-checkbox" >
+                              <div>
+                                <input
+                                  #searchField
+                                  matInput
+                                  placeholder="Пошук..."
+                                  [(ngModel)]="searchTerm"
+                                  (input)="onSearchTermChange(filter?.multiSearchOptions)"
+                                  (ngModelChange)="onSearchTermChange(filter?.multiSearchOptions)"
+                                  [ngModelOptions]="{standalone: true}"
                                   (click)="$event.stopPropagation()"
-                                  (change)="onCheckboxChange(column.name, filter.type, i, filter.callback)"
-                                  [(ngModel)]="item.selected">
-                      {{ item.label }}
-                    </mat-checkbox>
-                  </div>
+                                >
+                              </div>
+                            </mat-option>
 
-                  <!-- Select -->
-                  <mat-form-field *ngIf="filter.type === 'select'" appearance ="outline">
-                    <mat-label>{{ filter.label }}</mat-label>
-                    <mat-select
-                      [(ngModel)]="filterInputValues[column.name]"
-                      (selectionChange)="onFilterChange(column.name, filter.type, filter.label, $event.value, filter.callback)">
-                      <mat-option *ngFor="let item of column.filterValues?.[i]" [value]="item.value">
-                        {{ item.label }}
-                      </mat-option>
-                    </mat-select>
-                  </mat-form-field>
+                            <mat-option (onSelectionChange)="toggleAllItems($event)" value="all">
+                              Вибрати все
+                            </mat-option>
 
-                  <!-- Multi-Select -->
-                  <mat-form-field *ngIf="filter.type === 'multi-select'" appearance ="outline">
-                    <mat-label>{{ filter.label }}</mat-label>
-                    <mat-select multiple
-                                [(ngModel)]="filterMultiSelectValues[column.name]"
-                                (selectionChange)="onFilterChange(
-                                                column.name,
-                                                filter.type,
-                                                getSelectedLabels(column.filterValues?.[i], $event.value),
-                                                $event.value,
-                                                filter.callback
-                                             )">
-                      <mat-option *ngFor="let item of column.filterValues?.[i]" [value]="item.value">
-                        {{ item.label }}
-                      </mat-option>
-                    </mat-select>
-                  </mat-form-field>
+                            @for(data of searchData; track $index){
+                              <mat-option [value]="data.id">
+                                {{ data.label }}
+                              </mat-option>
+                            }
+                          </mat-select>
+                        </mat-form-field>
+                        }
+                        <!-- Date Range -->
+                        @if(filter.type==='date' && filter.dateOptions?.range){
+                          <div class="date-range" [formGroup]="dateFilters[column.name]">
+                          <mat-form-field appearance="outline">
+                            <mat-label>From</mat-label>
+                            <input
+                              matInput
+                              type="date"
+                              formControlName="start"
+                              #startInput
+                              (click)="$event.stopPropagation()"
+                              (focus)="startInput.showPicker()"
+                            />
+                            <mat-icon class="date-icons" matSuffix (click)="startInput.showPicker(); $event.stopPropagation()">
+                              calendar_today
+                            </mat-icon>
+                          </mat-form-field>
 
-                  <!-- Multi-search -->
-                  <mat-form-field (click)="$event.stopPropagation()" appearance="outline" *ngIf="filter.type === 'multi-search'">
-                    <mat-select placeholder="Пошук..."
-                                (openedChange)="onSelectOpened($event)"
-                                [formControl]="multiSearchControl"
-                                (selectionChange)="
-                                                    onFilterChange(
-                                                      column.name,
-                                                      filter.type,
-                                                      getSelectedLabelsSearch($event.value),
-                                                      $event.value,
-                                                      filter.callback
-                                                    )"
-                                multiple>
-                      <mat-option class="no-checkbox" >
-                        <div>
-                          <input
-                            #searchField
-                            matInput
-                            placeholder="Пошук..."
-                            [(ngModel)]="searchTerm"
-                            (input)="onSearchTermChange(filter?.multiSearchOptions)"
-                            (ngModelChange)="onSearchTermChange(filter?.multiSearchOptions)"
-                            [ngModelOptions]="{standalone: true}"
-                            (click)="$event.stopPropagation()"
-                          >
+                          <mat-form-field appearance="outline">
+                            <mat-label>To</mat-label>
+                            <input
+                              matInput
+                              type="date"
+                              formControlName="end"
+                              #endInput
+                              (click)="$event.stopPropagation()"
+                              (focus)="endInput.showPicker()"
+                            />
+                            <mat-icon class="date-icons" matSuffix (click)="endInput.showPicker(); $event.stopPropagation()">
+                              calendar_today
+                            </mat-icon>
+                          </mat-form-field>
                         </div>
-                      </mat-option>
+                        }
 
-                      <mat-option (onSelectionChange)="toggleAllItems($event)" value="all">
-                        Вибрати все
-                      </mat-option>
+                        <!-- Date -->
+                        @if(filter.type === 'date' && !filter.dateOptions?.range){
+                          <mat-form-field appearance="outline" [formGroup]="dateFilters[column.name]" (click)="$event.stopPropagation()">
+                          <input
+                            matInput
+                            type="date"
+                            formControlName="date"
+                            #dateInput
+                            (click)="$event.stopPropagation()"
+                            (focus)="dateInput.showPicker()"
+                          />
 
-                      <mat-option *ngFor="let data of searchData" [value]="data.id">
-                        {{ data.label }}
-                      </mat-option>
-                    </mat-select>
-                  </mat-form-field>
+                          <mat-icon
+                            matSuffix
+                            class="date-icons"
+                            (click)="dateInput.showPicker(); $event.stopPropagation()"
+                          >calendar_today</mat-icon>
+                        </mat-form-field>
+                        }
 
-                  <!-- Date Range -->
-                  <div class="date-range" *ngIf="filter.type==='date' && filter.dateOptions?.range" [formGroup]="dateFilters[column.name]">
-                    <mat-form-field appearance="outline">
-                      <mat-label>From</mat-label>
-                      <input
-                        matInput
-                        type="date"
-                        formControlName="start"
-                        #startInput
-                        (click)="$event.stopPropagation()"
-                        (focus)="startInput.showPicker?.()"
-                      />
-                      <mat-icon class="date-icons" matSuffix (click)="startInput.showPicker(); $event.stopPropagation()">
-                        calendar_today
-                      </mat-icon>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>To</mat-label>
-                      <input
-                        matInput
-                        type="date"
-                        formControlName="end"
-                        #endInput
-                        (click)="$event.stopPropagation()"
-                        (focus)="endInput.showPicker()"
-                      />
-                      <mat-icon class="date-icons" matSuffix (click)="endInput.showPicker(); $event.stopPropagation()">
-                        calendar_today
-                      </mat-icon>
-                    </mat-form-field>
-                  </div>
-
-
-                  <!-- Date -->
-                  <mat-form-field appearance="outline" [formGroup]="dateFilters[column.name]" (click)="$event.stopPropagation()"
-                                  *ngIf="filter.type === 'date' && !filter.dateOptions?.range">
-                    <input
-                      matInput
-                      type="date"
-                      formControlName="date"
-                      #dateInput
-                      (click)="$event.stopPropagation()"
-                      (focus)="dateInput.showPicker()"
-                    />
-
-                    <mat-icon
-                      matSuffix
-                      class="date-icons"
-                      (click)="dateInput.showPicker(); $event.stopPropagation()"
-                    >calendar_today</mat-icon>
-                  </mat-form-field>
-
-                  <!-- Input -->
-                  <mat-form-field *ngIf="filter.type === 'input'" appearance ="outline">
-                    <mat-label>{{ filter.label }}</mat-label>
-                    <input matInput [(ngModel)]="filterInputValues[column.name]"
-                           (input)="onInputFilterChange(column.name,
-                                                                        filter.type,
-                                                                        filter.label,
-                                                                        filterInputValues[column.name],
-                                                                        filter.callback)">
-                  </mat-form-field>
-                </ng-container>
-
-              </div>
-            </div>
-          </th>
-          <td class="grid__td" [ngClass]="getAllClasses(column, row)" mat-cell
-              *matCellDef="let row;"
-              [style.width]="column.width">
-            <ng-container [ngSwitch]="column.type">
-              <div class="column-content">
-                <div *ngSwitchCase="GridPropertyType.Actions" class="actions">
-                  <ng-container *ngFor="let action of column.actions">
-                    <button
-                      type="button"
-                      mat-icon-button
-                      *ngIf="(!action.customHtml && action && (!action.visible || action.visible(row)))"
-                      (click)="executeAction(action, row)"
-                      matTooltip="{{ action.tooltip }}">
-                      <mat-icon *ngIf="!isPath(action.icon)" class="material-icons-outlined">
-                        {{ action.icon }}
-                      </mat-icon>
-                      <img *ngIf="isPath(action.icon)" [src]="action.icon" [alt]="action.tooltip" />
-                    </button>
-
-                    <button
-                      class="btn-custom-html"
-                      type="button"
-                      mat-icon-button
-                      *ngIf="action.customHtml && (!action.visible || action.visible(row))"
-                      matTooltip="{{ action.tooltip }}">
-                      <span [innerHTML]="action.customHtml(row)"></span>
-                    </button>
-                  </ng-container>
+                        <!-- Input -->
+                        @if(filter.type === 'input'){
+                          <mat-form-field appearance ="outline">
+                          <mat-label>{{ filter.label }}</mat-label>
+                          <input matInput [(ngModel)]="filterInputValues[column.name]"
+                                 (input)="onInputFilterChange(column.name,
+                                                              filter.type,
+                                                              filter.label,
+                                                              filterInputValues[column.name],
+                                                              filter.callback)">
+                        </mat-form-field>
+                        }
+                      </ng-container>
+                    }
 
                 </div>
-                <span *ngSwitchCase="GridPropertyType.Hidden"></span>
-                <span *ngSwitchDefault
-                      [innerHTML]="IsCustomCallbackExist(column)
-                                                       ? ( column.callback ? column.callback(row) : row[column.name] )
-                                                       : row[column.name]">
-                                    </span>
-
-                <app-audio-player
-                  *ngSwitchCase="GridPropertyType.Audio"
-                  [src]="row[column.name]">
-                </app-audio-player>
-
-                <button mat-mini-fab
-                        type="button"
-                        class="sub-grid-accordion-btn"
-                        *ngIf="checkIsCurrentColumnSubGrid(column)"
-                        (click)="setCurrentGridColumn(column?.name, row)">
-                  <mat-icon>{{ isColumnExpanded(column, row) ? 'arrow_drop_up' : 'arrow_drop_down' }}</mat-icon>
-                </button>
+                }
               </div>
-            </ng-container>
-          </td>
-        </ng-container>
+              }
+            </th>
+            <td class="grid__td" [ngClass]="getAllClasses(column, row)" mat-cell
+                *matCellDef="let row;"
+                [style.width]="column.width">
+              <ng-container>
+                <div class="column-content">
+                    @switch (column.type){
+                      @case(GridPropertyType.Actions){
+                        <div class="actions">
+                          @for(action of column.actions; track $index){
+                          <ng-container>
+                            @if((!action.customHtml && action && (!action.visible || action.visible(row)))){
+                            <button
+                              type="button"
+                              mat-icon-button
+                              (click)="executeAction(action, row)"
+                              matTooltip="{{ action.tooltip }}">
+                                @if(!isPath(action.icon)){
+                                  <mat-icon class="material-icons-outlined">
+                                    {{ action.icon }}
+                                  </mat-icon>
+                                }
+
+                              @if(isPath(action.icon)){
+                                <img [src]="action.icon" [alt]="action.tooltip" />
+                              }
+                            </button>
+                            }
+
+                            @if(action.customHtml && (!action.visible || action.visible(row))){
+                              <button
+                                class="btn-custom-html"
+                                type="button"
+                                mat-icon-button
+                                matTooltip="{{ action.tooltip }}">
+                                <span [innerHTML]="action.customHtml(row)"></span>
+                              </button>
+                            }
+                          </ng-container>
+                          }
+
+                        </div>
+                      }
+
+                      @case(GridPropertyType.Hidden){
+                        <span></span>
+                      }
+
+                      @case(GridPropertyType.Audio){
+                        <app-audio-player #audioPlayer
+                                          [src]="row[column.name]">
+                        </app-audio-player>
+                      }
+
+                      @default {
+                        <span [innerHTML]="IsCustomCallbackExist(column)
+                                         ? ( column.callback ? column.callback(row) : row[column.name] )
+                                         : row[column.name]">
+                      </span>
+                      }
+                    }
+
+                  @if(checkIsCurrentColumnSubGrid(column)){
+                    <button mat-mini-fab
+                            type="button"
+                            class="sub-grid-accordion-btn"
+                            (click)="setCurrentGridColumn(column?.name, row)">
+                      <mat-icon>{{ isColumnExpanded(column, row) ? 'arrow_drop_up' : 'arrow_drop_down' }}</mat-icon>
+                    </button>
+                  }
+                </div>
+              </ng-container>
+            </td>
+          </ng-container>
+        }
 
         <!-- expand table -->
         <ng-container matColumnDef="expandedDetail">
           <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
             <div class="sub-grid-container"
-                 [@detailExpand]="expandedElement === element ? 'expanded' : 'collapsed'">
-              <ng-container *ngIf="expandedElement === element">
-                <ngx-data-gridx
-                  *ngFor="let o of [currentGridColumn]; trackBy: trackByKey"
-                  [url]="currentGridColumn?.subGridSettings?.suburl"
-                  [data]="currentGridColumn?.subGridPropertyList || []"
-                  [theme]="getCurrentTheme()"
-                  [subUrlParams]="currentGridColumn?.subGridSettings?.subUrlParams"
-                  [currentRow]  = "expandedElement"
-                  [parentGridFilters] = "{ filters: appliedFilters, search: searchValues}"
-                  [expandedElement] = "expandedElement"
-                  [autoRefreshIntervalSec]="currentGridColumn?.subGridSettings?.autoRefreshIntervalSec || null"
-                  [limit]="currentGridColumn?.subGridSettings?.subGridProps?.limit || 10"
-                  [showFilters] = "currentGridColumn?.subGridSettings?.subGridProps?.showFilters || false"
-                  [detailComponent]="currentGridColumn?.subGridSettings?.detailComponent"
-                  [multiselect] = "currentGridColumn?.subGridSettings?.subGridProps?.multiselect">
-                </ngx-data-gridx>
-              </ng-container>
+                 [class.expanded]="expandedElement() === element"
+                 [class.collapsed]="expandedElement() !== element"
+                 [@detailExpand]="expandedElement() === element ? 'expanded' : 'collapsed'">
+              @if(expandedElement() === element){
+                <ng-container>
+                  @for(o of [currentGridColumn]; track trackByKey($index, o)){
+                    <ngx-data-gridx
+                      [url]="currentGridColumn?.subGridSettings?.suburl"
+                      [data]="currentGridColumn?.subGridPropertyList || []"
+                      [theme]="getCurrentTheme()"
+                      [subUrlParams]="currentGridColumn?.subGridSettings?.subUrlParams"
+                      [currentRow]  = "expandedElement()"
+                      [parentGridFilters] = "{ filters: appliedFilters, search: searchValues}"
+                      [expandedElement] = "expandedElement()"
+                      [autoRefreshIntervalSec]="currentGridColumn?.subGridSettings?.autoRefreshIntervalSec || null"
+                      [limit]="currentGridColumn?.subGridSettings?.subGridProps?.limit || 10"
+                      [showFilters] = "currentGridColumn?.subGridSettings?.subGridProps?.showFilters || false"
+                      [detailComponent]="currentGridColumn?.subGridSettings?.detailComponent"
+                      [multiselect] = "currentGridColumn?.subGridSettings?.subGridProps?.multiselect ?? false">
+                    </ngx-data-gridx>
+                  }
+                </ng-container>
+              }
             </div>
           </td>
         </ng-container>
@@ -312,47 +389,44 @@
         <ng-container matColumnDef="detailRow">
           <td class="detail-row" mat-cell *matCellDef="let row" [attr.colspan]="displayedColumns.length">
             <div class="detail-accordion"
+                 [class.expanded]="isDetailExpanded(row)"
+                 [class.collapsed]="!isDetailExpanded(row)"
                  [@detailExpand]="isDetailExpanded(row) ? 'expanded' : 'collapsed'">
 
-              <ng-container *ngIf="detailTemplate">
+              @if(detailTemplate){
+              <ng-container>
                 <ng-container
                   *ngTemplateOutlet="detailTemplate;
                              context: { $implicit: row, rows: rows.data }">
                 </ng-container>
               </ng-container>
+              }
 
               <ng-template #detailContainer></ng-template>
-
             </div>
           </td>
         </ng-container>
 
 
-        <!-- Second header row -->
-        <ng-container matColumnDef="header-row-group" *ngIf="loading">
-          <th mat-header-cell *matHeaderCellDef [attr.colspan]="displayedColumns.length">
-            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-          </th>
-        </ng-container>
-
 
         <!-- primary row -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-
-        <tr class="grid__row__loader" [ngClass]="{'grid__no-loading': !loading}"
-            mat-header-row *matHeaderRowDef="loading ? ['header-row-group'] : []"></tr>
+        <tr mat-header-row
+            *matHeaderRowDef="['loader']; sticky: true"
+            class="grid__row__tr__loader"
+            [style.display]="loading ? '' : 'none'">
+        </tr>
 
         <tr mat-row *matRowDef="let element; columns: displayedColumns;"
             (dblclick)="toggleDetail(element)"
             class="example-element-row"
-            [class.accordion]="detailComponent"
-            [class.example-expanded-row]="expandedElement === element">
+            [class.accordion]="detailComponent()"
+            [class.example-expanded-row]="expandedElement() === element">
         </tr>
 
         <!-- expand row -->
         <tr mat-row *matRowDef="let element; columns: ['expandedDetail']"
-            class="example-detail-row"
-        >
+            class="example-detail-row">
         </tr>
 
         <tr mat-row
@@ -362,36 +436,43 @@
 
         <tr class="mat-row" *matNoDataRow>
           <td class="mat-cell" [attr.colspan]="displayedColumns.length">
-                        <span *ngIf="!loading">
-                            {{ noDataPlaceholder }}
-                        </span>
+            @if(!loading){
+              <span>
+                  {{ noDataPlaceholder() }}
+              </span>
+            }
           </td>
         </tr>
       </table>
+    </div>
+    <div class="grid__footer">
+      <div class="grid__footer__settings">
+        <grid-footer-settings [(columns)]="data" [storageKey]="storageKey"></grid-footer-settings>
+      </div>
 
-      <ng-container *ngIf="!disablePagination">
-        <ng-container *ngIf="getCurrentTheme() === GridTheme.FLAT && !isSubGrid(); else broadPaginator">
+      @if (!disablePagination() && !isSubGrid()) {
+        @if (getCurrentTheme() === GridTheme.FLAT) {
           <mat-paginator
             appSquarePagination
             [appCustomLength]="total"
             [showFirstLastButtons]="true"
             [pageSizeOptions]="uniquePageSizeOptions()"
-            [pageSize]="limit"
+            [pageSize]="limit()"
             [length]="total"
             class="grid__paginator">
           </mat-paginator>
-        </ng-container>
-      </ng-container>
-
-      <ng-template #broadPaginator>
-        <mat-paginator
-          *ngIf="!disablePagination"
-        [pageSizeOptions]="uniquePageSizeOptions()"
-        [pageSize]="limit"
-        [length]="total"
-        class="grid__paginator">
-        </mat-paginator>
-      </ng-template>
+        } @else {
+          <mat-paginator
+            [showFirstLastButtons]="true"
+            [pageSizeOptions]="uniquePageSizeOptions()"
+            [pageSize]="limit()"
+            [length]="total"
+            class="grid__paginator">
+          </mat-paginator>
+        }
+      }
     </div>
+    </div>
+
   </div>
 </div>

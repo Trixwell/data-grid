@@ -1,0 +1,180 @@
+@use './../../../styles/tokens' as tokens;
+
+
+.grid-columns-settings {
+  &__header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+
+  &__title{
+    display: flex;
+    align-items: center;
+    gap: tokens.$space-2;
+
+    mat-icon{
+      color: tokens.$primary-300;
+    }
+
+    h2{
+      font: 600 tokens.$font-h3;
+      margin: tokens.$margin-0;
+    }
+  }
+
+  &__close{
+    background: transparent;
+    cursor: pointer;
+    color: tokens.$neutral-800;
+    border: none;
+  }
+
+  &__body{
+    margin-top: tokens.$space-5;
+
+    &__wrapper{
+      display: flex;
+      justify-content: space-between;
+      gap: tokens.$space-4;
+
+      &__not__active, &__active{
+        button{
+          cursor: pointer;
+          border: none;
+          background: transparent;
+          text-decoration: underline;
+          font: tokens.$font-button-m-light;
+          margin-top: tokens.$space-3;
+          color: tokens.$neutral-800;
+          transition: opacity 160ms ease-in-out;
+        }
+
+        button:hover{
+          opacity: 0.7;
+        }
+
+        p{
+          margin: tokens.$margin-0;
+          color: tokens.$neutral-950;
+          font: tokens.$font-body-m-bold;
+        }
+
+        .columns{
+          background: tokens.$neutral-100;
+          border: tokens.$border-1 solid tokens.$neutral-300;
+          border-radius: tokens.$radius-small;
+          padding: tokens.$space-3;
+          margin-top: tokens.$margin-2;
+          min-height: 280px;
+          max-height: 300px;
+          overflow-y: scroll;
+          scrollbar-width: none;
+
+          .column{
+            display: flex;
+            height: 100%;
+            align-items: center;
+            gap: tokens.$space-2;
+            min-height: 36px;
+            margin-top: tokens.$space-2;
+            border-bottom: tokens.$border-1 solid tokens.$primary-100;
+
+            &:first-child{
+              margin-top: tokens.$space-0 !important;
+            }
+
+            mat-icon{
+              width: 20px;
+              height: 20px;
+              color: tokens.$neutral-800;
+              font-size: 20px;
+              cursor: pointer;
+            }
+
+            span{
+              color: tokens.$neutral-900;
+              font: tokens.$font-body-s;
+            }
+          }
+        }
+      }
+
+      &__active{
+        flex: 50%;
+      }
+
+      &__not__active{
+        flex: 50%;
+      }
+    }
+  }
+
+  &__actions{
+    margin-top: tokens.$space-5;
+      button[mat-flat-button]:not(:disabled) {
+        width: 100%;
+        max-height: 40px;
+        background: tokens.$primary-600;
+        border-radius: tokens.$space-1;
+        color: white;
+        border: none;
+        transition: background-color 180ms ease, color 180ms ease;
+
+        .mdc-button__label{
+          font: tokens.$font-button-m;
+          font-weight: 600;
+        }
+      }
+
+      button[mat-flat-button]:not(:disabled):hover{
+        background: tokens.$primary-300;
+        color: tokens.$neutral-50;
+      }
+  }
+}
+
+::ng-deep{
+  .mat-mdc-tooltip-surface{
+    width: 100% !important;
+    max-width: 350px !important;
+    padding: tokens.$space-3 !important;
+    background-color: tokens.$neutral-100 !important;
+    box-shadow: 0 2px 4px tokens.$shadow-medium;
+    color: tokens.$neutral-800 !important;
+    font: tokens.$font-caption-s !important;
+  }
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.columns.cdk-drop-list-dragging .column:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drag-preview {
+  display: flex;
+  align-items: center;
+  gap: tokens.$space-2;
+  border-bottom: tokens.$border-1 solid tokens.$primary-100;
+
+
+  span {
+    color: tokens.$neutral-900;
+    font: tokens.$font-body-s;
+  }
+
+  mat-icon{
+    width: 20px;
+    height: 20px;
+    color: tokens.$neutral-800;
+    font-size: 20px;
+    cursor: pointer;
+  }
+}

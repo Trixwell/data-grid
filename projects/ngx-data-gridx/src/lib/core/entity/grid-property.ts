@@ -7,6 +7,8 @@ export class GridProperty{
   type: GridPropertyType;
   search?: boolean;
   width?: string;
+  visible?: boolean;
+  columnIndex?: number;
   filter?: {
     label: string;
     type: "multi-search" | "text" | "checkbox" | "select" | "multi-select" | "date" | "input";
@@ -47,6 +49,8 @@ export class GridProperty{
     this.subGridSettings = params.subGridSettings || null;
     this.callback = params.callback || undefined;
     this.columnSortIndex = params.columnSortIndex || '';
+    this.visible = params.visible || true;
+    this.columnIndex = params.columnIndex;
 
     this.setDateOptionsByDefault(params);
   }
@@ -84,6 +88,7 @@ export interface GridPropertiesDTO{
   type: GridPropertyType;
   search?: boolean;
   width?: string;
+  visible?: boolean;
   filter?: {
     label: string;
     type: "multi-search" | "text" | "checkbox" | "select" | "multi-select" | "date" | "input";
@@ -108,4 +113,5 @@ export interface GridPropertiesDTO{
   ident?: boolean;
   subGridSettings?: SubGridSettings | null;
   columnSortIndex?: string;
+  columnIndex?: number;
 }

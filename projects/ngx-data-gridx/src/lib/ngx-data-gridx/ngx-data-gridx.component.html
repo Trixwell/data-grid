@@ -43,6 +43,7 @@
     <div class="grid__container__data">
     <div class="grid__container__wrapper">
       <table mat-table
+             id="printArea"
              multiTemplateDataRows
              [dataSource]="rows"
              [class.loading]="loading"
@@ -51,14 +52,14 @@
 
         @if(multiselect()){
           <ng-container matColumnDef="select">
-            <th class="grid__th grid__checkbox"
+            <th class="grid__th grid__checkbox no-print"
                 mat-header-cell *matHeaderCellDef>
               <mat-checkbox (change)="$event ? toggleAllRows() : null"
                             [checked]="selection.hasValue() && isAllSelected()"
                             [indeterminate]="selection.hasValue() && !isAllSelected()">
               </mat-checkbox>
             </th>
-            <td class="grid__td"
+            <td class="grid__td no-print"
                 mat-cell *matCellDef="let row">
               <mat-checkbox (click)="$event.stopPropagation()"
                             (change)="$event ? selection.toggle(row) : null"
@@ -88,7 +89,7 @@
               {{ column.displayName }}
 
               @if(showFilters()){
-                <div class="filter-container">
+                <div class="filter-container no-print">
                   @if(checkColumnFilters(column)){
                     <button type="button" mat-icon-button (click)="toggleFilter(column.name, $event); $event.stopPropagation();">
                       <svg width="15" height="16" viewBox="0 0 15 16" fill="none" xmlns="http://www.w3.org/2000/svg">

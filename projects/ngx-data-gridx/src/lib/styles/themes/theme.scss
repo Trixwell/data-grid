@@ -308,3 +308,27 @@
 .progressBarRow .progressBarCell {
   padding: 0;
 }
+
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  #printArea, #printArea * {
+    visibility: visible !important;
+  }
+
+  #printArea {
+    inset: 0 auto auto 0 !important;
+    width: 100% !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .mat-column-actions {
+    display: none !important;
+  }
+}

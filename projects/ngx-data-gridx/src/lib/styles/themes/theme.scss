@@ -373,9 +373,14 @@
     display: none !important;
   }
 
-  @media print {
-    .sub-grid-container table tr > .mat-mdc-cell:last-child {
-      border-right: none !important;
-    }
+  .grid__container__data {
+    box-shadow: none !important;
+  }
+
+  .grid__container__wrapper,
+  .grid__container__data {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
   }
 }

@@ -315,6 +315,47 @@
     visibility: hidden !important;
   }
 
+  #printArea table tr > th:last-child,
+  #printArea table tr > td:last-child {
+    border-right: none !important;
+  }
+
+  table{
+    border-left: token.$border-1 solid token.$primary-100;
+    border-top: token.$border-1 solid token.$primary-100;
+  }
+
+  .sub-grid-container table {
+    border-collapse: collapse !important;
+    border-left: token.$border-1 solid token.$primary-100 !important;
+    border-top:  token.$border-1 solid token.$primary-100 !important;
+    border-right: token.$border-1 solid token.$primary-100 !important;
+    border-bottom: token.$border-1 solid token.$primary-100 !important;
+  }
+
+  .sub-grid-container{
+    margin: token.$space-0 !important;
+
+    table{
+      border-top: none !important;
+      border-left: none !important;
+      border-right: token.$border-1 solid token.$primary-100;
+      border-bottom: token.$border-1 solid token.$primary-100;
+
+      .grid__th{
+        border-left: none !important;
+      }
+
+      .grid-th:last-child{
+        border-right: none !important;
+      }
+    }
+  }
+
+  .grid__th{
+    border-bottom: token.$border-1 solid token.$primary-100 !important;
+  }
+
   #printArea, #printArea * {
     visibility: visible !important;
   }
@@ -330,5 +371,11 @@
 
   .mat-column-actions {
     display: none !important;
+  }
+
+  @media print {
+    .sub-grid-container table tr > .mat-mdc-cell:last-child {
+      border-right: none !important;
+    }
   }
 }

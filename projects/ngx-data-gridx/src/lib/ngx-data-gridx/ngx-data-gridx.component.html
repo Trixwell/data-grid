@@ -1,6 +1,6 @@
 <div class="grid__container" [ngClass]="'grid-theme-' + theme()">
   @if(showHistoryFilters() || grid_name()){
-    <div class="grid__header">
+    <div class="grid__header no-print">
       <div class="grid__filters" [ngClass]="{'sub__grid_filter': isSubGrid()}">
         <div class="grid-title">
           @if(grid_name()){
@@ -446,7 +446,7 @@
         </tr>
       </table>
     </div>
-    <div class="grid__footer">
+    <div class="grid__footer no-print">
       <div class="grid__footer__settings">
         <grid-footer-settings [(columns)]="data" [storageKey]="storageKey"></grid-footer-settings>
       </div>

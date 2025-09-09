@@ -1,0 +1,16 @@
+<div class="history-filters">
+  <div class="grid__filter_selected_options">
+    @for(filter of getAppliedFilters(); track $index){
+      <div class="grid__filter_option">
+        {{ filter.label }}
+        <mat-icon (click)="clearFilter(filter.column, filter.filterType, filter.value)">close</mat-icon>
+      </div>
+    }
+  </div>
+
+  <div class="clear-filters">
+    <app-invoke-btn (click)="clearAllFilters()" iconName="delete" [outlined]="true">
+      Очистити фільтри
+    </app-invoke-btn>
+  </div>
+</div>

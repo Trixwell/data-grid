@@ -88,11 +88,6 @@
   .grid__header {
     margin-top: token.$space-6;
 
-    .grid__filter_selected_options {
-      display: flex;
-      gap: token.$space-3;
-    }
-
     .grid__filters {
       display: flex;
       gap: token.$space-6;
@@ -106,23 +101,32 @@
       }
     }
 
-    .grid__filter_option {
-      display: flex;
-      align-items: center;
-      gap: token.$space-1;
-      color: token.$neutral-700;
-      font: token.$font-button-m-light;
-
-      ::ng-deep mat-icon{
-        color: token.$neutral-500;
-        width: 20px;
-        height: 20px;
-        font-size: 20px;
+    ::ng-deep history-filters {
+      .grid__filter_selected_options {
+        display: flex;
+        gap: token.$space-3;
+        margin-right: token.$space-4;
       }
-    }
 
-    .grid__filter_option .mat-icon {
-      cursor: pointer;
+      .grid__filter_option {
+        display: flex;
+        align-items: center;
+        gap: token.$space-1;
+        color: token.$neutral-700;
+        font: token.$font-button-m-light;
+        white-space: nowrap;
+
+        ::ng-deep mat-icon {
+          color: token.$neutral-500;
+          width: 20px;
+          height: 20px;
+          font-size: 20px;
+        }
+      }
+
+      .grid__filter_option .mat-icon {
+        cursor: pointer;
+      }
     }
 
     .grid__filter_actions span:first-child {

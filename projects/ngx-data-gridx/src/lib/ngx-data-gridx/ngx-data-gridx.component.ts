@@ -30,6 +30,8 @@ import {AudioPlayerComponent} from '../core/components/audio-player/audio-player
 import {SquarePaginatorDirective} from '../directives/square-paginator.directive';
 import {InvokeBtnComponent} from '../core/components/invoke-btn/invoke-btn.component';
 import {GridFooterSettingsComponent} from '../core/components/grid-footer-settings/grid-footer-settings.component';
+import {HistoryFilters} from '../core/components/history-filters/history-filters';
+import {UtilsService} from '../core/services/utils.service';
 
 @Component({
   selector: 'ngx-data-gridx',
@@ -54,6 +56,7 @@ import {GridFooterSettingsComponent} from '../core/components/grid-footer-settin
     SquarePaginatorDirective,
     InvokeBtnComponent,
     GridFooterSettingsComponent,
+    HistoryFilters,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './ngx-data-gridx.component.html',
@@ -128,7 +131,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   private destroySearch$ = new Subject<void>();
   constructor(private http: HttpClient,
               private cdr: ChangeDetectorRef,
-              private elementRef: ElementRef
+              private elementRef: ElementRef,
+              protected utilsService: UtilsService
   ) {
     effect(() => {
       const data = this.data();
@@ -318,25 +322,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private saveFilters(): void {
-    if (!this.showHistoryFilters()) return;
-
-    try {
-      const raw = localStorage.getItem(this.storageKey);
-      const prev = raw ? JSON.parse(raw) : {};
-
-      const next = {
-        ...prev,
-        filters: this.appliedFilters,
-        search:  this.searchValues,
-      };
-
-      localStorage.setItem(this.storageKey, JSON.stringify(next));
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
 
   private setDetailInputs(inst: any, row: any) {
     if (typeof inst.row === 'function' && typeof inst.row.set === 'function') {
@@ -521,78 +506,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  clearFilter(
-    columnName: string | undefined,
-    filterType: string | undefined,
-    optionValue:  string | number | string[]
-  ) {
-
-    if (filterType === 'input' && columnName && this.searchValues[columnName]) {
-      delete this.searchValues[columnName];
-      this.saveFilters();
-      this.searchSubject.next({ ...this.searchValues });
-    }
-
-    if (!columnName || !filterType || !this.appliedFilters[columnName] || !this.appliedFilters[columnName][filterType]) {
-      return;
-    }
-
-    const filterObj : AppliedFiltersDTO = this.appliedFilters[columnName][filterType];
-    const column: GridProperty | undefined = this.data().find(col => col.name === columnName);
-
-    if (Array.isArray(filterObj.value) && Array.isArray(filterObj.label)) {
-      if (typeof optionValue === "string") {
-        const index = filterObj.value
-          .map(String)
-          .indexOf(String(optionValue));
-
-        if (index !== -1) {
-          filterObj.value.splice(index, 1);
-          filterObj.label.splice(index, 1);
-        }
-
-        if (filterObj.value.length === 0) {
-          delete this.appliedFilters[columnName][filterType];
-
-          if (Object.keys(this.appliedFilters[columnName]).length === 0) {
-            delete this.appliedFilters[columnName];
-          }
-        }
-      }
-    } else {
-      delete this.appliedFilters[columnName][filterType];
-
-      if (Object.keys(this.appliedFilters[columnName]).length === 0) {
-        delete this.appliedFilters[columnName];
-      }
-    }
-
-    if (filterType === 'date' && this.dateFilters[columnName]) {
-      this.dateFilters[columnName].patchValue({ start: null, end: null });
-      this.dateFilters[columnName].reset();
-    }
-
-
-    this.uncheckedCheckbox(column, filterType, optionValue);
-    this.saveFilters();
-    this.loadData(1, this.limit());
-  }
-
-
-  private uncheckedCheckbox(column: GridProperty | undefined,
-                            filterType: string,
-                            value: string | string[] | number){
-    if (column && column.filterValues && filterType === "checkbox") {
-      column.filterValues.forEach(group => {
-        group.forEach(filterItem => {
-          if (filterItem.value === value) {
-            filterItem.selected = false;
-          }
-        });
-      });
-    }
-  }
-
   initSearch() {
     this.searchSubject.pipe(
       debounceTime(300),
@@ -638,27 +551,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  clearAllFilters(){
-    this.appliedFilters = {};
-    this.searchValues = {};
-
-    this.data().forEach((column) => {
-      if (column.filterValues) {
-        column.filterValues.forEach((group) => {
-          group.forEach((filterItem) => filterItem.selected = false);
-        });
-      }
-    });
-
-    Object.keys(this.dateFilters).forEach((key) => {
-      this.dateFilters[key].patchValue({ start: null, end: null, date: null });
-      this.dateFilters[key].reset();
-    });
-
-    this.saveFilters();
-    this.loadData();
-  }
-
   private formatDate(date: Date | string | null): string {
     if (!date) return '';
 
@@ -695,52 +587,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       .map(item => item.label);
   }
 
-  getAppliedFilters(): AppliedFiltersDTO[] {
-    const result: AppliedFiltersDTO[] = [];
-
-    Object.keys(this.appliedFilters).forEach((colName) => {
-      const filters = this.appliedFilters[colName];
-      Object.keys(filters).forEach((filterType) => {
-        const filterObj: AppliedFiltersDTO = filters[filterType];
-
-        if (Array.isArray(filterObj.label) && Array.isArray(filterObj.value)) {
-          filterObj.label.forEach((lbl: string, index: number) => {
-            const value = Array.isArray(filterObj.value) ? filterObj.value[index]?.toString() : filterObj.value.toString();
-            result.push({
-              column: colName,
-              filterType: filterType,
-              value: value,
-              label: lbl
-            });
-          });
-        } else {
-          result.push({
-            column: colName,
-            filterType: filterType,
-            value: filterObj.value?.toString(),
-            label: filterObj.label?.toString()
-          });
-        }
-      });
-    });
-
-    Object.keys(this.searchValues).forEach((colName) => {
-      const column = this.data().find(col => col.name === colName);
-      if (this.searchValues[colName]) {
-        result.push({
-          column: colName,
-          filterType: 'input',
-          value: this.searchValues[colName],
-          label: `Пошук по ${column?.displayName || colName}: "${this.searchValues[colName]?.length > 50
-            ? this.searchValues[colName].slice(0, 50) + '...'
-            : this.searchValues[colName]}"`
-        });
-      }
-    });
-
-    return result;
-  }
-
   onSearch(columnName: string, event: Event) {
     const value = (event.target as HTMLInputElement).value.trim();
 
@@ -750,7 +596,12 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       delete this.searchValues[columnName];
     }
 
-    this.saveFilters();
+    this.utilsService.saveFilters(
+      this.showHistoryFilters(),
+      this.storageKey,
+      this.appliedFilters,
+      this.searchValues
+    );
     this.searchSubject.next({ ...this.searchValues });
   }
 
@@ -1046,7 +897,12 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if(filterType !== 'multi-search') {
-      this.saveFilters();
+      this.utilsService.saveFilters(
+        this.showHistoryFilters(),
+        this.storageKey,
+        this.appliedFilters,
+        this.searchValues
+      );
     }
 
     this.loadData(1, this.limit());
@@ -1069,12 +925,22 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
         value: value
       };
 
-      this.saveFilters();
+      this.utilsService.saveFilters(
+        this.showHistoryFilters(),
+        this.storageKey,
+        this.appliedFilters,
+        this.searchValues
+      );
       this.loadData(1, this.limit());
     } else {
       if (this.appliedFilters[columnName]) {
         delete this.appliedFilters[columnName]['date'];
-        this.saveFilters();
+        this.utilsService.saveFilters(
+          this.showHistoryFilters(),
+          this.storageKey,
+          this.appliedFilters,
+          this.searchValues
+        );
       }
     }
   }

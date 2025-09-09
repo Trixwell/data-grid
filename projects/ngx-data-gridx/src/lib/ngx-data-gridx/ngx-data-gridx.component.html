@@ -1,7 +1,7 @@
 <div class="grid__container" [ngClass]="'grid-theme-' + theme()">
   @if(showHistoryFilters() || grid_name()){
     <div class="grid__header no-print">
-      <div class="grid__filters" [ngClass]="{'sub__grid_filter': isSubGrid()}">
+      <div class="grid__filters" [class.sub__grid_filter]="isSubGrid()">
         <div class="grid-title">
           @if(grid_name()){
             <span class="grid__name">{{ grid_name() }}</span>
@@ -10,19 +10,16 @@
 
         <ng-content select=".action-buttons"></ng-content>
         @if(showHistoryFilters()){
-          <div class="grid__options" [ngClass]="{'sub__grid_options': isSubGrid()}">
-            <div class="grid__filter_selected_options">
-              @for(filter of getAppliedFilters(); track $index){
-                <div class="grid__filter_option">
-                  {{ filter.label }}
-                  <mat-icon (click)="clearFilter(filter.column, filter.filterType, filter.value)">close</mat-icon>
-                </div>
-              }
-            </div>
-
-            <app-invoke-btn (click)="clearAllFilters()" iconName="delete" [outlined]="true">
-              Очистити фільтри
-            </app-invoke-btn>
+          <div class="grid__options" [class.sub__grid_options]="isSubGrid()">
+            <history-filters [storageKey]="storageKey"
+                             [loadData]="loadData.bind(this)"
+                             [limit]="limit()"
+                             [(appliedFilters)]="appliedFilters"
+                             [(data)]="data"
+                             [(dateFilters)]="dateFilters"
+                             [(searchSubject)]="searchSubject"
+                             [(searchValues)]="searchValues">
+            </history-filters>
 
             <app-invoke-btn (click)="loadData()" iconName="autorenew" [outlined]="true">
               Оновити дані
@@ -32,7 +29,7 @@
               <app-invoke-btn (click)="exportCsvAction()" iconName="file_export" [outlined]="true">
                 Експорт CSV
               </app-invoke-btn>
-          }
+            }
           </div>
         }
       </div>

@@ -14,7 +14,10 @@ import {GridProperty} from '../../entity/grid-property';
 })
 export class GridFooterSettingsComponent {
   columns = model<GridProperty[]>();
+  showPrint = input<boolean>(true);
+  showColumnSettings = input<boolean>(true);
   storageKey = input<string>('');
+  printData = input<(() => void) | null>(null);
 
   constructor(
     protected dialog: MatDialog
@@ -37,7 +40,13 @@ export class GridFooterSettingsComponent {
   }
 
   print(){
-    window.print();
+    const print = this.printData();
+    if (print) {
+      print();
+    } else {
+      window.print();
+    }
+
     return this;
   }
 }

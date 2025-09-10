@@ -184,6 +184,10 @@
     box-shadow: none !important;
   }
 
+  .accordion.detail-expanded{
+    background: token.$primary-200;
+  }
+
 
   ::ng-deep .grid__paginator .mdc-notched-outline > * {
     border: none !important;

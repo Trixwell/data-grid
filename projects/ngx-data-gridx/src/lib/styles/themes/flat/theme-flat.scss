@@ -112,6 +112,7 @@
 
       .grid__options {
         display: flex;
+        gap: token.$space-12;
       }
     }
 
@@ -206,6 +207,10 @@
   .sub-grid-accordion-btn:hover,
   .sub-grid-accordion-btn:focus {
     box-shadow: none !important;
+  }
+
+  .grid__footer{
+    margin-top: token.$space-16;
   }
 
   ::ng-deep{

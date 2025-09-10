@@ -448,7 +448,11 @@
     </div>
     <div class="grid__footer no-print">
       <div class="grid__footer__settings">
-        <grid-footer-settings [(columns)]="data" [storageKey]="storageKey"></grid-footer-settings>
+        <grid-footer-settings [(columns)]="data"
+                              [showPrint]="showPrint()"
+                              [printData]="print()"
+                              [showColumnSettings]="showColumnSettings()"
+                              [storageKey]="storageKey"></grid-footer-settings>
       </div>
 
       @if (!disablePagination() && !isSubGrid()) {

@@ -88,6 +88,9 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   lazyLoad = input<boolean>(false);
   detailComponent = input<Type<any> | undefined>();
   openAllToggleDetails = input<boolean>(false);
+  showPrint = input<boolean>(true);
+  showColumnSettings = input<boolean>(true);
+  print = input<(() => void) | null>(null);
 
   /** detail accordion (dblclick) */
   detailExpandedElement: any | null = null;

@@ -236,10 +236,6 @@
     width: 32px;
   }
 
-  .grid__table {
-    width: max-content;
-  }
-
   ::ng-deep .mat-sort-header-content{
     color: token.$neutral-900;
     font: token.$font-table-header-m1;

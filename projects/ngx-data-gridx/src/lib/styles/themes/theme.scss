@@ -24,7 +24,6 @@
 @mixin grid-theme-common {
   .grid__table {
     background: transparent;
-    width: max-content;
   }
 
   .grid__container {
@@ -235,6 +234,10 @@
       overflow-x: scroll;
       scrollbar-width: none;
       -ms-overflow-style: none;
+    }
+
+    .grid__table {
+      width: max-content;
     }
 
     .grid__filters{

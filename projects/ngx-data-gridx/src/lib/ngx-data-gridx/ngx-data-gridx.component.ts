@@ -131,6 +131,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   multiSearchControl = new FormControl<number[]>([]);
   private searchTermSubject = new Subject<SearchQuery>();
   private destroySearch$ = new Subject<void>();
+  private mappingsColumns = new Map<string, GridProperty>();
+  private baseColumns: GridProperty[] = [];
 
   constructor(private http: HttpClient,
               private cdr: ChangeDetectorRef,
@@ -138,6 +140,13 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   ) {
     effect(() => {
       const data = this.data();
+      const incoming = this.data();
+
+      if (!this.baseColumns.length && incoming?.length) {
+        this.baseColumns = incoming;
+      }
+
+      this.mappingsColumns = new Map(this.baseColumns.map(c => [c.name, c]));
 
       let items: GridProperty[] | undefined = undefined;
       try {
@@ -851,6 +860,9 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     return this;
   }
 
+  resolveColumn(name: string): GridProperty | null {
+    return this.mappingsColumns.get(name) ?? null;
+  }
 
   private mappingParentGridFiltersParams(params: URLSearchParams) {
     if (!this.isSubGrid() || !this.parentGridFilters()) return;

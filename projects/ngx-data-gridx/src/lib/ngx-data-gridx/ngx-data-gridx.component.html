@@ -336,8 +336,8 @@
                       }
 
                       @default {
-                        @if(column.component){
-                          <grid-cell-host [component]="column.component" [row]="row"></grid-cell-host>
+                        @if(resolveColumn(column.name)?.component){
+                          <grid-cell-host [component]="resolveColumn(column.name)?.component!" [row]="row"></grid-cell-host>
                         } @else {
                           <span [innerHTML]="IsCustomCallbackExist(column)
                                            ? ( column.callback ? column.callback(row) : row[column.name] )
@@ -412,8 +412,6 @@
             </div>
           </td>
         </ng-container>
-
-
 
         <!-- primary row -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

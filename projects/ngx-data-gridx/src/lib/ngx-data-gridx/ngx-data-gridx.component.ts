@@ -5,22 +5,22 @@ import {
   ViewChild, ViewChildren, ViewContainerRef
 } from '@angular/core';
 import {GridProperty, GridPropertyType} from '../core/entity/grid-property';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {MatTableModule} from '@angular/material/table';
-import { CommonModule } from '@angular/common';
+import {CommonModule} from '@angular/common';
 import {MatPaginatorModule, MatPaginator} from '@angular/material/paginator';
-import { MatTableDataSource } from '@angular/material/table';
+import {MatTableDataSource} from '@angular/material/table';
 import {MatSort, Sort, MatSortModule} from '@angular/material/sort';
 import {MatSelectModule} from '@angular/material/select';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
 import {MatMenuModule} from '@angular/material/menu';
 import {finalize, interval, isObservable, map, Observable, of, Subject, Subscription, takeUntil} from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, switchMap} from 'rxjs/operators';
 import {MatOptionSelectionChange, provideNativeDateAdapter} from '@angular/material/core';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -84,7 +84,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   parentGridFilters = input<{
     search: Record<string, string>;
     filters: Record<string, Record<string, AppliedFiltersDTO>>;
-  }>({ search: {}, filters: {} });
+  }>({search: {}, filters: {}});
   autoRefreshIntervalSec = input<number | null>(null);
   disablePagination = input<boolean>(false);
   lazyLoad = input<boolean>(false);
@@ -98,7 +98,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   detailExpandedElement: any | null = null;
 
   @ContentChild(TemplateRef) detailTemplate?: TemplateRef<any>;
-  @ViewChildren('detailContainer', { read: ViewContainerRef })
+  @ViewChildren('detailContainer', {read: ViewContainerRef})
   detailContainers!: QueryList<ViewContainerRef>;
 
   private static loadedUrls = new Set<string>();
@@ -123,7 +123,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
   appliedFilters: Record<string, Record<string, AppliedFiltersDTO>> = {};
 
-  initialSelection:never[] = [];
+  initialSelection: never[] = [];
   allowMultiSelect = true;
   selection: SelectionModel<object> = new SelectionModel<object>(this.allowMultiSelect, this.initialSelection as object[]);
 
@@ -131,6 +131,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   multiSearchControl = new FormControl<number[]>([]);
   private searchTermSubject = new Subject<SearchQuery>();
   private destroySearch$ = new Subject<void>();
+
   constructor(private http: HttpClient,
               private cdr: ChangeDetectorRef,
               private elementRef: ElementRef
@@ -145,7 +146,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
           const parsed = JSON.parse(raw);
           items = parsed?.columns as GridProperty[] | undefined;
         }
-      } catch {}
+      } catch {
+      }
 
       this.reorderColumnsData(items ?? data);
     });
@@ -163,10 +165,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   searchData: SearchItem[] = [];
   selectedItems: number[] = [];
 
-  ngOnInit(){
+  ngOnInit() {
     this.loadFilters();
 
-    if(!this.lazyLoad()) {
+    if (!this.lazyLoad()) {
       this.loadData();
     }
 
@@ -209,7 +211,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  runLazyLoad(){
+  runLazyLoad() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -226,11 +228,11 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     observer.observe(this.elementRef.nativeElement);
   }
 
-  showLoader(){
+  showLoader() {
     this.loading = true;
   }
 
-  hideLoader(){
+  hideLoader() {
     this.loading = false;
   }
 
@@ -244,7 +246,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     const names = [...new Set(cols
       .map(c => c?.name ?? '')
       .filter(Boolean))]
-      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+      .sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}));
 
     return names.length
       ? `grid-state-auto-${names.join('-')}`
@@ -259,20 +261,20 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
     try {
       const state: {
-        filters?: Record<string, Record<string,AppliedFiltersDTO>>,
-        search?: Record<string,string>
+        filters?: Record<string, Record<string, AppliedFiltersDTO>>,
+        search?: Record<string, string>
       } = JSON.parse(raw);
 
-      this.appliedFilters = state.filters  ?? {};
-      this.searchValues   = state.search   ?? {};
+      this.appliedFilters = state.filters ?? {};
+      this.searchValues = state.search ?? {};
 
     } catch {
       this.appliedFilters = {};
-      this.searchValues   = {};
+      this.searchValues = {};
     }
   }
 
-  restoreFilters(){
+  restoreFilters() {
     Object.entries(this.appliedFilters).forEach(([col, byType]) => {
       const column = this.data().find(c => c.name === col);
       if (!column?.filterValues) return;
@@ -307,14 +309,14 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
             const [s, e] = rawVal.split(',');
             this.dateFilters[col].patchValue({
               start: new Date(s),
-              end:   new Date(e),
-              date:  null
+              end: new Date(e),
+              date: null
             });
           } else {
             this.dateFilters[col].patchValue({
               start: null,
-              end:   null,
-              date:  new Date(rawVal)
+              end: null,
+              date: new Date(rawVal)
             });
           }
         }
@@ -333,7 +335,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       const next = {
         ...prev,
         filters: this.appliedFilters,
-        search:  this.searchValues,
+        search: this.searchValues,
       };
 
       localStorage.setItem(this.storageKey, JSON.stringify(next));
@@ -341,7 +343,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       console.error(e);
     }
   }
-
 
   private setDetailInputs(inst: any, row: any) {
     if (typeof inst.row === 'function' && typeof inst.row.set === 'function') {
@@ -394,7 +395,9 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     if (!dc) return;
 
     const currentIds = new Set(this.rows.data.map(r => this.getRowId(r)));
-    this.expandedDetailIds.forEach(id => { if (!currentIds.has(id)) this.expandedDetailIds.delete(id); });
+    this.expandedDetailIds.forEach(id => {
+      if (!currentIds.has(id)) this.expandedDetailIds.delete(id);
+    });
     this.cdr.detectChanges();
 
     const containers = this.detailContainers.toArray();
@@ -422,10 +425,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   executeAction(action: Action, row: object | null | undefined) {
-    if(action.action) {
+    if (action.action) {
       const result = action.action(row);
-      const page  = this.paginator?.pageIndex + 1 || 1;
-      const size  = this.paginator?.pageSize    || this.limit();
+      const page = this.paginator?.pageIndex + 1 || 1;
+      const size = this.paginator?.pageSize || this.limit();
 
       if (isObservable(result)) {
         result.subscribe({
@@ -444,12 +447,12 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  getCurrentTheme(){
+  getCurrentTheme() {
     return this.theme();
   }
 
   exportCsvAction() {
-    if (!this.exportCsvUrl() || !this.url()){
+    if (!this.exportCsvUrl() || !this.url()) {
       return;
     }
 
@@ -469,10 +472,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onSearchTermChange(multiSearch: { url: string; id: string; label: string; } | undefined): void {
-    if(!multiSearch) return;
+    if (!multiSearch) return;
 
     if (multiSearch) {
-      this.searchTermSubject.next({ term: this.searchTerm, multiSearch: multiSearch });
+      this.searchTermSubject.next({term: this.searchTerm, multiSearch: multiSearch});
     }
   }
 
@@ -529,20 +532,20 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   clearFilter(
     columnName: string | undefined,
     filterType: string | undefined,
-    optionValue:  string | number | string[]
+    optionValue: string | number | string[]
   ) {
 
     if (filterType === 'input' && columnName && this.searchValues[columnName]) {
       delete this.searchValues[columnName];
       this.saveFilters();
-      this.searchSubject.next({ ...this.searchValues });
+      this.searchSubject.next({...this.searchValues});
     }
 
     if (!columnName || !filterType || !this.appliedFilters[columnName] || !this.appliedFilters[columnName][filterType]) {
       return;
     }
 
-    const filterObj : AppliedFiltersDTO = this.appliedFilters[columnName][filterType];
+    const filterObj: AppliedFiltersDTO = this.appliedFilters[columnName][filterType];
     const column: GridProperty | undefined = this.data().find(col => col.name === columnName);
 
     if (Array.isArray(filterObj.value) && Array.isArray(filterObj.label)) {
@@ -573,7 +576,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (filterType === 'date' && this.dateFilters[columnName]) {
-      this.dateFilters[columnName].patchValue({ start: null, end: null });
+      this.dateFilters[columnName].patchValue({start: null, end: null});
       this.dateFilters[columnName].reset();
     }
 
@@ -586,7 +589,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
   private uncheckedCheckbox(column: GridProperty | undefined,
                             filterType: string,
-                            value: string | string[] | number){
+                            value: string | string[] | number) {
     if (column && column.filterValues && filterType === "checkbox") {
       column.filterValues.forEach(group => {
         group.forEach(filterItem => {
@@ -643,7 +646,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  clearAllFilters(){
+  clearAllFilters() {
     this.appliedFilters = {};
     this.searchValues = {};
 
@@ -656,7 +659,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     });
 
     Object.keys(this.dateFilters).forEach((key) => {
-      this.dateFilters[key].patchValue({ start: null, end: null, date: null });
+      this.dateFilters[key].patchValue({start: null, end: null, date: null});
       this.dateFilters[key].reset();
     });
 
@@ -668,14 +671,14 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     if (!date) return '';
 
     const d = typeof date === 'string' ? new Date(date) : date;
-    const year  = d.getFullYear();
+    const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day   = String(d.getDate()).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
 
   checkColumnFilters(column: GridProperty): boolean {
-    if(column.search) return true;
+    if (column.search) return true;
     return !!(column.filter && column.filter.length > 0);
   }
 
@@ -756,7 +759,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.saveFilters();
-    this.searchSubject.next({ ...this.searchValues });
+    this.searchSubject.next({...this.searchValues});
   }
 
   toggleFilter(columnName: string, event: Event) {
@@ -767,7 +770,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  private setInputFocus(event: Event){
+  private setInputFocus(event: Event) {
     setTimeout(() => {
       const th = (event.target as HTMLElement).closest('th');
       if (!th) return;
@@ -780,9 +783,9 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     return this;
   }
 
-  setDisplayedColumns(){
+  setDisplayedColumns() {
     this.displayedColumns = [...new Set(this.data().map(col => col.name))];
-    if(this.multiselect()) this.displayedColumns.unshift('select');
+    if (this.multiselect()) this.displayedColumns.unshift('select');
   }
 
   getRequestUrl(page = 1, pageSize = this.limit()): string {
@@ -799,7 +802,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     return `${baseUrl}?${params.toString()}`;
   }
 
-  isSubGrid():boolean{
+  isSubGrid(): boolean {
     return !!this.currentRow();
   }
 
@@ -811,7 +814,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
     const rowData = this.currentRow() as Record<string, unknown>;
 
-    subUrlParams?.forEach(({ paramName, columnName }) => {
+    subUrlParams?.forEach(({paramName, columnName}) => {
       if (Object.prototype.hasOwnProperty.call(rowData, columnName)) {
         const value = rowData[columnName];
 
@@ -825,23 +828,26 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   private reorderColumnsData(data: GridProperty[]) {
     if (!Array.isArray(data) || data.length === 0) return this;
 
-    const withOrigIdx = data.map((c, i) => ({ c, i }));
+    const withOrigIdx = data.map((c, i) => ({c, i}));
     withOrigIdx.sort((a, b) => {
-      const ai = a.c.columnIndex ?? a.i;
-      const bi = b.c.columnIndex ?? b.i;
-      if (ai === bi) return 0;
-      return ai < bi ? -1 : 1;
+      const ax = a.c.type === GridPropertyType.Actions ? Number.MAX_SAFE_INTEGER : (a.c.columnIndex ?? a.i);
+      const bx = b.c.type === GridPropertyType.Actions ? Number.MAX_SAFE_INTEGER : (b.c.columnIndex ?? b.i);
+      if (ax === bx) return 0;
+      return ax < bx ? -1 : 1;
     });
 
     const sorted = withOrigIdx.map(x => x.c);
-
-    const visibleCols = sorted.filter(
-      c => c.visible !== false && c.type !== GridPropertyType.Hidden
-    );
-
+    const visibleCols = sorted.filter(c => c.visible !== false && c.type !== GridPropertyType.Hidden && c.type !== GridPropertyType.Actions);
+    const actionsCol = sorted.find(c => c.type === GridPropertyType.Actions && c.visible !== false) ?? null;
     const names = visibleCols.map(c => c.name);
-    this.displayedColumns = this.multiselect() ? ['select', ...names] : names;
 
+    if (actionsCol) {
+      const idx = names.indexOf(actionsCol.name);
+      if (idx > -1) names.splice(idx, 1);
+      names.push(actionsCol.name);
+    }
+
+    this.displayedColumns = this.multiselect() ? ['select', ...names] : names;
     return this;
   }
 
@@ -849,7 +855,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   private mappingParentGridFiltersParams(params: URLSearchParams) {
     if (!this.isSubGrid() || !this.parentGridFilters()) return;
 
-    const { search, filters } = this.parentGridFilters();
+    const {search, filters} = this.parentGridFilters();
 
     Object.keys(search).forEach((searchColumn) => {
       const searchValue = search[searchColumn];
@@ -875,14 +881,18 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  private setFiltersValues(params:URLSearchParams, page = 1, pageSize = this.limit()){
+  private setFiltersValues(params: URLSearchParams, page = 1, pageSize = this.limit()) {
     const sidx = this.sidx();
     const sort = this.sort();
     params.append('page', page.toString());
     params.append('limit', pageSize.toString());
 
-    if (sidx) { params.append('sidx', sidx.toString()); }
-    if (sort) { params.append('sort', sort.toString()); }
+    if (sidx) {
+      params.append('sidx', sidx.toString());
+    }
+    if (sort) {
+      params.append('sort', sort.toString());
+    }
 
     Object.keys(this.searchValues).forEach(columnName => {
       const value = this.searchValues[columnName];
@@ -898,7 +908,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
         const filterObj = filters[filterType];
         const value = filterObj.value;
 
-        if (this.checkFilterType(filterType, 'checkbox') || this.checkFilterType(filterType, 'multi-select') || this.checkFilterType(filterType, 'multi-search') ) {
+        if (this.checkFilterType(filterType, 'checkbox') || this.checkFilterType(filterType, 'multi-select') || this.checkFilterType(filterType, 'multi-search')) {
           const cleaned = Array.isArray(value)
             ? value.filter(v => v !== null && v !== undefined && v !== '')
             : value;
@@ -909,10 +919,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
         } else if (this.checkFilterType(filterType, 'select') || this.checkFilterType(filterType, 'input')) {
           this.setFilterValue(params, columnName, value);
 
-        } else if (this.checkFilterType(filterType, 'date') && this.checkDateFilterValues(columnName) ) {
+        } else if (this.checkFilterType(filterType, 'date') && this.checkDateFilterValues(columnName)) {
           const formattedStart = this.dateFilters[columnName].value.start ? this.formatDate(this.dateFilters[columnName].value.start) : null;
-          const formattedEnd   = this.dateFilters[columnName].value.end ? this.formatDate(this.dateFilters[columnName].value.end) : null;
-          const formattedDate  = this.dateFilters[columnName].value.date ? this.formatDate(this.dateFilters[columnName].value.date) : null;
+          const formattedEnd = this.dateFilters[columnName].value.end ? this.formatDate(this.dateFilters[columnName].value.end) : null;
+          const formattedDate = this.dateFilters[columnName].value.date ? this.formatDate(this.dateFilters[columnName].value.date) : null;
 
           const date = formattedStart && formattedEnd
             ? `${formattedStart},${formattedEnd}`
@@ -923,17 +933,17 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private checkDateFilterValues(columnName: string){
+  private checkDateFilterValues(columnName: string) {
     return (this.dateFilters[columnName]?.value.start && this.dateFilters[columnName]?.value.end) || this.dateFilters[columnName]?.value?.date
   }
 
   private setFilterValue(params: URLSearchParams,
                          columnName: string,
-                         selectedValues:  string | number | string[]){
+                         selectedValues: string | number | string[]) {
     return params.set(`${columnName}`, selectedValues.toString());
   }
 
-  private checkFilterType(filterType: string, type: string){
+  private checkFilterType(filterType: string, type: string) {
     return filterType === type;
   }
 
@@ -960,7 +970,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
           this.rows.data = resp;
           this.total = resp.length;
         } else {
-          const { list, total, ...singleObject } = resp;
+          const {list, total, ...singleObject} = resp;
 
           if (Array.isArray(list)) {
             this.rows.data = list;
@@ -992,9 +1002,9 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  rollbackExpandedElement(){
+  rollbackExpandedElement() {
     const expandedElement = this.expandedElement();
-    if(expandedElement) {
+    if (expandedElement) {
       const openId = expandedElement[this.sidx() as keyof typeof expandedElement];
 
       if (openId !== undefined) {
@@ -1043,14 +1053,14 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
         this.appliedFilters[columnName] = {};
       }
 
-      this.appliedFilters[columnName][filterType] = { value: value, label: label };
+      this.appliedFilters[columnName][filterType] = {value: value, label: label};
     }
 
     if (callback) {
       callback(columnName, filterType, value);
     }
 
-    if(filterType !== 'multi-search') {
+    if (filterType !== 'multi-search') {
       this.saveFilters();
     }
 
@@ -1095,7 +1105,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (value) {
-      this.appliedFilters[columnName][filterType] = { value: value, label: label };
+      this.appliedFilters[columnName][filterType] = {value: value, label: label};
     } else {
       delete this.appliedFilters[columnName][filterType];
 
@@ -1104,7 +1114,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
-    if(callback){
+    if (callback) {
       callback(columnName, filterType, value);
     }
   }
@@ -1271,7 +1281,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 export interface AppliedFiltersDTO {
   column?: string;
   filterType?: string;
-  value:  string | number | string[];
+  value: string | number | string[];
   label: string | number | string[];
 }
 
@@ -1286,10 +1296,10 @@ export interface SearchItem {
 
 interface SearchQuery {
   term: string;
-  multiSearch: {url:string; id: string; label: string; }
+  multiSearch: { url: string; id: string; label: string; }
 }
 
-export enum GridTheme{
+export enum GridTheme {
   BROAD = 'broad',
-  FLAT  = 'flat'
+  FLAT = 'flat'
 }

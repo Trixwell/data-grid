@@ -108,6 +108,16 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    .mat-mdc-icon-button img, .mat-mdc-icon-button svg{
+      width: 20px;
+      height: 20px;
+    }
+
+    .mat-mdc-icon-button .mat-mdc-button-touch-target{
+      width: 20px !important;
+      height: 20px !important;
+    }
   }
 
   .grid__row__loader {

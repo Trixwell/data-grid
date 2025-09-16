@@ -29,6 +29,10 @@
     cursor: pointer;
     color: tokens.$neutral-800;
     border: none;
+
+    ::ng-deep .mdc-icon-button__ripple{
+      display: none !important;
+    }
   }
 
   &__body{

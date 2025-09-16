@@ -294,6 +294,7 @@
                             @if((!action.customHtml && action && (!action.visible || action.visible(row)))){
                             <button
                               type="button"
+                              class="action-btn"
                               mat-icon-button
                               (click)="executeAction(action, row)"
                               matTooltip="{{ action.tooltip }}">

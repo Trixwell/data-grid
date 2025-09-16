@@ -289,7 +289,7 @@
                     @switch (column.type){
                       @case(GridPropertyType.Actions){
                         <div class="actions">
-                          @for(action of column.actions; track $index){
+                          @for(action of resolveColumn(column.name)?.actions; track $index){
                           <ng-container>
                             @if((!action.customHtml && action && (!action.visible || action.visible(row)))){
                             <button

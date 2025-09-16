@@ -123,7 +123,7 @@
   .grid__row__loader {
     border: 0;
     height: 4px;
-    padding: token.$space-0;
+    padding: token.$space-0 !important;
     position: absolute;
   }
 

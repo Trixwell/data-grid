@@ -1,5 +1,6 @@
 import {SubGridSettings} from './sub-grid-settings';
 import {Observable, Subscription} from 'rxjs';
+import {Type} from '@angular/core';
 
 export class GridProperty{
   name: string;
@@ -32,6 +33,7 @@ export class GridProperty{
   subGridSettings: SubGridSettings | null  = null;
   callback?: (row: object | null | undefined) => string | undefined;
   columnSortIndex?: string;
+  component?: Type<any> | null;
   constructor(params: GridPropertiesDTO) {
     this.name = params.name;
     this.displayName = params.displayName;
@@ -51,6 +53,7 @@ export class GridProperty{
     this.columnSortIndex = params.columnSortIndex || '';
     this.visible = params.visible || true;
     this.columnIndex = params.columnIndex;
+    this.component = params.component || null;
 
     this.setDateOptionsByDefault(params);
   }
@@ -89,6 +92,7 @@ export interface GridPropertiesDTO{
   search?: boolean;
   width?: string;
   visible?: boolean;
+  component?: Type<any>;
   filter?: {
     label: string;
     type: "multi-search" | "text" | "checkbox" | "select" | "multi-select" | "date" | "input";

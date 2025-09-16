@@ -335,10 +335,14 @@
                       }
 
                       @default {
-                        <span [innerHTML]="IsCustomCallbackExist(column)
-                                         ? ( column.callback ? column.callback(row) : row[column.name] )
-                                         : row[column.name]">
-                      </span>
+                        @if(column.component){
+                          <grid-cell-host [component]="column.component" [row]="row"></grid-cell-host>
+                        } @else {
+                          <span [innerHTML]="IsCustomCallbackExist(column)
+                                           ? ( column.callback ? column.callback(row) : row[column.name] )
+                                           : row[column.name]">
+                          </span>
+                        }
                       }
                     }
 
@@ -452,6 +456,7 @@
         <grid-footer-settings [(columns)]="data"
                               [showPrint]="showPrint()"
                               [printData]="print()"
+                              [theme]="getCurrentTheme()"
                               [showColumnSettings]="showColumnSettings()"
                               [storageKey]="storageKey"></grid-footer-settings>
       </div>

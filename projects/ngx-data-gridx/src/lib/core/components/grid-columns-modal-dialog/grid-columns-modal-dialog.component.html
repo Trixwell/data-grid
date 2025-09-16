@@ -28,10 +28,12 @@
              [@staggerList]="inactive().length"
              (cdkDropListDropped)="onDropInactive($event)">
           @for (column of inactive(); track $index) {
-            <div class="column" cdkDrag [cdkDragData]="column" [@flyFromLeft]>
-              <mat-icon cdkDragHandle>reorder</mat-icon>
-              <span class="label">{{ GridPropertyType.Actions === column.type ? 'Дії' : column.displayName }}</span>
-            </div>
+            @if(column.type !== GridPropertyType.Actions){
+              <div class="column" cdkDrag [cdkDragData]="column" [@flyFromLeft]>
+                <mat-icon cdkDragHandle>reorder</mat-icon>
+                <span class="label">{{ column.displayName }}</span>
+              </div>
+            }
           }
         </div>
 
@@ -52,10 +54,12 @@
              [@staggerList]="active().length"
              (cdkDropListDropped)="onDropActive($event)">
           @for (column of active(); track $index) {
-            <div class="column" cdkDrag [cdkDragData]="column" [@flyFromRight]>
-              <mat-icon cdkDragHandle>reorder</mat-icon>
-              <span class="label">{{ GridPropertyType.Actions === column.type ? 'Дії' : column.displayName }}</span>
-            </div>
+            @if(column.type !== GridPropertyType.Actions){
+              <div class="column" cdkDrag [cdkDragData]="column" [@flyFromRight]>
+                <mat-icon cdkDragHandle>reorder</mat-icon>
+                <span class="label">{{ column.displayName }}</span>
+              </div>
+            }
           }
         </div>
 

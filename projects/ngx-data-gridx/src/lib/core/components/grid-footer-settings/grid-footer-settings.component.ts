@@ -3,6 +3,7 @@ import {MatIcon} from '@angular/material/icon';
 import {GridColumnsModalDialogComponent} from '../grid-columns-modal-dialog/grid-columns-modal-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import {GridProperty} from '../../entity/grid-property';
+import {GridTheme} from '../../../ngx-data-gridx/ngx-data-gridx.component';
 
 @Component({
   selector: 'grid-footer-settings',
@@ -18,6 +19,7 @@ export class GridFooterSettingsComponent {
   showColumnSettings = input<boolean>(true);
   storageKey = input<string>('');
   printData = input<(() => void) | null>(null);
+  theme = input<GridTheme>();
 
   constructor(
     protected dialog: MatDialog

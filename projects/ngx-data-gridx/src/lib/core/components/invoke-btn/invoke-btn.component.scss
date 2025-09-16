@@ -22,14 +22,22 @@
   overflow: hidden;
   min-width: 100px;
   white-space: nowrap;
+  transition: background-color 160ms ease, color 160ms ease;
 
   &:disabled {
     color: tokens.$neutral-500!important;
+    opacity: .55;
     background: tokens.$neutral-600!important;
   }
 
   &:hover {
+    opacity: .55;
+    color: tokens.$neutral-50;
     background: tokens.$primary-300;
+
+    mat-icon{
+      color: tokens.$neutral-50;
+    }
   }
 
   &__dropdown {

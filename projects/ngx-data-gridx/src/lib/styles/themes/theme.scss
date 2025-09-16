@@ -227,6 +227,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    max-height: 40px;
   }
 
   @media screen and (max-width: 700px) {
@@ -294,6 +295,10 @@
 
 
 ::ng-deep{
+  .mdc-data-table__header-cell, .mdc-data-table__cell, .mdc-data-table__header-cell{
+    padding: token.$space-0 token.$space-3 !important;
+  }
+
   .mat-mdc-dialog-surface{
     border-radius: token.$radius-small !important;
     padding: token.$space-6;

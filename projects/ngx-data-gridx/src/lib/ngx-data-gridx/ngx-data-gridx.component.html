@@ -315,6 +315,7 @@
                                 class="btn-custom-html"
                                 type="button"
                                 mat-icon-button
+                                (click)="action.action ? executeAction(action, row) : null"
                                 matTooltip="{{ action.tooltip }}">
                                 <span [innerHTML]="action.customHtml(row)"></span>
                               </button>

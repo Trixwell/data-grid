@@ -834,31 +834,34 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private reorderColumnsData(data: GridProperty[]) {
-    if (!Array.isArray(data) || data.length === 0) return this;
+  private reorderColumnsData(input: GridProperty[] | undefined) {
+    const base = this.baseColumns.length ? this.baseColumns : (input ?? []);
+    const byName = new Map<string, GridProperty>();
+    (input ?? base).forEach(c => byName.set(c.name, c));
+    base.forEach(c => { if (!byName.has(c.name)) byName.set(c.name, c); });
 
-    const withOrigIdx = data.map((c, i) => ({c, i}));
-    withOrigIdx.sort((a, b) => {
+    const merged = Array.from(byName.values());
+
+    const withIdx = merged.map((c, i) => ({ c, i }));
+    withIdx.sort((a, b) => {
       const ax = a.c.type === GridPropertyType.Actions ? Number.MAX_SAFE_INTEGER : (a.c.columnIndex ?? a.i);
       const bx = b.c.type === GridPropertyType.Actions ? Number.MAX_SAFE_INTEGER : (b.c.columnIndex ?? b.i);
-      if (ax === bx) return 0;
-      return ax < bx ? -1 : 1;
+      return ax - bx;
     });
 
-    const sorted = withOrigIdx.map(x => x.c);
-    const visibleCols = sorted.filter(c => c.visible !== false && c.type !== GridPropertyType.Hidden && c.type !== GridPropertyType.Actions);
-    const actionsCol = sorted.find(c => c.type === GridPropertyType.Actions && c.visible !== false) ?? null;
-    const names = visibleCols.map(c => c.name);
+    const sorted = withIdx.map(x => x.c);
 
-    if (actionsCol) {
-      const idx = names.indexOf(actionsCol.name);
-      if (idx > -1) names.splice(idx, 1);
-      names.push(actionsCol.name);
-    }
+    const regular = sorted.filter(c => c.visible !== false && c.type !== GridPropertyType.Hidden && c.type !== GridPropertyType.Actions);
+    const actions = sorted.filter(c => c.visible !== false && c.type === GridPropertyType.Actions);
+
+    const names = [
+      ...regular.map(c => c.name),
+      ...actions.map(c => c.name),
+    ];
 
     this.displayedColumns = this.multiselect() ? ['select', ...names] : names;
-    return this;
   }
+
 
   resolveColumn(name: string): GridProperty | null {
     return this.mappingsColumns.get(name) ?? null;

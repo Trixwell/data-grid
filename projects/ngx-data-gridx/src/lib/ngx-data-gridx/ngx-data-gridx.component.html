@@ -332,7 +332,7 @@
 
                       @case(GridPropertyType.Audio){
                         <app-audio-player #audioPlayer
-                                          [src]="row[column.name]">
+                                          [src]="column.callback ? column.callback(row[column.name]) : row[column.name]">
                         </app-audio-player>
                       }
 

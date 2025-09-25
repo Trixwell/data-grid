@@ -23,9 +23,11 @@
     "@angular/animations": ">=19.0.0",
     "pdfmake": ">= 0.2.20"
   },
-  "dependencies": {
-    "tslib": "^2.3.0",
+  "devDependencies": {
     "@types/pdfmake": ">=0.2.11"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
   },
   "sideEffects": false
 }

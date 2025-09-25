@@ -45,4 +45,13 @@ export class GridFooterSettingsComponent {
 
     return this;
   }
+
+  print() {
+    const print = this.printData();
+    if (print) {
+      print();
+    } else {
+      this.pdfExportService.export(this.rows(), this.columns()!, this.storageKey())
+    }
+  }
 }

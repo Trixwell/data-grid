@@ -31,39 +31,39 @@ export class PdfExportService {
       ),
     ];
 
+    const widths = Array(exportableCols.length).fill('auto');
     this.createPdf({
+      pageMargins: [5, 20, 5, 20],
       content: [
         {
-          alignment: 'center',
-          table: {
-            headerRows: 1,
-            widths: Array(exportableCols.length).fill('*'),
-            body,
-          },
-          layout: {
-            hLineWidth: () => 0.5,
-            vLineWidth: () => 0.5,
-            hLineColor: () => '#343A40',
-            vLineColor: () => '#343A40',
-            paddingLeft: () => 4,
-            paddingRight: () => 4,
-            paddingTop: () => 3,
-            paddingBottom: () => 3,
-          },
+          columns: [
+            { width: '*', text: '' },
+            {
+              width: 'auto',
+              table: {
+                headerRows: 1,
+                widths,
+                body,
+              },
+              layout: {
+                hLineWidth: () => 0.5,
+                vLineWidth: () => 0.5,
+                hLineColor: () => '#343A40',
+                vLineColor: () => '#343A40',
+                paddingLeft: () => 4,
+                paddingRight: () => 4,
+                paddingTop: () => 3,
+                paddingBottom: () => 3,
+              },
+              margin: [0, 0, 0, 0],
+            },
+            { width: '*', text: '' },
+          ],
+          columnGap: 0
         },
       ],
-      styles: {
-        header: {
-          fontSize: 14,
-          bold: true,
-          margin: [0, 0, 0, 10] as [number, number, number, number],
-        },
-        tableExample: {
-          margin: [0, 5, 0, 15] as [number, number, number, number],
-        },
-      },
       defaultStyle: { fontSize: 10 },
-    })
+    });
   }
 
   createPdf(data: TDocumentDefinitions){

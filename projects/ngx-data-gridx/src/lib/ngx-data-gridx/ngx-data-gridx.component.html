@@ -42,6 +42,10 @@
   <div class="mat-elevation-z8">
     <div class="grid__container__data">
     <div class="grid__container__wrapper">
+      <div class="grid__linear-loader" [class.is-visible]="loading">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      </div>
+
       <table mat-table
              id="printArea"
              multiTemplateDataRows
@@ -68,14 +72,6 @@
             </td>
           </ng-container>
         }
-
-        <ng-container matColumnDef="loader">
-          <th mat-header-cell *matHeaderCellDef
-              [attr.colspan]="displayedColumns.length"
-              class="grid__row__loader">
-            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-          </th>
-        </ng-container>
 
         <!-- primary cols -->
         @for(column of data(); track $index){
@@ -117,10 +113,18 @@
                         <!-- Checkbox -->
                         @if(filter.type === 'checkbox'){
                           <div class="filter-options">
-                            @for(item of column.filterValues?.[$index]; track $index){
-                              <mat-checkbox (click)="$event.stopPropagation()"
-                                            (change)="onCheckboxChange(column.name, filter.type, $index, filter.callback)"
-                                            [(ngModel)]="item.selected">
+                            @for (item of column.filterValues?.[$index]; track item.value) {
+                              <mat-checkbox
+                                (click)="$event.stopPropagation()"
+                                [checked]="isCheckboxChecked(column.name, item.value)"
+                                (change)="onCheckboxChange(
+                                   column.name,
+                                   'checkbox',
+                                   item.label,
+                                   item.value,
+                                   $event.checked,
+                                   filter.callback
+                                 )">
                                 {{ item.label }}
                               </mat-checkbox>
                             }
@@ -332,7 +336,7 @@
 
                       @case(GridPropertyType.Audio){
                         <app-audio-player #audioPlayer
-                                          [src]="column.callback ? column.callback(row[column.name]) : row[column.name]">
+                                          [src]="resolveColumn(column.name)?.callback ? resolveColumn(column.name)?.callback?.(row[column.name]) : row[column.name]">
                         </app-audio-player>
                       }
 
@@ -341,7 +345,7 @@
                           <grid-cell-host [component]="resolveColumn(column.name)?.component!" [row]="row"></grid-cell-host>
                         } @else {
                           <span [innerHTML]="IsCustomCallbackExist(column)
-                                           ? ( column.callback ? column.callback(row) : row[column.name] )
+                                           ? ( resolveColumn(column.name)?.callback ? resolveColumn(column.name)?.callback?.(row) : row[column.name] )
                                            : row[column.name]">
                           </span>
                         }
@@ -416,11 +420,6 @@
 
         <!-- primary row -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-header-row
-            *matHeaderRowDef="['loader']; sticky: true"
-            class="grid__row__tr__loader"
-            [style.display]="loading ? '' : 'none'">
-        </tr>
 
         <tr mat-row *matRowDef="let element; columns: displayedColumns;"
             (dblclick)="toggleDetail(element)"

@@ -1134,20 +1134,35 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  isCheckboxChecked(columnName: string, value: string | number): boolean {
+    const v = this.appliedFilters[columnName]?.['checkbox']?.value;
+    if (!Array.isArray(v)) return false;
+    return v.map(String).includes(String(value));
+  }
+
   onCheckboxChange(
     columnName: string,
-    filterType: string,
-    index: number,
+    filterType: 'checkbox',
+    label: string,
+    value: string,
+    checked: boolean,
     callback?: (columnName: string, filterType: string, value: string | number | string[]) => void
   ) {
-    this.showLoader();
-    const column = this.data().find(col => col.name === columnName);
-    if (!column || !column.filterValues || !column.filterValues[index]) return;
+    const currentValues = this.appliedFilters[columnName]?.[filterType]?.value;
+    const currentLabels = this.appliedFilters[columnName]?.[filterType]?.label;
 
-    const selectedItems = column.filterValues[index].filter(item => item.selected);
+    const values = Array.isArray(currentValues) ? [...currentValues] : [];
+    const labels = Array.isArray(currentLabels) ? [...currentLabels] : [];
 
-    const values = selectedItems.map(item => item.value);
-    const labels = selectedItems.map(item => item.label);
+    const idx = values.map(String).indexOf(String(value));
+
+    if (checked && idx === -1) {
+      values.push(value);
+      labels.push(label);
+    } else if (!checked && idx !== -1) {
+      values.splice(idx, 1);
+      labels.splice(idx, 1);
+    }
 
     this.onFilterChange(columnName, filterType, labels, values, callback);
   }
@@ -1215,7 +1230,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   IsCustomCallbackExist(column: GridProperty): boolean {
-    return column && typeof column.callback === 'function';
+    const data = this.resolveColumn(column.name) ?? column;
+    return data && typeof data.callback === 'function';
   }
 
   getAllClasses(column: GridProperty, row: object): Record<string, boolean> {

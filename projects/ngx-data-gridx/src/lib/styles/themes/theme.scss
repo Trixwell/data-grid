@@ -100,6 +100,8 @@
       border-radius: token.$radius-medium;
       box-shadow: 0 2px 6px token.$shadow-medium;
       z-index: 99;
+      max-height: 350px;
+      overflow: scroll;
     }
 
     mat-form-field {
@@ -209,11 +211,25 @@
     background-color: token.$primary-50;
   }
 
-  .grid__container__wrapper { padding-top: 0; }
+  .grid__container__wrapper {
+    padding-top: 0;
+    position: relative;
+  }
 
   .grid__row__tr__loader{
     height: 4px !important;
     padding: token.$space-0;
+  }
+
+  .grid__linear-loader {
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .2s ease;
+    will-change: opacity;
+  }
+
+  .grid__linear-loader.is-visible {
+    opacity: 1;
   }
 
   .grid__row__loader .mat-mdc-progress-bar {

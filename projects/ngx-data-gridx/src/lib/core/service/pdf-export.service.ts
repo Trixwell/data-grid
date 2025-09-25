@@ -34,15 +34,17 @@ export class PdfExportService {
     this.createPdf({
       content: [
         {
+          alignment: 'center',
           table: {
             headerRows: 1,
+            widths: Array(exportableCols.length).fill('*'),
             body,
           },
           layout: {
             hLineWidth: () => 0.5,
             vLineWidth: () => 0.5,
-            hLineColor: () => '#ccc',
-            vLineColor: () => '#ccc',
+            hLineColor: () => '#343A40',
+            vLineColor: () => '#343A40',
             paddingLeft: () => 4,
             paddingRight: () => 4,
             paddingTop: () => 3,

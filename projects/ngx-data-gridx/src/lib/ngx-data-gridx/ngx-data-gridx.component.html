@@ -453,6 +453,7 @@
     <div class="grid__footer no-print">
       <div class="grid__footer__settings">
         <grid-footer-settings [(columns)]="data"
+                              [printData]="print()"
                               [rows]="rows.data"
                               [showPrint]="showPrint()"
                               [theme]="getCurrentTheme()"

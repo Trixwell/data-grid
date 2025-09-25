@@ -31,6 +31,7 @@ import {SquarePaginatorDirective} from '../directives/square-paginator.directive
 import {InvokeBtnComponent} from '../core/components/invoke-btn/invoke-btn.component';
 import {GridFooterSettingsComponent} from '../core/components/grid-footer-settings/grid-footer-settings.component';
 import {GridCellHost} from '../core/components/grid-cell-host/grid-cell-host';
+import {PdfExportService} from '../core/service/pdf-export.service';
 
 @Component({
   selector: 'ngx-data-gridx',
@@ -131,8 +132,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   multiSearchControl = new FormControl<number[]>([]);
   private searchTermSubject = new Subject<SearchQuery>();
   private destroySearch$ = new Subject<void>();
-  private mappingsColumns = new Map<string, GridProperty>();
-  private baseColumns: GridProperty[] = [];
+  protected mappingsColumns = new Map<string, GridProperty>();
+  protected baseColumns: GridProperty[] = [];
 
   constructor(private http: HttpClient,
               private cdr: ChangeDetectorRef,

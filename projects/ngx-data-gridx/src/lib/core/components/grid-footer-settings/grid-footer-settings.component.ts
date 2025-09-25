@@ -4,6 +4,8 @@ import {GridColumnsModalDialogComponent} from '../grid-columns-modal-dialog/grid
 import {MatDialog} from '@angular/material/dialog';
 import {GridProperty} from '../../entity/grid-property';
 import {GridTheme} from '../../../ngx-data-gridx/ngx-data-gridx.component';
+import {PdfExportService} from '../../service/pdf-export.service';
+
 
 @Component({
   selector: 'grid-footer-settings',
@@ -15,6 +17,8 @@ import {GridTheme} from '../../../ngx-data-gridx/ngx-data-gridx.component';
 })
 export class GridFooterSettingsComponent {
   columns = model<GridProperty[]>();
+  mappedColumns = input<GridProperty[]>();
+  rows = input<any[]>([]);
   showPrint = input<boolean>(true);
   showColumnSettings = input<boolean>(true);
   storageKey = input<string>('');
@@ -22,7 +26,8 @@ export class GridFooterSettingsComponent {
   theme = input<GridTheme>();
 
   constructor(
-    protected dialog: MatDialog
+    protected dialog: MatDialog,
+    protected pdfExportService: PdfExportService
   ) {}
 
   showColumnSettingsModal(){
@@ -37,17 +42,6 @@ export class GridFooterSettingsComponent {
       if (!Array.isArray(res)) return;
       this.columns.set(res);
     });
-
-    return this;
-  }
-
-  print(){
-    const print = this.printData();
-    if (print) {
-      print();
-    } else {
-      window.print();
-    }
 
     return this;
   }

@@ -12,7 +12,7 @@
 
   @if(showPrint()){
     <button type="button"
-            (click)="print()"
+            (click)="pdfExportService.export(rows(), columns()!, storageKey())"
             class="grid__footer__settings_element" >
       <mat-icon fontSet="material-symbols-outlined">
         print

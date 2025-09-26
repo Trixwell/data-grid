@@ -2,6 +2,8 @@
   @if(showHistoryFilters() || grid_name()){
     <div class="grid__header no-print">
       <div class="grid__filters" [ngClass]="{'sub__grid_filter': isSubGrid()}">
+        <ng-content select=".grid__filter_option"></ng-content>
+
         <div class="grid-title">
           @if(grid_name()){
             <span class="grid__name">{{ grid_name() }}</span>
@@ -19,8 +21,6 @@
                 </div>
               }
             </div>
-
-            <ng-content select=".grid__filter_option"></ng-content>
 
             <app-invoke-btn (click)="clearAllFilters()" iconName="delete" [outlined]="true">
               Очистити фільтри

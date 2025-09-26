@@ -20,6 +20,8 @@
               }
             </div>
 
+            <ng-content select=".grid__filter_option"></ng-content>
+
             <app-invoke-btn (click)="clearAllFilters()" iconName="delete" [outlined]="true">
               Очистити фільтри
             </app-invoke-btn>

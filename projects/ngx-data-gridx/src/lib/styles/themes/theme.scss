@@ -154,6 +154,19 @@
     }
   }
 
+  ::ng-deep .mat-mdc-paginator-page-size{
+    align-items: center;
+  }
+
+  ::ng-deep{
+    mat-paginator.grid__paginator{
+      mat-form-field{
+        height: 100% !important;
+        min-height: 100% !important;
+      }
+    }
+  }
+
   ::ng-deep .no-checkbox mat-pseudo-checkbox {
     display: none !important;
   }

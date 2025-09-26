@@ -27,7 +27,7 @@
              [@.disabled]="!massMove()"
              [@staggerList]="inactive().length"
              (cdkDropListDropped)="onDropInactive($event)">
-          @for (column of inactive(); track $index) {
+          @for (column of inactive(); track column) {
             @if(column.type !== GridPropertyType.Actions){
               <div class="column" cdkDrag [cdkDragData]="column" [@flyFromLeft]>
                 <mat-icon cdkDragHandle>reorder</mat-icon>
@@ -53,7 +53,7 @@
              [@.disabled]="!massMove()"
              [@staggerList]="active().length"
              (cdkDropListDropped)="onDropActive($event)">
-          @for (column of active(); track $index) {
+          @for (column of active(); track column) {
             @if(column.type !== GridPropertyType.Actions){
               <div class="column" cdkDrag [cdkDragData]="column" [@flyFromRight]>
                 <mat-icon cdkDragHandle>reorder</mat-icon>

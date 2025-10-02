@@ -199,7 +199,12 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.disablePagination()) return;
 
+    if (this.paginator) {
+      this.limit.set(this.paginator.pageSize);
+    }
+
     this.paginator?.page.subscribe((event) => {
+      this.limit.set(event.pageSize);
       this.loadData(event.pageIndex + 1, event.pageSize);
 
       if (this.openAllToggleDetails()) {

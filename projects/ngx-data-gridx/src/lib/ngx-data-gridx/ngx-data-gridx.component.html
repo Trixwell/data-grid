@@ -149,6 +149,29 @@
                           </mat-form-field>
                         }
 
+                        @if (filter.type === 'range') {
+                          <mat-slider [min]="filter.rangeOptions?.min" [max]="filter.rangeOptions?.max" discrete>
+                            <input matSliderStartThumb #start
+                                   [value]="getRangeMin(column.name, filter.rangeOptions)"
+                                   (change)="onFilterChange(
+                                            column.name,
+                                            'range',
+                                            ('від ' + start.valueAsNumber + ' до ' + end.valueAsNumber),
+                                            (start.valueAsNumber + ',' + end.valueAsNumber),
+                                            filter.callback
+                                         )">
+                            <input matSliderEndThumb #end
+                                   [value]="getRangeMax(column.name, filter.rangeOptions)"
+                                   (change)="onFilterChange(
+                                      column.name,
+                                      'range',
+                                      ('від ' + start.valueAsNumber + ' до ' + end.valueAsNumber),
+                                      (start.valueAsNumber + ',' + end.valueAsNumber),
+                                      filter.callback
+                                   )">
+                          </mat-slider>
+                        }
+
                         <!-- Multi-Select -->
                         @if(filter.type === 'multi-select'){
                           <mat-form-field appearance ="outline">

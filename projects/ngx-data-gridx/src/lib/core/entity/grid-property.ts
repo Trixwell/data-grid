@@ -12,10 +12,14 @@ export class GridProperty{
   columnIndex?: number;
   filter?: {
     label: string;
-    type: "multi-search" | "text" | "checkbox" | "select" | "multi-select" | "date" | "input";
+    type: "multi-search" | "text" | "checkbox" | "select" | "multi-select" | "date" | "input" | "range";
     dateOptions?:{
       range: boolean;
-    }
+    },
+    rangeOptions?:{
+      min: number;
+      max: number
+    },
     multiSearchOptions?:{
       url:string;
       id: string;
@@ -56,6 +60,22 @@ export class GridProperty{
     this.component = params.component || null;
 
     this.setDateOptionsByDefault(params);
+    this.setRangeOptions(params);
+  }
+
+  setRangeOptions(params: GridPropertiesDTO) {
+    this.filter = (params.filter || []).map(f => {
+      const rangeMax = f.rangeOptions?.max ?? 0;
+      const rangeMin = f.rangeOptions?.min ?? 0;
+
+      return {
+        label: f.label,
+        type: f.type,
+        callback: f.callback,
+        multiSearchOptions: f.multiSearchOptions,
+        rangeOptions: { min: rangeMin, max: rangeMax }
+      };
+    });
   }
 
   setDateOptionsByDefault(params: GridPropertiesDTO){
@@ -95,11 +115,15 @@ export interface GridPropertiesDTO{
   component?: Type<any>;
   filter?: {
     label: string;
-    type: "multi-search" | "text" | "checkbox" | "select" | "multi-select" | "date" | "input";
+    type: "multi-search" | "text" | "checkbox" | "select" | "multi-select" | "date" | "input" | "range";
     callback?: (columnName: string, filterType: string, value: string | number | string[]) => void;
     dateOptions?:{
       range: boolean;
     },
+    rangeOptions?:{
+      min: number;
+      max: number
+    }
     multiSearchOptions?:{
       url:string;
       id: string;

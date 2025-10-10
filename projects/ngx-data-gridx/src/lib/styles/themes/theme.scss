@@ -364,6 +364,20 @@
   padding: 0;
 }
 
+::ng-deep{
+  .mdc-slider__track--active, .mdc-slider__track--inactive{
+    top: 5px !important;
+  }
+
+  mat-slider-visual-thumb{
+    width: 50px !important;
+    height: 57px !important;
+  }
+}
+
+mat-slider{
+  width: 90%;
+}
 
 @media print {
   body * {

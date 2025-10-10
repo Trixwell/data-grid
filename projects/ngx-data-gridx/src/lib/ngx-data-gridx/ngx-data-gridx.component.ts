@@ -31,7 +31,7 @@ import {SquarePaginatorDirective} from '../directives/square-paginator.directive
 import {InvokeBtnComponent} from '../core/components/invoke-btn/invoke-btn.component';
 import {GridFooterSettingsComponent} from '../core/components/grid-footer-settings/grid-footer-settings.component';
 import {GridCellHost} from '../core/components/grid-cell-host/grid-cell-host';
-import {PdfExportService} from '../core/service/pdf-export.service';
+import {MatSlider, MatSliderRangeThumb} from '@angular/material/slider';
 
 @Component({
   selector: 'ngx-data-gridx',
@@ -57,6 +57,8 @@ import {PdfExportService} from '../core/service/pdf-export.service';
     InvokeBtnComponent,
     GridFooterSettingsComponent,
     GridCellHost,
+    MatSliderRangeThumb,
+    MatSlider,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './ngx-data-gridx.component.html',
@@ -134,6 +136,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   private destroySearch$ = new Subject<void>();
   protected mappingsColumns = new Map<string, GridProperty>();
   protected baseColumns: GridProperty[] = [];
+  private rangeValues: Record<string, { min: number; max: number }> = {};
 
   constructor(private http: HttpClient,
               private cdr: ChangeDetectorRef,
@@ -336,8 +339,25 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
           }
         }
 
+        if (type === 'range') {
+          const raw = String(dto.value);
+          if (raw.includes(',')) {
+            const [s, e] = raw.split(',');
+            const min = Number(s), max = Number(e);
+            if (Number.isFinite(min) && Number.isFinite(max)) {
+              this.rangeValues[col] = { min, max };
+            }
+          }
+        }
       });
     });
+  }
+
+  getRangeMin(col: string, opts?: {min:number; max:number}): number {
+    return this.rangeValues[col]?.min ?? Number(opts?.min ?? 0);
+  }
+  getRangeMax(col: string, opts?: {min:number; max:number}): number {
+    return this.rangeValues[col]?.max ?? Number(opts?.max ?? 100);
   }
 
   private saveFilters(): void {
@@ -949,6 +969,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
             ? `${formattedStart},${formattedEnd}`
             : formattedDate;
           this.setFilterValue(params, columnName, `${date}`);
+        } else if (this.checkFilterType(filterType, 'range')) {
+          this.setFilterValue(params, columnName, String(value));
         }
       });
     });
@@ -1059,6 +1081,26 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     this.showLoader();
     if ((filterType === 'checkbox' || filterType === 'multi-select' || filterType === 'multi-search') && !Array.isArray(label)) {
       label = [label];
+    }
+
+    if (filterType === 'range') {
+      const raw = Array.isArray(value) ? value.join(',') : String(value);
+      const [s, e] = raw.split(',');
+
+      const minNum = Number(s);
+      const maxNum = Number(e);
+
+      if (!Number.isFinite(minNum) || !Number.isFinite(maxNum)) {
+        return;
+      }
+
+      const lo = Math.min(minNum, maxNum);
+      const hi = Math.max(minNum, maxNum);
+
+      this.rangeValues[columnName] = { min: lo, max: hi };
+
+      value = `${lo},${hi}`;
+      label = `від ${lo} до ${hi}`;
     }
 
     if (!value || (Array.isArray(value) && value.length === 0)) {

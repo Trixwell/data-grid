@@ -538,7 +538,17 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       takeUntil(this.destroySearch$)
     ).subscribe({
       next: (res: SearchItem[]) => {
-        this.searchData = res;
+        const selectedIds = this.multiSearchControl.value ?? [];
+        const selectedItems = this.searchData.filter(item =>
+          selectedIds.includes(item.id)
+        );
+
+        const map = new Map<number, SearchItem>();
+        for (const item of [...selectedItems, ...res]) {
+          map.set(item.id, item);
+        }
+
+        this.searchData = Array.from(map.values());
         this.cdr.markForCheck();
       },
       error: err => console.error(err)

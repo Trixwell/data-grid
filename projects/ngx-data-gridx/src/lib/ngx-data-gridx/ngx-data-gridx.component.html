@@ -156,7 +156,7 @@
                                    (change)="onFilterChange(
                                             column.name,
                                             'range',
-                                            ('від ' + start.valueAsNumber + ' до ' + end.valueAsNumber),
+                                            (column.displayName + ' від ' + start.valueAsNumber + ' до ' + end.valueAsNumber),
                                             (start.valueAsNumber + ',' + end.valueAsNumber),
                                             filter.callback
                                          )">
@@ -165,7 +165,7 @@
                                    (change)="onFilterChange(
                                       column.name,
                                       'range',
-                                      ('від ' + start.valueAsNumber + ' до ' + end.valueAsNumber),
+                                      (column.displayName + ' від ' + start.valueAsNumber + ' до ' + end.valueAsNumber),
                                       (start.valueAsNumber + ',' + end.valueAsNumber),
                                       filter.callback
                                    )">

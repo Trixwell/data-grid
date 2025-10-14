@@ -199,6 +199,7 @@
                           <mat-select placeholder="Пошук..."
                                       (openedChange)="onSelectOpened($event)"
                                       [formControl]="multiSearchControl"
+                                      [multiple]="!filter?.multiSearchOptions?.selectSingleOption"
                                       (selectionChange)="
                                                           onFilterChange(
                                                             column.name,
@@ -206,8 +207,7 @@
                                                             getSelectedLabelsSearch($event.value),
                                                             $event.value,
                                                             filter.callback
-                                                          )"
-                                      multiple>
+                                                          )">
                             <mat-option class="no-checkbox" >
                               <div>
                                 <input
@@ -223,9 +223,11 @@
                               </div>
                             </mat-option>
 
-                            <mat-option (onSelectionChange)="toggleAllItems($event)" value="all">
-                              Вибрати все
-                            </mat-option>
+                            @if(!filter?.multiSearchOptions?.selectSingleOption){
+                              <mat-option (onSelectionChange)="toggleAllItems($event)" value="all">
+                                Вибрати все
+                              </mat-option>
+                            }
 
                             @for(data of searchData; track $index){
                               <mat-option [value]="data.id">

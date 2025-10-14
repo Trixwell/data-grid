@@ -21,6 +21,7 @@ export class GridProperty{
       max: number
     },
     multiSearchOptions?:{
+      selectSingleOption?: boolean;
       url:string;
       id: string;
       label:string;
@@ -72,7 +73,12 @@ export class GridProperty{
         label: f.label,
         type: f.type,
         callback: f.callback,
-        multiSearchOptions: f.multiSearchOptions,
+        multiSearchOptions: {
+          selectSingleOption: f.multiSearchOptions?.selectSingleOption ?? false,
+          url: f.multiSearchOptions?.url ?? '',
+          id: f.multiSearchOptions?.id ?? '',
+          label: f.multiSearchOptions?.label ?? ''
+        },
         rangeOptions: { min: rangeMin, max: rangeMax }
       };
     });
@@ -86,7 +92,12 @@ export class GridProperty{
         label: f.label,
         type: f.type,
         callback: f.callback,
-        multiSearchOptions: f.multiSearchOptions,
+        multiSearchOptions: {
+          selectSingleOption: f.multiSearchOptions?.selectSingleOption ?? false,
+          url: f.multiSearchOptions?.url ?? '',
+          id: f.multiSearchOptions?.id ?? '',
+          label: f.multiSearchOptions?.label ?? ''
+        },
         dateOptions: { range: rangeValue }
       };
     });
@@ -125,6 +136,7 @@ export interface GridPropertiesDTO{
       max: number
     }
     multiSearchOptions?:{
+      selectSingleOption?: boolean,
       url:string;
       id: string;
       label:string;

@@ -538,9 +538,21 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       takeUntil(this.destroySearch$)
     ).subscribe({
       next: (res: SearchItem[]) => {
+        const currentValue = this.multiSearchControl.value;
+
+        if (!Array.isArray(currentValue)) {
+          this.multiSearchControl.setValue(
+            currentValue != null ? [currentValue] : []
+          );
+        }
+
         const selectedIds = this.multiSearchControl.value ?? [];
         const selectedItems = this.searchData.filter(item =>
           selectedIds.includes(item.id)
+        );
+
+        const isSingleSelect = this.currentGridColumn?.filter?.some(
+          f => f.type === 'multi-search' && f.multiSearchOptions?.selectSingleOption
         );
 
         const map = new Map<number, SearchItem>();
@@ -549,6 +561,12 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
         }
 
         this.searchData = Array.from(map.values());
+
+        if (isSingleSelect && Array.isArray(selectedIds) && selectedIds.length > 1) {
+          const lastSelected = selectedIds[selectedIds.length - 1];
+          this.multiSearchControl.setValue([lastSelected]);
+        }
+
         this.cdr.markForCheck();
       },
       error: err => console.error(err)
@@ -743,6 +761,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
 
   getSelectedLabelsSearch(selected: number[]): string[] {
+    if(!Array.isArray(selected)){
+      selected = [selected];
+    }
+
     return this.searchData
       .filter(item => selected?.includes(item.id))
       .map(item => item.label);

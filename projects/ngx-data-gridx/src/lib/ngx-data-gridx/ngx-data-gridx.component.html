@@ -224,7 +224,7 @@
                             </mat-option>
 
                             @if(!filter?.multiSearchOptions?.selectSingleOption){
-                              <mat-option (onSelectionChange)="toggleAllItems($event)" value="all">
+                              <mat-option (onSelectionChange)="toggleAllItems($event, column.name)">
                                 Вибрати все
                               </mat-option>
                             }

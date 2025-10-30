@@ -573,13 +573,35 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  toggleAllItems(event: MatOptionSelectionChange): void {
+  toggleAllItems(event: MatOptionSelectionChange, columnName: string): void {
     if (event.source.selected) {
-      this.multiSearchControl.setValue(this.searchData.map(item => item.id));
+      const allIds = this.searchData.map(item => item.id);
+      const labels = this.searchData.map(item => item.label);
+
+      this.multiSearchControl.setValue(allIds, { emitEvent: false });
+
+      this.onFilterChange(
+        columnName,
+        'multi-search',
+        labels,
+        allIds.map(String)
+      );
     } else {
-      this.multiSearchControl.setValue([]);
+      this.multiSearchControl.setValue([], { emitEvent: false });
+
+      if (this.appliedFilters[columnName]) {
+        delete this.appliedFilters[columnName]['multi-search'];
+
+        if (Object.keys(this.appliedFilters[columnName]).length === 0) {
+          delete this.appliedFilters[columnName];
+        }
+      }
+
+      this.saveFilters();
+      this.loadData(1, this.limit());
     }
   }
+
 
   getSelectedCustomSearchItems(): SearchItem[] {
     const selected: number[] = this.multiSearchControl.value || [];

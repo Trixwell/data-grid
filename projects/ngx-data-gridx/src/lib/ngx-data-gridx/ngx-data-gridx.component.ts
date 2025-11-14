@@ -564,7 +564,9 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
         if (isSingleSelect && Array.isArray(selectedIds) && selectedIds.length > 1) {
           const lastSelected = selectedIds[selectedIds.length - 1];
-          this.multiSearchControl.setValue([lastSelected]);
+          if(lastSelected) {
+            this.multiSearchControl.setValue([lastSelected])
+          }
         }
 
         this.cdr.markForCheck();
@@ -575,8 +577,14 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
   toggleAllItems(event: MatOptionSelectionChange, columnName: string): void {
     if (event.source.selected) {
-      const allIds = this.searchData.map(item => item.id);
-      const labels = this.searchData.map(item => item.label);
+
+      const allIds = this.searchData
+        .map(item => item.id)
+        .filter(id => id !== null && id !== undefined);
+
+      const labels = this.searchData
+        .map(item => item.label)
+        .filter(label => label != null);
 
       this.multiSearchControl.setValue(allIds, { emitEvent: false });
 
@@ -586,7 +594,9 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
         labels,
         allIds.map(String)
       );
+
     } else {
+
       this.multiSearchControl.setValue([], { emitEvent: false });
 
       if (this.appliedFilters[columnName]) {
@@ -619,6 +629,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     filterType: string | undefined,
     optionValue: string | number | string[]
   ) {
+
+    if(filterType === 'multi-search') {
+
+    }
 
     if (filterType === 'input' && columnName && this.searchValues[columnName]) {
       delete this.searchValues[columnName];
@@ -1132,6 +1146,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     value: string | number | string[],
     callback?: (columnName: string, filterType: string, value: string | number | string[]) => void
   ) {
+    if (Array.isArray(value)) {
+      value = value.filter(v => v !== undefined);
+    }
+
     this.showLoader();
     if ((filterType === 'checkbox' || filterType === 'multi-select' || filterType === 'multi-search') && !Array.isArray(label)) {
       label = [label];

@@ -564,9 +564,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
         if (isSingleSelect && Array.isArray(selectedIds) && selectedIds.length > 1) {
           const lastSelected = selectedIds[selectedIds.length - 1];
-          if(lastSelected) {
-            this.multiSearchControl.setValue([lastSelected])
-          }
+          this.multiSearchControl.setValue([lastSelected])
         }
 
         this.cdr.markForCheck();
@@ -630,10 +628,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     optionValue: string | number | string[]
   ) {
 
-    if(filterType === 'multi-search') {
-
-    }
-
     if (filterType === 'input' && columnName && this.searchValues[columnName]) {
       delete this.searchValues[columnName];
       this.saveFilters();
@@ -679,6 +673,16 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       this.dateFilters[columnName].reset();
     }
 
+    if (filterType === 'multi-search') {
+      const current = this.multiSearchControl.value ?? [];
+      const next = current.filter(v => String(v) !== String(optionValue));
+
+      this.multiSearchControl.setValue(next, { emitEvent: false });
+
+      this.searchData = this.searchData.filter(
+        item => String(item.id) !== String(optionValue)
+      );
+    }
 
     this.uncheckedCheckbox(column, filterType, optionValue);
     this.saveFilters();

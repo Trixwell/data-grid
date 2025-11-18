@@ -10,7 +10,7 @@
       padding: 4px 8px !important;
       max-height: 32px;
       border-radius: token.$radius-small;
-      border: token.$border-1 solid token.$neutral-200;
+      border: token.$border-1 solid token.$neutral-200 !important;
     }
 
     .mdc-icon-button{

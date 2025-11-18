@@ -22,18 +22,18 @@
               }
             </div>
 
-            <app-invoke-btn (click)="clearAllFilters()" iconName="delete" [outlined]="true">
-              Очистити фільтри
-            </app-invoke-btn>
+            <button mat-icon-button (click)="clearAllFilters()">
+              <mat-icon fontSet="material-symbols-outlined">delete</mat-icon>
+            </button>
 
-            <app-invoke-btn (click)="loadData()" iconName="autorenew" [outlined]="true">
-              Оновити дані
-            </app-invoke-btn>
+            <button mat-icon-button (click)="loadData()">
+              <mat-icon fontSet="material-symbols-outlined">autorenew</mat-icon>
+            </button>
 
             @if(exportCsvUrl()){
-              <app-invoke-btn (click)="exportCsvAction()" iconName="file_export" [outlined]="true">
-                Експорт CSV
-              </app-invoke-btn>
+              <button mat-icon-button (click)="exportCsvAction()">
+                <mat-icon fontSet="material-symbols-outlined">file_export</mat-icon>
+              </button>
           }
           </div>
         }
@@ -99,7 +99,7 @@
                   <div class="filter-dropdown">
 
                     @if(column.search){
-                      <mat-form-field appearance="outline">
+                      <mat-form-field appearance="fill">
                         <mat-icon matPrefix (click)="$event.stopPropagation()">search</mat-icon>
                         <input
                           matInput
@@ -135,8 +135,7 @@
 
                         <!-- Select -->
                         @if(filter.type === 'select'){
-                          <mat-form-field appearance ="outline">
-                            <mat-label>{{ filter.label }}</mat-label>
+                          <mat-form-field appearance ="fill">
                             <mat-select
                               [(ngModel)]="filterInputValues[column.name]"
                               (selectionChange)="onFilterChange(column.name, filter.type, filter.label, $event.value, filter.callback)">
@@ -174,8 +173,7 @@
 
                         <!-- Multi-Select -->
                         @if(filter.type === 'multi-select'){
-                          <mat-form-field appearance ="outline">
-                            <mat-label>{{ filter.label }}</mat-label>
+                          <mat-form-field appearance ="fill">
                             <mat-select multiple
                                         [(ngModel)]="filterMultiSelectValues[column.name]"
                                         (selectionChange)="onFilterChange(
@@ -195,8 +193,28 @@
                         }
                         <!-- Multi-search -->
                         @if(filter.type === 'multi-search'){
-                          <mat-form-field (click)="$event.stopPropagation()" appearance="outline">
-                          <mat-select placeholder="Пошук..."
+
+                          @if(filter.multiSearchOptions?.searchTypes?.length){
+                            <div class="multi-search-type-selector" (click)="$event.stopPropagation()">
+                              <mat-radio-group
+                                [(ngModel)]="currentSearchType"
+                                (change)="onSearchTermChange(filter.multiSearchOptions)"
+                                [ngModelOptions]="{standalone: true}"
+                              >
+                                @for(type of filter.multiSearchOptions?.searchTypes ?? []; track type.value){
+                                  <mat-radio-button
+                                    [value]="type.value"
+                                    class="multi-search-type-radio"
+                                  >
+                                    {{ type.label }}
+                                  </mat-radio-button>
+                                }
+                              </mat-radio-group>
+                            </div>
+                          }
+
+                          <mat-form-field (click)="$event.stopPropagation()" appearance="fill">
+                          <mat-select
                                       (openedChange)="onSelectOpened($event)"
                                       [formControl]="multiSearchControl"
                                       [multiple]="!filter?.multiSearchOptions?.selectSingleOption"
@@ -213,7 +231,6 @@
                                 <input
                                   #searchField
                                   matInput
-                                  placeholder="Пошук..."
                                   [(ngModel)]="searchTerm"
                                   (input)="onSearchTermChange(filter?.multiSearchOptions)"
                                   (ngModelChange)="onSearchTermChange(filter?.multiSearchOptions)"
@@ -240,7 +257,7 @@
                         <!-- Date Range -->
                         @if(filter.type==='date' && filter.dateOptions?.range){
                           <div class="date-range" [formGroup]="dateFilters[column.name]">
-                          <mat-form-field appearance="outline">
+                          <mat-form-field appearance="fill">
                             <mat-label>From</mat-label>
                             <input
                               matInput
@@ -255,7 +272,7 @@
                             </mat-icon>
                           </mat-form-field>
 
-                          <mat-form-field appearance="outline">
+                          <mat-form-field appearance="fill">
                             <mat-label>To</mat-label>
                             <input
                               matInput
@@ -274,7 +291,7 @@
 
                         <!-- Date -->
                         @if(filter.type === 'date' && !filter.dateOptions?.range){
-                          <mat-form-field appearance="outline" [formGroup]="dateFilters[column.name]" (click)="$event.stopPropagation()">
+                          <mat-form-field appearance="fill" [formGroup]="dateFilters[column.name]" (click)="$event.stopPropagation()">
                           <input
                             matInput
                             type="date"
@@ -294,8 +311,7 @@
 
                         <!-- Input -->
                         @if(filter.type === 'input'){
-                          <mat-form-field appearance ="outline">
-                          <mat-label>{{ filter.label }}</mat-label>
+                          <mat-form-field appearance ="fill">
                           <input matInput [(ngModel)]="filterInputValues[column.name]"
                                  (input)="onInputFilterChange(column.name,
                                                               filter.type,

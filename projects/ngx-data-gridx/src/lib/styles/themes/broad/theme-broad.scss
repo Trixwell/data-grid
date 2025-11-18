@@ -4,10 +4,76 @@
 .grid-theme-broad {
   @include common.grid-theme-common;
 
+  ::ng-deep {
+    mat-form-field.mat-mdc-form-field:not(.mat-form-field-disabled):not(.mat-mdc-paginator-page-size-select)
+    .mdc-text-field {
+      padding: 4px 8px !important;
+      max-height: 32px;
+      border-radius: token.$radius-small;
+      border: token.$border-1 solid token.$neutral-200;
+    }
+
+    .mdc-icon-button{
+      width: 24px;
+      height: 24px;
+      padding: token.$space-0;
+    }
+
+    .mdc-line-ripple{
+      display: none;
+    }
+
+    .mdc-text-field--filled:not(.mdc-text-field--disabled){
+      background: token.$neutral-100 !important;
+    }
+
+    .mat-mdc-form-field-infix{
+      input{
+        font: token.$font-body-s;
+      }
+    }
+
+    .mat-mdc-form-field-icon-prefix>.mat-icon, .mat-mdc-form-field-icon-suffix>.mat-icon{
+      padding: token.$space-0 !important;
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+
+    body .mat-mdc-form-field:not(:has(textarea)) {
+      background: initial !important;
+      min-height: 32px;
+      --mdc-outlined-text-field-border-color: initial;
+      --mdc-outlined-text-field-hover-border-color: initial;
+      --mdc-outlined-text-field-focus-border-color: initial;
+    }
+
+    .mat-mdc-form-field-flex {
+      display: inline-flex;
+      align-items: baseline;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    mat-form-field.mat-form-field-disabled,
+    mat-form-field.mat-form-field-disabled .mat-mdc-text-field-wrapper {
+      background-color: token.$neutral-200 !important;
+    }
+
+    .mat-mdc-form-field-type-mat-select:not(.mat-form-field-disabled) .mat-mdc-text-field-wrapper,
+    .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+      cursor: pointer;
+      padding: token.$space-2 token.$space-1 !important;
+      display: flex;
+      align-items: center;
+    }
+
+  }
+
   font-family: Roboto, sans-serif;
 
   mat-icon {
-    color: token.$neutral-800;
+    color: token.$neutral-500;
   }
 
   ::ng-deep .mdc-checkbox__background {

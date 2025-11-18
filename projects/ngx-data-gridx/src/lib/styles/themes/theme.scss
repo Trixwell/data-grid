@@ -19,8 +19,6 @@
   border-radius: token.$scrollbar-track-radius;
 }
 
-
-
 @mixin grid-theme-common {
   .grid__table {
     background: transparent;
@@ -95,7 +93,7 @@
       position: absolute;
       top: 40px;
       left: 0;
-      background: white;
+      background: #F8F9FA;
       padding: token.$space-4;
       border-radius: token.$radius-medium;
       box-shadow: 0 2px 6px token.$shadow-medium;

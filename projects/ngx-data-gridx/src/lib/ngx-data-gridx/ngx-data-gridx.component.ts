@@ -32,6 +32,7 @@ import {InvokeBtnComponent} from '../core/components/invoke-btn/invoke-btn.compo
 import {GridFooterSettingsComponent} from '../core/components/grid-footer-settings/grid-footer-settings.component';
 import {GridCellHost} from '../core/components/grid-cell-host/grid-cell-host';
 import {MatSlider, MatSliderRangeThumb} from '@angular/material/slider';
+import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
 
 @Component({
   selector: 'ngx-data-gridx',
@@ -59,6 +60,8 @@ import {MatSlider, MatSliderRangeThumb} from '@angular/material/slider';
     GridCellHost,
     MatSliderRangeThumb,
     MatSlider,
+    MatRadioGroup,
+    MatRadioButton,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './ngx-data-gridx.component.html',
@@ -96,6 +99,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   showPrint = input<boolean>(true);
   showColumnSettings = input<boolean>(true);
   print = input<(() => void) | null>(null);
+  currentSearchType: string | null = null;
 
   /** detail accordion (dblclick) */
   detailExpandedElement: any | null = null;
@@ -506,7 +510,11 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  onSearchTermChange(multiSearch: { url: string; id: string; label: string; } | undefined): void {
+  onSearchTermChange(multiSearch: { url: string; id: string; label: string; searchTypes?: {
+      name: string;
+      label: string;
+      value: string;
+    }[]; } | undefined): void {
     if (!multiSearch) return;
 
     if (multiSearch) {
@@ -524,7 +532,18 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
         if (!query.term.trim()) {
           return of<SearchItem[]>([]);
         }
-        const urlWithQuery = `${query.multiSearch.url}?q=${encodeURIComponent(query.term)}`;
+        let urlWithQuery = `${query.multiSearch.url}?q=${encodeURIComponent(query.term)}`;
+
+        if (this.currentSearchType && query.multiSearch.searchTypes?.length) {
+          const selectedType = query.multiSearch.searchTypes.find(
+            t => t.value === this.currentSearchType
+          );
+
+          if (selectedType) {
+            urlWithQuery += `&${selectedType.name}=${encodeURIComponent(selectedType.value)}`;
+          }
+        }
+
         return this.http.get<{ response: [] }>(urlWithQuery).pipe(
           map(res =>
             res.response.map(item => ({
@@ -1451,7 +1470,16 @@ export interface SearchItem {
 
 interface SearchQuery {
   term: string;
-  multiSearch: { url: string; id: string; label: string; }
+  multiSearch: {
+    url: string;
+    id: string;
+    label: string;
+    searchTypes?: {
+      name: string;
+      label: string;
+      value: string;
+    }[];
+  };
 }
 
 export enum GridTheme {

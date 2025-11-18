@@ -25,6 +25,11 @@ export class GridProperty{
       url:string;
       id: string;
       label:string;
+      searchTypes?: {
+        name: string;
+        label: string;
+        value: string;
+      }[]
     }
     callback?: (columnName: string, filterType: string, value: (string | number | string[])) => void
   }[] | undefined;
@@ -77,7 +82,8 @@ export class GridProperty{
           selectSingleOption: f.multiSearchOptions?.selectSingleOption ?? false,
           url: f.multiSearchOptions?.url ?? '',
           id: f.multiSearchOptions?.id ?? '',
-          label: f.multiSearchOptions?.label ?? ''
+          label: f.multiSearchOptions?.label ?? '',
+          searchTypes: f.multiSearchOptions?.searchTypes ?? []
         },
         rangeOptions: { min: rangeMin, max: rangeMax }
       };
@@ -96,7 +102,8 @@ export class GridProperty{
           selectSingleOption: f.multiSearchOptions?.selectSingleOption ?? false,
           url: f.multiSearchOptions?.url ?? '',
           id: f.multiSearchOptions?.id ?? '',
-          label: f.multiSearchOptions?.label ?? ''
+          label: f.multiSearchOptions?.label ?? '',
+          searchTypes: f.multiSearchOptions?.searchTypes ?? []
         },
         dateOptions: { range: rangeValue }
       };
@@ -140,6 +147,11 @@ export interface GridPropertiesDTO{
       url:string;
       id: string;
       label:string;
+      searchTypes?: {
+        name: string,
+        label: string;
+        value: string;
+      }[]
     }
   }[];
   filterValues?: { label: string; value: string, selected?:false }[][];

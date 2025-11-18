@@ -13,6 +13,12 @@
       border: token.$border-1 solid token.$neutral-200 !important;
     }
 
+    .mat-mdc-form-field-infix{
+      .mat-mdc-input-element{
+        padding: token.$space-0 !important;
+      }
+    }
+
     .mdc-icon-button{
       width: 24px;
       height: 24px;

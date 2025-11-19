@@ -693,7 +693,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (filterType === 'multi-search') {
-      const current = this.multiSearchControl.value ?? [];
+      const current = Array.isArray(this.multiSearchControl.value)
+        ? this.multiSearchControl.value
+        : [];
+
       const next = current.filter(v => String(v) !== String(optionValue));
 
       this.multiSearchControl.setValue(next, { emitEvent: false });

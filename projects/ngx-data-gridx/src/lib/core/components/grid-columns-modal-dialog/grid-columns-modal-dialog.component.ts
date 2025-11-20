@@ -131,6 +131,15 @@ export class GridColumnsModalDialogComponent implements OnInit{
       targetSignal.set(target);
       otherSignal.set(source);
     }
+
+    if (targetSignal === this.active || otherSignal === this.active) {
+      const all = this.active();
+      const normal = [
+        ...all.filter(c => c.type !== GridPropertyType.Actions),
+        ...all.filter(c => c.type === GridPropertyType.Actions)
+      ];
+      this.active.set(normal);
+    }
   }
 
   onSaveSettings(){
@@ -169,6 +178,11 @@ export class GridColumnsModalDialogComponent implements OnInit{
     this.inactive.set([]);
     setTimeout(() => this.massMove.set(false), 240);
 
+    this.active.set([
+      ...this.active().filter(c => c.type !== GridPropertyType.Actions),
+      ...this.active().filter(c => c.type === GridPropertyType.Actions)
+    ]);
+
     return this;
   }
 
@@ -187,9 +201,14 @@ export class GridColumnsModalDialogComponent implements OnInit{
     this.inactive.set(mergedInactive);
 
     setTimeout(() => this.massMove.set(false), 240);
+
+    this.active.set([
+      ...this.active().filter(c => c.type !== GridPropertyType.Actions),
+      ...this.active().filter(c => c.type === GridPropertyType.Actions)
+    ]);
+
     return this;
   }
-
 
   protected readonly GridPropertyType = GridPropertyType;
 }

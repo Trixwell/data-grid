@@ -1,35 +1,50 @@
-@use './../../../styles/tokens' as tokens;
+@use './../../../styles/themes/broad/tokens' as broad;
+@use './../../../styles/themes/flat/tokens'  as flat;
 
-.settings{
+@mixin settings-theme($gap, $icon-color, $text-color, $font, $mt-mobile) {
   display: flex;
 
   .grid__footer__settings_element{
     display: flex;
     align-items: center;
-    gap: tokens.$space-1;
+    gap: $gap;
     background: transparent;
     border: none;
     cursor: pointer;
-    transition: opacity 0.2s ease-in-out;
+    transition: opacity .2s ease-in-out;
 
-    ::ng-deep mat-icon{
-      color: tokens.$neutral-500;
-    }
+    ::ng-deep mat-icon { color: $icon-color; }
 
-    span{
-      color: tokens.$neutral-950;
-      font: tokens.$font-caption-s;
+    span {
+      color: $text-color;
+      font: $font;
     }
   }
 
-  .grid__footer__settings_element:hover{
-    opacity: 0.7;
+  .grid__footer__settings_element:hover { opacity: .7; }
+
+  @media (max-width: 700px) {
+    justify-content: flex-start;
+    margin-top: $mt-mobile;
   }
 }
 
-@media screen and (max-width: 700px) {
-  .settings{
-    justify-content: flex-start;
-    margin-top: tokens.$space-4;
-  }
+.settings-broad {
+  @include settings-theme(
+      broad.$space-1,
+      broad.$neutral-500,
+      broad.$neutral-950,
+      broad.$font-caption-s,
+      broad.$space-4
+  );
+}
+
+.settings-flat {
+  @include settings-theme(
+      flat.$space-4,
+      broad.$neutral-500,
+      broad.$neutral-950,
+      flat.$font-caption-m,
+      flat.$space-4
+  );
 }

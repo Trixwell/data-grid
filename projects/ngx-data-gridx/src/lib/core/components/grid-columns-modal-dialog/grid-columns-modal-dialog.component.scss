@@ -15,7 +15,7 @@
     gap: tokens.$space-2;
 
     mat-icon{
-      color: tokens.$primary-300;
+      color: tokens.$neutral-500;
     }
 
     h2{
@@ -29,6 +29,10 @@
     cursor: pointer;
     color: tokens.$neutral-800;
     border: none;
+
+    ::ng-deep .mdc-icon-button__ripple{
+      display: none !important;
+    }
   }
 
   &__body{
@@ -96,6 +100,7 @@
             span{
               color: tokens.$neutral-900;
               font: tokens.$font-body-s;
+              user-select: none;
             }
           }
         }

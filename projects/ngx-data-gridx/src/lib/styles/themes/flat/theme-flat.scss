@@ -81,6 +81,14 @@
     }
   }
 
+  .grid__linear-loader{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    top: 52px;
+  }
+
   .grid__td {
     border-bottom: 1px solid token.$violet-100;
     background: transparent;
@@ -210,7 +218,7 @@
   }
 
   .grid__footer{
-    margin-top: token.$space-16;
+    margin-top: token.$space-12;
   }
 
   ::ng-deep{

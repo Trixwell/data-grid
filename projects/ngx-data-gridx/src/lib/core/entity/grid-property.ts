@@ -1,5 +1,6 @@
 import {SubGridSettings} from './sub-grid-settings';
 import {Observable, Subscription} from 'rxjs';
+import {Type} from '@angular/core';
 
 export class GridProperty{
   name: string;
@@ -11,14 +12,24 @@ export class GridProperty{
   columnIndex?: number;
   filter?: {
     label: string;
-    type: "multi-search" | "text" | "checkbox" | "select" | "multi-select" | "date" | "input";
+    type: "multi-search" | "text" | "checkbox" | "select" | "multi-select" | "date" | "input" | "range";
     dateOptions?:{
       range: boolean;
-    }
+    },
+    rangeOptions?:{
+      min: number;
+      max: number
+    },
     multiSearchOptions?:{
+      selectSingleOption?: boolean;
       url:string;
       id: string;
       label:string;
+      searchTypes?: {
+        name: string;
+        label: string;
+        value: string;
+      }[]
     }
     callback?: (columnName: string, filterType: string, value: (string | number | string[])) => void
   }[] | undefined;
@@ -32,6 +43,7 @@ export class GridProperty{
   subGridSettings: SubGridSettings | null  = null;
   callback?: (row: object | null | undefined) => string | undefined;
   columnSortIndex?: string;
+  component?: Type<any> | null;
   constructor(params: GridPropertiesDTO) {
     this.name = params.name;
     this.displayName = params.displayName;
@@ -51,8 +63,31 @@ export class GridProperty{
     this.columnSortIndex = params.columnSortIndex || '';
     this.visible = params.visible || true;
     this.columnIndex = params.columnIndex;
+    this.component = params.component || null;
 
     this.setDateOptionsByDefault(params);
+    this.setRangeOptions(params);
+  }
+
+  setRangeOptions(params: GridPropertiesDTO) {
+    this.filter = (params.filter || []).map(f => {
+      const rangeMax = f.rangeOptions?.max ?? 0;
+      const rangeMin = f.rangeOptions?.min ?? 0;
+
+      return {
+        label: f.label,
+        type: f.type,
+        callback: f.callback,
+        multiSearchOptions: {
+          selectSingleOption: f.multiSearchOptions?.selectSingleOption ?? false,
+          url: f.multiSearchOptions?.url ?? '',
+          id: f.multiSearchOptions?.id ?? '',
+          label: f.multiSearchOptions?.label ?? '',
+          searchTypes: f.multiSearchOptions?.searchTypes ?? []
+        },
+        rangeOptions: { min: rangeMin, max: rangeMax }
+      };
+    });
   }
 
   setDateOptionsByDefault(params: GridPropertiesDTO){
@@ -63,7 +98,13 @@ export class GridProperty{
         label: f.label,
         type: f.type,
         callback: f.callback,
-        multiSearchOptions: f.multiSearchOptions,
+        multiSearchOptions: {
+          selectSingleOption: f.multiSearchOptions?.selectSingleOption ?? false,
+          url: f.multiSearchOptions?.url ?? '',
+          id: f.multiSearchOptions?.id ?? '',
+          label: f.multiSearchOptions?.label ?? '',
+          searchTypes: f.multiSearchOptions?.searchTypes ?? []
+        },
         dateOptions: { range: rangeValue }
       };
     });
@@ -89,17 +130,28 @@ export interface GridPropertiesDTO{
   search?: boolean;
   width?: string;
   visible?: boolean;
+  component?: Type<any>;
   filter?: {
     label: string;
-    type: "multi-search" | "text" | "checkbox" | "select" | "multi-select" | "date" | "input";
+    type: "multi-search" | "text" | "checkbox" | "select" | "multi-select" | "date" | "input" | "range";
     callback?: (columnName: string, filterType: string, value: string | number | string[]) => void;
     dateOptions?:{
       range: boolean;
     },
+    rangeOptions?:{
+      min: number;
+      max: number
+    }
     multiSearchOptions?:{
+      selectSingleOption?: boolean,
       url:string;
       id: string;
       label:string;
+      searchTypes?: {
+        name: string,
+        label: string;
+        value: string;
+      }[]
     }
   }[];
   filterValues?: { label: string; value: string, selected?:false }[][];

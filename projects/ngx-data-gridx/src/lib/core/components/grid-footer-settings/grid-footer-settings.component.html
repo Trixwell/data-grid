@@ -1,21 +1,25 @@
-<div class="settings">
-  <button type="button" (click)="showColumnSettingsModal()" class="grid__footer__settings_element">
-    <mat-icon fontSet="material-symbols-outlined">
-      settings
-    </mat-icon>
-    <span>
-      Налаштування колонок
-    </span>
-  </button>
+<div [class]="'settings-' + theme()">
+  @if(showColumnSettings()){
+    <button type="button" (click)="showColumnSettingsModal()" class="grid__footer__settings_element">
+      <mat-icon fontSet="material-symbols-outlined">
+        settings
+      </mat-icon>
+      <span>
+        Налаштування колонок
+      </span>
+    </button>
+  }
 
-  <button type="button"
-          (click)="print()"
-          class="grid__footer__settings_element" >
-    <mat-icon fontSet="material-symbols-outlined">
-      print
-    </mat-icon>
-    <span>
-      Друк
-    </span>
-  </button>
+  @if(showPrint()){
+    <button type="button"
+            (click)="print()"
+            class="grid__footer__settings_element" >
+      <mat-icon fontSet="material-symbols-outlined">
+        print
+      </mat-icon>
+      <span>
+        Друк
+      </span>
+    </button>
+  }
 </div>

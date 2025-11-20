@@ -19,12 +19,17 @@
   border-radius: token.$scrollbar-track-radius;
 }
 
-
-
 @mixin grid-theme-common {
   .grid__table {
     background: transparent;
-    width: max-content;
+  }
+
+  ::ng-deep {
+    .mat-mdc-icon-button img, .mat-mdc-icon-button svg {
+      width: 20px;
+      height: 20px;
+      font-size: 20px;
+    }
   }
 
   .grid__container {
@@ -88,11 +93,13 @@
       position: absolute;
       top: 40px;
       left: 0;
-      background: white;
+      background: #F8F9FA;
       padding: token.$space-4;
       border-radius: token.$radius-medium;
       box-shadow: 0 2px 6px token.$shadow-medium;
       z-index: 99;
+      max-height: 350px;
+      overflow: scroll;
     }
 
     mat-form-field {
@@ -109,12 +116,22 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    .mat-mdc-icon-button img, .mat-mdc-icon-button svg{
+      width: 20px;
+      height: 20px;
+    }
+
+    .mat-mdc-icon-button .mat-mdc-button-touch-target{
+      width: 20px !important;
+      height: 20px !important;
+    }
   }
 
   .grid__row__loader {
     border: 0;
     height: 4px;
-    padding: token.$space-0;
+    padding: token.$space-0 !important;
     position: absolute;
   }
 
@@ -132,6 +149,19 @@
 
     span {
       pointer-events: auto;
+    }
+  }
+
+  ::ng-deep .mat-mdc-paginator-page-size{
+    align-items: center;
+  }
+
+  ::ng-deep{
+    mat-paginator.grid__paginator{
+      mat-form-field{
+        height: 100% !important;
+        min-height: 100% !important;
+      }
     }
   }
 
@@ -192,11 +222,25 @@
     background-color: token.$primary-50;
   }
 
-  .grid__container__wrapper { padding-top: 0; }
+  .grid__container__wrapper {
+    padding-top: 0;
+    position: relative;
+  }
 
   .grid__row__tr__loader{
     height: 4px !important;
     padding: token.$space-0;
+  }
+
+  .grid__linear-loader {
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .2s ease;
+    will-change: opacity;
+  }
+
+  .grid__linear-loader.is-visible {
+    opacity: 1;
   }
 
   .grid__row__loader .mat-mdc-progress-bar {
@@ -228,6 +272,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    max-height: 40px;
   }
 
   @media screen and (max-width: 700px) {
@@ -235,6 +280,14 @@
       overflow-x: scroll;
       scrollbar-width: none;
       -ms-overflow-style: none;
+    }
+
+    .grid__footer{
+      max-height: 100% !important;
+    }
+
+    .grid__table {
+      width: max-content;
     }
 
     .grid__filters{
@@ -291,13 +344,13 @@
 
 
 ::ng-deep{
+  .mdc-data-table__header-cell, .mdc-data-table__cell, .mdc-data-table__header-cell{
+    padding: token.$space-0 token.$space-3 !important;
+  }
+
   .mat-mdc-dialog-surface{
     border-radius: token.$radius-small !important;
     padding: token.$space-6;
-  }
-
-  .mdc-icon-button__ripple{
-    display: none !important;
   }
 }
 
@@ -309,6 +362,20 @@
   padding: 0;
 }
 
+::ng-deep{
+  .mdc-slider__track--active, .mdc-slider__track--inactive{
+    top: 5px !important;
+  }
+
+  mat-slider-visual-thumb{
+    width: 50px !important;
+    height: 57px !important;
+  }
+}
+
+mat-slider{
+  width: 90%;
+}
 
 @media print {
   body * {

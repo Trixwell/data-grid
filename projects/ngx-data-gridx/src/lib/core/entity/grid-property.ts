@@ -10,29 +10,7 @@ export class GridProperty{
   width?: string;
   visible?: boolean;
   columnIndex?: number;
-  filter?: {
-    label: string;
-    type: "multi-search" | "text" | "checkbox" | "select" | "multi-select" | "date" | "input" | "range";
-    dateOptions?:{
-      range: boolean;
-    },
-    rangeOptions?:{
-      min: number;
-      max: number
-    },
-    multiSearchOptions?:{
-      selectSingleOption?: boolean;
-      url:string;
-      id: string;
-      label:string;
-      searchTypes?: {
-        name: string;
-        label: string;
-        value: string;
-      }[]
-    }
-    callback?: (columnName: string, filterType: string, value: (string | number | string[])) => void
-  }[] | undefined;
+  filter?: GridFilterDTO[] | undefined;
   filterValues?: { label: string; value: string; selected?:false }[][];
   sort?: boolean;
   classes?: string;
@@ -131,29 +109,7 @@ export interface GridPropertiesDTO{
   width?: string;
   visible?: boolean;
   component?: Type<any>;
-  filter?: {
-    label: string;
-    type: "multi-search" | "text" | "checkbox" | "select" | "multi-select" | "date" | "input" | "range";
-    callback?: (columnName: string, filterType: string, value: string | number | string[]) => void;
-    dateOptions?:{
-      range: boolean;
-    },
-    rangeOptions?:{
-      min: number;
-      max: number
-    }
-    multiSearchOptions?:{
-      selectSingleOption?: boolean,
-      url:string;
-      id: string;
-      label:string;
-      searchTypes?: {
-        name: string,
-        label: string;
-        value: string;
-      }[]
-    }
-  }[];
+  filter?: GridFilterDTO[] | undefined;
   filterValues?: { label: string; value: string, selected?:false }[][];
   sort?: boolean;
   classes?: string;
@@ -166,4 +122,29 @@ export interface GridPropertiesDTO{
   subGridSettings?: SubGridSettings | null;
   columnSortIndex?: string;
   columnIndex?: number;
+}
+
+
+export interface GridFilterDTO {
+  label: string;
+  type: "multi-search" | "text" | "checkbox" | "select" | "multi-select" | "date" | "input" | "range";
+  callback?: (columnName: string, filterType: string, value: string | number | string[]) => void;
+  dateOptions?:{
+    range: boolean;
+  },
+  rangeOptions?:{
+    min: number;
+    max: number
+  }
+  multiSearchOptions?:{
+    selectSingleOption?: boolean,
+    url:string;
+    id: string;
+    label:string;
+    searchTypes?: {
+      name: string,
+      label: string;
+      value: string;
+    }[]
+  }
 }

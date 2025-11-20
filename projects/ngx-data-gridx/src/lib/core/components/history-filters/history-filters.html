@@ -9,8 +9,8 @@
   </div>
 
   <div class="clear-filters">
-    <app-invoke-btn (click)="clearAllFilters()" iconName="delete" [outlined]="true">
-      Очистити фільтри
-    </app-invoke-btn>
+    <button mat-icon-button (click)="clearAllFilters()">
+      <mat-icon fontSet="material-symbols-outlined">delete</mat-icon>
+    </button>
   </div>
 </div>

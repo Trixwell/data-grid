@@ -6,12 +6,13 @@ import {Subject} from 'rxjs';
 import {FormGroup} from '@angular/forms';
 import {UtilsService} from '../../services/utils.service';
 import {MatIcon} from '@angular/material/icon';
+import {MatIconButton} from '@angular/material/button';
 
 @Component({
   selector: 'history-filters',
   imports: [
-    InvokeBtnComponent,
-    MatIcon
+    MatIcon,
+    MatIconButton
   ],
   templateUrl: './history-filters.html',
   styleUrl: './history-filters.scss',

@@ -1,0 +1,59 @@
+@if(filter()!.multiSearchOptions?.searchTypes?.length){
+  <div class="multi-search-type-selector" (click)="$event.stopPropagation()">
+    <mat-radio-group
+      [(ngModel)]="currentSearchType"
+      (change)="onSearchTermChange(filter()!.multiSearchOptions)"
+      [ngModelOptions]="{standalone: true}"
+    >
+      @for(type of filter()!.multiSearchOptions?.searchTypes ?? []; track type.value){
+        <mat-radio-button
+          [value]="type.value"
+          class="multi-search-type-radio"
+        >
+          {{ type.label }}
+        </mat-radio-button>
+      }
+    </mat-radio-group>
+  </div>
+}
+
+<mat-form-field (click)="$event.stopPropagation()" appearance="fill">
+  <mat-select
+    (openedChange)="onSelectOpened($event)"
+    [formControl]="multiSearchControl"
+    [multiple]="!filter()!.multiSearchOptions?.selectSingleOption"
+    (selectionChange)="
+    onFilterChange()?.(
+      column()!.name,
+      filter()!.type,
+      getSelectedLabelsSearch($event.value),
+      $event.value,
+      filter()!.callback
+    )">
+    <mat-option class="no-checkbox">
+      <div>
+        <input
+          #searchField
+          matInput
+          [(ngModel)]="searchTerm"
+          (input)="onSearchTermChange(filter()!?.multiSearchOptions)"
+          (ngModelChange)="onSearchTermChange(filter()?.multiSearchOptions)"
+          [ngModelOptions]="{standalone: true}"
+          (click)="$event.stopPropagation()"
+        >
+      </div>
+    </mat-option>
+
+    @if(!filter()!?.multiSearchOptions?.selectSingleOption){
+      <mat-option (onSelectionChange)="toggleAllItems($event, column()!.name)">
+        Вибрати все
+      </mat-option>
+    }
+
+    @for(data of searchData; track $index){
+      <mat-option [value]="data.id">
+        {{ data.label }}
+      </mat-option>
+    }
+  </mat-select>
+</mat-form-field>

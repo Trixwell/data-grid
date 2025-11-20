@@ -19,22 +19,22 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
 import {MatMenuModule} from '@angular/material/menu';
-import {finalize, interval, isObservable, map, Observable, of, Subject, Subscription, takeUntil} from 'rxjs';
+import {finalize, interval, isObservable, Observable, Subject, Subscription, takeUntil} from 'rxjs';
 import {debounceTime, distinctUntilChanged, switchMap} from 'rxjs/operators';
-import {MatOptionSelectionChange, provideNativeDateAdapter} from '@angular/material/core';
+import {provideNativeDateAdapter} from '@angular/material/core';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {SelectionModel} from '@angular/cdk/collections';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {AudioPlayerComponent} from '../core/components/audio-player/audio-player.component';
 import {SquarePaginatorDirective} from '../directives/square-paginator.directive';
-import {InvokeBtnComponent} from '../core/components/invoke-btn/invoke-btn.component';
 import {GridFooterSettingsComponent} from '../core/components/grid-footer-settings/grid-footer-settings.component';
 import {HistoryFilters} from '../core/components/history-filters/history-filters';
 import {UtilsService} from '../core/services/utils.service';
 import {GridCellHost} from '../core/components/grid-cell-host/grid-cell-host';
 import {MatSlider, MatSliderRangeThumb} from '@angular/material/slider';
-import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
+import {GridColumnSortService} from '../core/services/grid-column-sort.service';
+import {MultiSearch} from '../core/components/multi-search/multi-search';
 
 @Component({
   selector: 'ngx-data-gridx',
@@ -57,14 +57,12 @@ import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
     MatProgressBarModule,
     AudioPlayerComponent,
     SquarePaginatorDirective,
-    InvokeBtnComponent,
     GridFooterSettingsComponent,
     GridCellHost,
     MatSliderRangeThumb,
     MatSlider,
-    MatRadioGroup,
-    MatRadioButton,
     HistoryFilters,
+    MultiSearch,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './ngx-data-gridx.component.html',
@@ -102,7 +100,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   showPrint = input<boolean>(true);
   showColumnSettings = input<boolean>(true);
   print = input<(() => void) | null>(null);
-  currentSearchType: string | null = null;
 
   /** detail accordion (dblclick) */
   detailExpandedElement: any | null = null;
@@ -113,7 +110,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
   private static loadedUrls = new Set<string>();
 
-  @ViewChild('searchField') searchField!: ElementRef<HTMLInputElement>;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sortTable!: MatSort;
   @ViewChild('audioPlayer') audioPlayerRef!: ElementRef<HTMLAudioElement>;
@@ -137,10 +133,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   allowMultiSelect = true;
   selection: SelectionModel<object> = new SelectionModel<object>(this.allowMultiSelect, this.initialSelection as object[]);
 
-  searchTerm = '';
-  multiSearchControl = new FormControl<number[]>([]);
-  private searchTermSubject = new Subject<SearchQuery>();
-  private destroySearch$ = new Subject<void>();
   protected mappingsColumns = new Map<string, GridProperty>();
   protected baseColumns: GridProperty[] = [];
   private rangeValues: Record<string, { min: number; max: number }> = {};
@@ -148,7 +140,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   constructor(private http: HttpClient,
               private cdr: ChangeDetectorRef,
               private elementRef: ElementRef,
-              protected utilsService: UtilsService
+              protected utilsService: UtilsService,
+              protected gridColumnSortService: GridColumnSortService
   ) {
     effect(() => {
       const data = this.data();
@@ -162,7 +155,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
       let items: GridProperty[] | undefined = undefined;
       try {
-        const raw = localStorage.getItem(this.storageKey);
+        const raw = localStorage.getItem(this.gridColumnSortService.storageKey(
+          this.grid_name(),
+          this.data()
+        ));
         if (raw) {
           const parsed = JSON.parse(raw);
           items = parsed?.columns as GridProperty[] | undefined;
@@ -170,7 +166,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       } catch {
       }
 
-      this.reorderColumnsData(items ?? data);
+      const sortedColumns = this.gridColumnSortService.reorderColumnsData(items ?? data, this.baseColumns);
+      this.displayedColumns = this.multiselect() ? ['select', ...sortedColumns] : sortedColumns;
     });
   }
 
@@ -183,7 +180,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
   private previousFiltersState = '';
-  searchData: SearchItem[] = [];
   selectedItems: number[] = [];
 
   ngOnInit() {
@@ -198,7 +194,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     this.rows.sort = this.sortTable;
     this.createDateFilter();
     this.restoreFilters();
-    this.initCustomFilterSearch();
     this.startAutoRefresh();
   }
 
@@ -262,27 +257,12 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     this.loading = false;
   }
 
-  get storageKey(): string {
-    const name = this.grid_name();
-    if (name) return `grid-state-${name}`;
-
-    const cols = this.data();
-    if (!cols || cols.length === 0) return 'grid-state-auto';
-
-    const names = [...new Set(cols
-      .map(c => c?.name ?? '')
-      .filter(Boolean))]
-      .sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}));
-
-    return names.length
-      ? `grid-state-auto-${names.join('-')}`
-      : 'grid-state-auto';
-  }
-
-
   private loadFilters(): void {
     if (!this.showHistoryFilters) return;
-    const raw = localStorage.getItem(this.storageKey);
+    const raw = localStorage.getItem(this.gridColumnSortService.storageKey(
+      this.grid_name(),
+      this.data()
+    ));
     if (!raw) return;
 
     try {
@@ -367,7 +347,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   getRangeMax(col: string, opts?: {min:number; max:number}): number {
     return this.rangeValues[col]?.max ?? Number(opts?.max ?? 100);
   }
-
 
   private setDetailInputs(inst: any, row: any) {
     if (typeof inst.row === 'function' && typeof inst.row.set === 'function') {
@@ -496,137 +475,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  onSearchTermChange(multiSearch: { url: string; id: string; label: string; searchTypes?: {
-      name: string;
-      label: string;
-      value: string;
-    }[]; } | undefined): void {
-    if (!multiSearch) return;
-
-    if (multiSearch) {
-      this.searchTermSubject.next({term: this.searchTerm, multiSearch: multiSearch});
-    }
-  }
-
-  private initCustomFilterSearch(): void {
-    this.searchTermSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged((prev, curr) =>
-        prev.term === curr.term && prev.multiSearch.url === curr.multiSearch.url
-      ),
-      switchMap(query => {
-        if (!query.term.trim()) {
-          return of<SearchItem[]>([]);
-        }
-        let urlWithQuery = `${query.multiSearch.url}?q=${encodeURIComponent(query.term)}`;
-
-        if (this.currentSearchType && query.multiSearch.searchTypes?.length) {
-          const selectedType = query.multiSearch.searchTypes.find(
-            t => t.value === this.currentSearchType
-          );
-
-          if (selectedType) {
-            urlWithQuery += `&${selectedType.name}=${encodeURIComponent(selectedType.value)}`;
-          }
-        }
-
-        return this.http.get<{ response: [] }>(urlWithQuery).pipe(
-          map(res =>
-            res.response.map(item => ({
-              id: item[query.multiSearch.id] as number,
-              label: item[query.multiSearch.label] as string,
-              ...(item as Record<string, unknown>)
-            }))
-          )
-        );
-      }),
-      takeUntil(this.destroySearch$)
-    ).subscribe({
-      next: (res: SearchItem[]) => {
-        const currentValue = this.multiSearchControl.value;
-
-        if (!Array.isArray(currentValue)) {
-          this.multiSearchControl.setValue(
-            currentValue != null ? [currentValue] : []
-          );
-        }
-
-        const selectedIds = this.multiSearchControl.value ?? [];
-        const selectedItems = this.searchData.filter(item =>
-          selectedIds.includes(item.id)
-        );
-
-        const isSingleSelect = this.currentGridColumn?.filter?.some(
-          f => f.type === 'multi-search' && f.multiSearchOptions?.selectSingleOption
-        );
-
-        const map = new Map<number, SearchItem>();
-        for (const item of [...selectedItems, ...res]) {
-          map.set(item.id, item);
-        }
-
-        this.searchData = Array.from(map.values());
-
-        if (isSingleSelect && Array.isArray(selectedIds) && selectedIds.length > 1) {
-          const lastSelected = selectedIds[selectedIds.length - 1];
-          this.multiSearchControl.setValue([lastSelected])
-        }
-
-        this.cdr.markForCheck();
-      },
-      error: err => console.error(err)
-    });
-  }
-
-  toggleAllItems(event: MatOptionSelectionChange, columnName: string): void {
-    if (event.source.selected) {
-
-      const allIds = this.searchData
-        .map(item => item.id)
-        .filter(id => id !== null && id !== undefined);
-
-      const labels = this.searchData
-        .map(item => item.label)
-        .filter(label => label != null);
-
-      this.multiSearchControl.setValue(allIds, { emitEvent: false });
-
-      this.onFilterChange(
-        columnName,
-        'multi-search',
-        labels,
-        allIds.map(String)
-      );
-
-    } else {
-
-      this.multiSearchControl.setValue([], { emitEvent: false });
-
-      if (this.appliedFilters[columnName]) {
-        delete this.appliedFilters[columnName]['multi-search'];
-
-        if (Object.keys(this.appliedFilters[columnName]).length === 0) {
-          delete this.appliedFilters[columnName];
-        }
-      }
-
-      this.saveFilters();
-      this.loadData(1, this.limit());
-    }
-  }
-
-
-  getSelectedCustomSearchItems(): SearchItem[] {
-    const selected: number[] = this.multiSearchControl.value || [];
-    return this.searchData.filter(item => selected.includes(item.id));
-  }
-
-  onSelectOpened(opened: boolean): void {
-    if (opened) {
-      this.searchField.nativeElement.focus();
-    }
-  }
-
   initSearch() {
     this.searchSubject.pipe(
       debounceTime(300),
@@ -701,17 +549,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       .map(item => item.label);
   }
 
-
-  getSelectedLabelsSearch(selected: number[]): string[] {
-    if(!Array.isArray(selected)){
-      selected = [selected];
-    }
-
-    return this.searchData
-      .filter(item => selected?.includes(item.id))
-      .map(item => item.label);
-  }
-
   onSearch(columnName: string, event: Event) {
     const value = (event.target as HTMLInputElement).value.trim();
 
@@ -723,7 +560,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
     this.utilsService.saveFilters(
       this.showHistoryFilters(),
-      this.storageKey,
+      this.gridColumnSortService.storageKey(
+        this.grid_name(),
+        this.data()
+      ),
       this.appliedFilters,
       this.searchValues
     );
@@ -736,7 +576,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
     this.setInputFocus(event);
   }
-
 
   private setInputFocus(event: Event) {
     setTimeout(() => {
@@ -793,35 +632,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private reorderColumnsData(input: GridProperty[] | undefined) {
-    const base = this.baseColumns.length ? this.baseColumns : (input ?? []);
-    const byName = new Map<string, GridProperty>();
-    (input ?? base).forEach(c => byName.set(c.name, c));
-    base.forEach(c => { if (!byName.has(c.name)) byName.set(c.name, c); });
-
-    const merged = Array.from(byName.values());
-
-    const withIdx = merged.map((c, i) => ({ c, i }));
-    withIdx.sort((a, b) => {
-      const ax = a.c.type === GridPropertyType.Actions ? Number.MAX_SAFE_INTEGER : (a.c.columnIndex ?? a.i);
-      const bx = b.c.type === GridPropertyType.Actions ? Number.MAX_SAFE_INTEGER : (b.c.columnIndex ?? b.i);
-      return ax - bx;
-    });
-
-    const sorted = withIdx.map(x => x.c);
-
-    const regular = sorted.filter(c => c.visible !== false && c.type !== GridPropertyType.Hidden && c.type !== GridPropertyType.Actions);
-    const actions = sorted.filter(c => c.visible !== false && c.type === GridPropertyType.Actions);
-
-    const names = [
-      ...regular.map(c => c.name),
-      ...actions.map(c => c.name),
-    ];
-
-    this.displayedColumns = this.multiselect() ? ['select', ...names] : names;
-  }
-
-
   resolveColumn(name: string): GridProperty | null {
     return this.mappingsColumns.get(name) ?? null;
   }
@@ -853,7 +663,6 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       });
     });
   }
-
 
   private setFiltersValues(params: URLSearchParams, page = 1, pageSize = this.limit()) {
     const sidx = this.sidx();
@@ -1063,7 +872,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     if(filterType !== 'multi-search') {
       this.utilsService.saveFilters(
         this.showHistoryFilters(),
-        this.storageKey,
+        this.gridColumnSortService.storageKey(
+          this.grid_name(),
+          this.data()
+        ),
         this.appliedFilters,
         this.searchValues
       );
@@ -1091,7 +903,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
       this.utilsService.saveFilters(
         this.showHistoryFilters(),
-        this.storageKey,
+        this.gridColumnSortService.storageKey(
+          this.grid_name(),
+          this.data()
+        ),
         this.appliedFilters,
         this.searchValues
       );
@@ -1101,7 +916,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
         delete this.appliedFilters[columnName]['date'];
         this.utilsService.saveFilters(
           this.showHistoryFilters(),
-          this.storageKey,
+          this.gridColumnSortService.storageKey(
+            this.grid_name(),
+            this.data()
+          ),
           this.appliedFilters,
           this.searchValues
         );
@@ -1323,20 +1141,6 @@ export interface Action {
 export interface SearchItem {
   id: number;
   label: string;
-}
-
-interface SearchQuery {
-  term: string;
-  multiSearch: {
-    url: string;
-    id: string;
-    label: string;
-    searchTypes?: {
-      name: string;
-      label: string;
-      value: string;
-    }[];
-  };
 }
 
 export enum GridTheme {

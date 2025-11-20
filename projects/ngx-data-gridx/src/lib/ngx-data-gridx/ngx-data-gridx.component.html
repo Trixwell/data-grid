@@ -11,7 +11,7 @@
         <ng-content select=".action-buttons"></ng-content>
         @if(showHistoryFilters()){
           <div class="grid__options" [class.sub__grid_options]="isSubGrid()">
-            <history-filters [storageKey]="storageKey"
+            <history-filters [storageKey]="gridColumnSortService.storageKey(grid_name(), data())"
                              [loadData]="loadData.bind(this)"
                              [limit]="limit()"
                              [(appliedFilters)]="appliedFilters"
@@ -188,66 +188,19 @@
                         }
                         <!-- Multi-search -->
                         @if(filter.type === 'multi-search'){
-
-                          @if(filter.multiSearchOptions?.searchTypes?.length){
-                            <div class="multi-search-type-selector" (click)="$event.stopPropagation()">
-                              <mat-radio-group
-                                [(ngModel)]="currentSearchType"
-                                (change)="onSearchTermChange(filter.multiSearchOptions)"
-                                [ngModelOptions]="{standalone: true}"
-                              >
-                                @for(type of filter.multiSearchOptions?.searchTypes ?? []; track type.value){
-                                  <mat-radio-button
-                                    [value]="type.value"
-                                    class="multi-search-type-radio"
-                                  >
-                                    {{ type.label }}
-                                  </mat-radio-button>
-                                }
-                              </mat-radio-group>
-                            </div>
-                          }
-
-                          <mat-form-field (click)="$event.stopPropagation()" appearance="fill">
-                          <mat-select
-                                      (openedChange)="onSelectOpened($event)"
-                                      [formControl]="multiSearchControl"
-                                      [multiple]="!filter?.multiSearchOptions?.selectSingleOption"
-                                      (selectionChange)="
-                                                          onFilterChange(
-                                                            column.name,
-                                                            filter.type,
-                                                            getSelectedLabelsSearch($event.value),
-                                                            $event.value,
-                                                            filter.callback
-                                                          )">
-                            <mat-option class="no-checkbox" >
-                              <div>
-                                <input
-                                  #searchField
-                                  matInput
-                                  [(ngModel)]="searchTerm"
-                                  (input)="onSearchTermChange(filter?.multiSearchOptions)"
-                                  (ngModelChange)="onSearchTermChange(filter?.multiSearchOptions)"
-                                  [ngModelOptions]="{standalone: true}"
-                                  (click)="$event.stopPropagation()"
-                                >
-                              </div>
-                            </mat-option>
-
-                            @if(!filter?.multiSearchOptions?.selectSingleOption){
-                              <mat-option (onSelectionChange)="toggleAllItems($event, column.name)">
-                                Вибрати все
-                              </mat-option>
-                            }
-
-                            @for(data of searchData; track $index){
-                              <mat-option [value]="data.id">
-                                {{ data.label }}
-                              </mat-option>
-                            }
-                          </mat-select>
-                        </mat-form-field>
+                          <app-multi-search
+                            #multiSearch
+                            [data]="data()"
+                            [column]="column"
+                            [showHistoryFilters]="showHistoryFilters()"
+                            [filter]="filter"
+                            [limit]="limit()"
+                            [loadData]="loadData"
+                            [onFilterChange]="onFilterChange"
+                            [searchValues]="searchValues"
+                            [(appliedFilters)]="appliedFilters"
+                            [currentGridColumn]="currentGridColumn"
+                          />
                         }
                         <!-- Date Range -->
                         @if(filter.type==='date' && filter.dateOptions?.range){
@@ -496,7 +449,7 @@
                               [showPrint]="showPrint()"
                               [theme]="getCurrentTheme()"
                               [showColumnSettings]="showColumnSettings()"
-                              [storageKey]="storageKey"></grid-footer-settings>
+                              [storageKey]="gridColumnSortService.storageKey(grid_name(), data())" />
       </div>
 
       @if (!disablePagination() && !isSubGrid()) {

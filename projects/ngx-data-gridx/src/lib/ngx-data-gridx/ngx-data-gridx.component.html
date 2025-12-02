@@ -339,22 +339,41 @@
                           @for(action of resolveColumn(column.name)?.actions; track $index){
                           <ng-container>
                             @if((!action.customHtml && action && (!action.visible || action.visible(row)))){
-                            <button
-                              type="button"
-                              class="action-btn"
-                              mat-icon-button
-                              (click)="executeAction(action, row)"
-                              matTooltip="{{ action.tooltip }}">
-                                @if(!isPath(action.icon)){
-                                  <mat-icon class="material-icons-outlined">
-                                    {{ action.icon }}
-                                  </mat-icon>
-                                }
+                              @if(!action.routerLink){
+                                <button
+                                  type="button"
+                                  class="action-btn"
+                                  mat-icon-button
+                                  (click)="executeAction(action, row)"
+                                  matTooltip="{{ action.tooltip }}">
+                                    @if(!isPath(action.icon)){
+                                      <mat-icon class="material-icons-outlined">
+                                        {{ action.icon }}
+                                      </mat-icon>
+                                    }
 
-                              @if(isPath(action.icon)){
-                                <img [src]="action.icon" [alt]="action.tooltip" />
+                                  @if(isPath(action.icon)){
+                                    <img [src]="action.icon" [alt]="action.tooltip" />
+                                  }
+                                </button>
+                              } @else{
+                                <button
+                                  type="button"
+                                  class="action-btn"
+                                  mat-icon-button
+                                  [routerLink]="action?.routerLink ? action?.routerLink(row) : null"
+                                  matTooltip="{{ action.tooltip }}">
+                                  @if(!isPath(action.icon)){
+                                    <mat-icon class="material-icons-outlined">
+                                      {{ action.icon }}
+                                    </mat-icon>
+                                  }
+
+                                  @if(isPath(action.icon)){
+                                    <img [src]="action.icon" [alt]="action.tooltip" />
+                                  }
+                                </button>
                               }
-                            </button>
                             }
 
                             @if(action.customHtml && (!action.visible || action.visible(row))){

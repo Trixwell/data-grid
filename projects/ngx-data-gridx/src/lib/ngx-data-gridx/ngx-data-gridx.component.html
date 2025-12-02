@@ -504,7 +504,7 @@
                               [storageKey]="storageKey"></grid-footer-settings>
       </div>
 
-      @if (!disablePagination() && !isSubGrid()) {
+      @if (!disablePagination()) {
         @if (getCurrentTheme() === GridTheme.FLAT) {
           <mat-paginator
             appSquarePagination

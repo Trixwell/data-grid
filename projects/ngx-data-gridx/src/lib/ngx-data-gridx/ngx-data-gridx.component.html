@@ -357,8 +357,7 @@
                                   }
                                 </button>
                               } @else{
-                                <button
-                                  type="button"
+                                <a
                                   class="action-btn"
                                   mat-icon-button
                                   [routerLink]="action?.routerLink ? action?.routerLink(row) : null"
@@ -372,7 +371,7 @@
                                   @if(isPath(action.icon)){
                                     <img [src]="action.icon" [alt]="action.tooltip" />
                                   }
-                                </button>
+                                </a>
                               }
                             }
 

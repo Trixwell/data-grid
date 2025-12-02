@@ -32,6 +32,13 @@
     }
   }
 
+  ::ng-deep{
+    .mat-mdc-icon-button .mat-mdc-button-touch-target{
+      width: 20px;
+      height: 20px;
+    }
+  }
+
   .grid__container {
     background-color: transparent;
   }

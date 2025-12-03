@@ -150,6 +150,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     callback?: (columnName: string, filterType: string, value: string | number | string[]) => void;
     options: MultiSearchOptions | null;
   }> = {};
+  private pendingCheckboxColumns = new Set<string>();
 
   constructor(private http: HttpClient,
               private cdr: ChangeDetectorRef,
@@ -1169,7 +1170,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       value = value.filter(v => v !== undefined);
     }
 
-    if(filterType === 'multi-search' && multiSearchOptions?.selectSingleOption) {
+    if (
+      (filterType === 'multi-search' && multiSearchOptions?.selectSingleOption) ||
+      filterType === 'select'
+    ) {
       this.openFilterColumn = null;
     }
 
@@ -1332,7 +1336,28 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       labels.splice(idx, 1);
     }
 
-    this.onFilterChange(columnName, filterType, labels, values, callback);
+    if (!values.length) {
+      if (this.appliedFilters[columnName]) {
+        delete this.appliedFilters[columnName][filterType];
+        if (!Object.keys(this.appliedFilters[columnName]).length) {
+          delete this.appliedFilters[columnName];
+        }
+      }
+    } else {
+      if (!this.appliedFilters[columnName]) {
+        this.appliedFilters[columnName] = {};
+      }
+      this.appliedFilters[columnName][filterType] = {
+        value: values,
+        label: labels,
+      };
+    }
+
+    if (callback) {
+      callback(columnName, filterType, values);
+    }
+
+    this.pendingCheckboxColumns.add(columnName);
   }
 
   onSortChange(sortEvent: Sort) {
@@ -1430,6 +1455,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   @HostListener('document:click', ['$event'])
+  @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
 
@@ -1451,12 +1477,21 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    if (this.openFilterColumn) {
-      this.confirmMultiSearch(this.openFilterColumn);
+    if (!this.openFilterColumn) {
+      return;
+    }
+
+    const col = this.openFilterColumn;
+    const hasPendingMulti = !!this.pendingMultiSearch[col];
+    const hasPendingCheckbox = this.pendingCheckboxColumns.has(col);
+
+    if (hasPendingMulti || hasPendingCheckbox) {
+      this.confirmFilters(col);
     } else {
       this.openFilterColumn = null;
     }
   }
+
 
 
   ngOnDestroy(): void {
@@ -1476,25 +1511,38 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  confirmMultiSearch(columnName: string): void {
-    const pending = this.pendingMultiSearch[columnName];
-    if (!pending) {
+  confirmFilters(columnName: string): void {
+    const pendingMulti = this.pendingMultiSearch[columnName];
+    const hasPendingCheckbox = this.pendingCheckboxColumns.has(columnName);
+
+    if (!pendingMulti && !hasPendingCheckbox) {
       this.openFilterColumn = null;
       return;
     }
 
-    const value = pending.ids.map(String);
+    if (pendingMulti) {
+      const value = pendingMulti.ids.map(String);
 
-    this.onFilterChange(
-      columnName,
-      'multi-search',
-      pending.labels,
-      value,
-      pending.callback,
-      pending.options
-    );
+      this.onFilterChange(
+        columnName,
+        'multi-search',
+        pendingMulti.labels,
+        value,
+        pendingMulti.callback,
+        pendingMulti.options
+      );
 
-    delete this.pendingMultiSearch[columnName];
+      delete this.pendingMultiSearch[columnName];
+      this.saveFilters();
+    }
+
+    if (hasPendingCheckbox) {
+      this.pendingCheckboxColumns.delete(columnName);
+      this.showLoader();
+      this.saveFilters();
+      this.loadData(1, this.limit());
+    }
+
     this.openFilterColumn = null;
   }
 
@@ -1515,21 +1563,26 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   @HostListener('document:keydown.enter', ['$event'])
+  @HostListener('document:keydown.enter', ['$event'])
   onDocumentEnter(event: KeyboardEvent): void {
     if (!this.openFilterColumn) {
       return;
     }
 
-    const pending = this.pendingMultiSearch[this.openFilterColumn];
-    if (!pending) {
+    const col = this.openFilterColumn;
+    const hasPendingMulti = !!this.pendingMultiSearch[col];
+    const hasPendingCheckbox = this.pendingCheckboxColumns.has(col);
+
+    if (!hasPendingMulti && !hasPendingCheckbox) {
       return;
     }
 
     event.preventDefault();
     event.stopPropagation();
 
-    this.confirmMultiSearch(this.openFilterColumn);
+    this.confirmFilters(col);
   }
+
 
 
   protected readonly GridPropertyType = GridPropertyType;

@@ -35,7 +35,7 @@
 
     .mat-mdc-form-field-infix{
       input{
-        font: token.$font-body-s;
+        font: token.$font-body-s-400;
       }
     }
 
@@ -87,7 +87,7 @@
   }
 
   .grid__container .grid__name {
-    font: token.$font-h1;
+    font: token.$font-sizes-font-h1-500;
     color: token.$neutral-950;
     font-weight: 500;
   }
@@ -108,7 +108,7 @@
     color: token.$neutral-950;
     font-weight: token.$font-weight-h !important;
     line-height: 16px;
-    font: token.$font-body-s;
+    font: token.$font-body-s-500;
     border-bottom-color: transparent;
     overflow: visible;
     position: relative;
@@ -184,7 +184,7 @@
       align-items: center;
       gap: token.$space-1;
       color: token.$neutral-700;
-      font: token.$font-button-m-light;
+      font: token.$font-sizes-font-button-m;
 
       ::ng-deep mat-icon{
         color: token.$neutral-500;
@@ -202,7 +202,7 @@
       color: token.$primary-600;
       text-decoration: underline;
       cursor: pointer;
-      font: token.$font-table-header-m;
+      font: token.$font-data-m-600;
       font-weight: token.$font-weight-b;
     }
 
@@ -319,6 +319,6 @@
 
   ::ng-deep .mat-sort-header-content{
     color: token.$neutral-900;
-    font: token.$font-table-header-m1;
+    font: token.$font-data-m-600;
   }
 }

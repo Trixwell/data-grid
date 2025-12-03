@@ -105,6 +105,7 @@
                           matInput
                           (click)="$event.stopPropagation()"
                           (keydown.space)="$event.stopPropagation()"
+                          (keydown.enter)="openFilterColumn = null"
                           (input)="onSearch(column.name, $event)"
                           [(ngModel)]="searchValues[column.name]">
                       </mat-form-field>
@@ -214,45 +215,56 @@
                           }
 
                           <mat-form-field (click)="$event.stopPropagation()" appearance="fill">
-                          <mat-select
-                                      (openedChange)="onSelectOpened($event)"
-                                      [formControl]="multiSearchControl"
-                                      [multiple]="!filter?.multiSearchOptions?.selectSingleOption"
-                                      (selectionChange)="
-                                                          onFilterChange(
-                                                            column.name,
-                                                            filter.type,
-                                                            getSelectedLabelsSearch($event.value),
-                                                            $event.value,
-                                                            filter.callback
-                                                          )">
-                            <mat-option class="no-checkbox" >
-                              <div>
-                                <input
-                                  #searchField
-                                  matInput
-                                  [(ngModel)]="searchTerm"
-                                  (input)="onSearchTermChange(filter?.multiSearchOptions)"
-                                  (ngModelChange)="onSearchTermChange(filter?.multiSearchOptions)"
-                                  [ngModelOptions]="{standalone: true}"
-                                  (click)="$event.stopPropagation()"
-                                >
-                              </div>
-                            </mat-option>
-
-                            @if(!filter?.multiSearchOptions?.selectSingleOption){
-                              <mat-option (onSelectionChange)="toggleAllItems($event, column.name)">
-                                Вибрати все
+                            <mat-select
+                              (openedChange)="onSelectOpened($event)"
+                              [formControl]="multiSearchControl"
+                              [multiple]="!filter?.multiSearchOptions?.selectSingleOption"
+                              (selectionChange)="
+                                filter?.multiSearchOptions?.selectSingleOption
+                                  ? onFilterChange(
+                                      column.name,
+                                      filter.type,
+                                      getSelectedLabelsSearch($event.value),
+                                      $event.value,
+                                      filter.callback,
+                                      filter.multiSearchOptions
+                                    )
+                                  : onMultiSearchSelectionChange(
+                                      column.name,
+                                      $event.value,
+                                      filter
+                                    )
+                              ">
+                              <mat-option class="no-checkbox">
+                                <div>
+                                  <input
+                                    #searchField
+                                    matInput
+                                    [(ngModel)]="searchTerm"
+                                    (input)="onSearchTermChange(filter?.multiSearchOptions)"
+                                    (ngModelChange)="onSearchTermChange(filter?.multiSearchOptions)"
+                                    [ngModelOptions]="{standalone: true}"
+                                    (click)="$event.stopPropagation()"
+                                    (keydown.enter)="confirmMultiSearch(column.name)"
+                                  >
+                                </div>
                               </mat-option>
-                            }
 
-                            @for(data of searchData; track $index){
-                              <mat-option [value]="data.id">
-                                {{ data.label }}
-                              </mat-option>
-                            }
-                          </mat-select>
-                        </mat-form-field>
+                              @if(!filter?.multiSearchOptions?.selectSingleOption){
+                                <mat-option
+                                  (keydown.enter)="$event.preventDefault()"
+                                  (onSelectionChange)="toggleAllItems($event, column.name, filter)">
+                                  Вибрати все
+                                </mat-option>
+                              }
+
+                              @for(data of searchData; track $index){
+                                <mat-option [value]="data.id">
+                                  {{ data.label }}
+                                </mat-option>
+                              }
+                            </mat-select>
+                          </mat-form-field>
                         }
                         <!-- Date Range -->
                         @if(filter.type==='date' && filter.dateOptions?.range){

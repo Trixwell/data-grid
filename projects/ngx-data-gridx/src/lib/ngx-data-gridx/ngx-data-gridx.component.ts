@@ -4,7 +4,7 @@ import {
   model, OnDestroy, OnInit, QueryList, TemplateRef, Type,
   ViewChild, ViewChildren, ViewContainerRef
 } from '@angular/core';
-import {GridProperty, GridPropertyType} from '../core/entity/grid-property';
+import {GridProperty, GridPropertyType, MultiSearchOptions} from '../core/entity/grid-property';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {MatTableModule} from '@angular/material/table';
 import {CommonModule} from '@angular/common';
@@ -143,6 +143,13 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   protected mappingsColumns = new Map<string, GridProperty>();
   protected baseColumns: GridProperty[] = [];
   private rangeValues: Record<string, { min: number; max: number }> = {};
+
+  pendingMultiSearch: Record<string, {
+    ids: number[];
+    labels: string[];
+    callback?: (columnName: string, filterType: string, value: string | number | string[]) => void;
+    options: MultiSearchOptions | null;
+  }> = {};
 
   constructor(private http: HttpClient,
               private cdr: ChangeDetectorRef,
@@ -594,42 +601,25 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  toggleAllItems(event: MatOptionSelectionChange, columnName: string): void {
+  toggleAllItems(
+    event: MatOptionSelectionChange,
+    columnName: string,
+    filter: { callback?: (columnName: string, filterType: string, value: string | number | string[]) => void; multiSearchOptions?: MultiSearchOptions | null }
+  ): void {
     if (event.source.selected) {
-
       const allIds = this.searchData
         .map(item => item.id)
         .filter(id => id !== null && id !== undefined);
 
-      const labels = this.searchData
-        .map(item => item.label)
-        .filter(label => label != null);
-
       this.multiSearchControl.setValue(allIds, { emitEvent: false });
 
-      this.onFilterChange(
-        columnName,
-        'multi-search',
-        labels,
-        allIds.map(String)
-      );
-
+      this.onMultiSearchSelectionChange(columnName, allIds, filter);
     } else {
-
       this.multiSearchControl.setValue([], { emitEvent: false });
-
-      if (this.appliedFilters[columnName]) {
-        delete this.appliedFilters[columnName]['multi-search'];
-
-        if (Object.keys(this.appliedFilters[columnName]).length === 0) {
-          delete this.appliedFilters[columnName];
-        }
-      }
-
-      this.saveFilters();
-      this.loadData(1, this.limit());
+      delete this.pendingMultiSearch[columnName];
     }
   }
+
 
 
   getSelectedCustomSearchItems(): SearchItem[] {
@@ -1172,10 +1162,15 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     filterType: string,
     label: string | string[],
     value: string | number | string[],
-    callback?: (columnName: string, filterType: string, value: string | number | string[]) => void
+    callback?: (columnName: string, filterType: string, value: string | number | string[]) => void,
+    multiSearchOptions: MultiSearchOptions | null = null
   ) {
     if (Array.isArray(value)) {
       value = value.filter(v => v !== undefined);
+    }
+
+    if(filterType === 'multi-search' && multiSearchOptions?.selectSingleOption) {
+      this.openFilterColumn = null;
     }
 
     this.showLoader();
@@ -1231,16 +1226,29 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onDateRangeChange(columnName: string, dateGroup: FormGroup) {
-    const start = dateGroup.value.start ? this.formatDate(dateGroup.value.start) : null;
-    const end = dateGroup.value.end ? this.formatDate(dateGroup.value.end) : null;
-    const date = dateGroup.value.date ? this.formatDate(dateGroup.value.date) : null;
+    const raw = dateGroup.value;
 
-    if ((start && end) || date) {
+    const hasStart = !!raw.start;
+    const hasEnd   = !!raw.end;
+    const hasDate  = !!raw.date;
+
+    const isSingleDate = hasDate && !hasStart && !hasEnd;
+    const isRange      = (hasStart || hasEnd) && !hasDate;
+
+    let value: string | null = null;
+
+    if (isSingleDate) {
+      value = this.formatDate(raw.date);
+    } else if (isRange && hasStart && hasEnd) {
+      const start = this.formatDate(raw.start);
+      const end   = this.formatDate(raw.end);
+      value = `${start},${end}`;
+    }
+
+    if (value) {
       if (!this.appliedFilters[columnName]) {
         this.appliedFilters[columnName] = {};
       }
-
-      const value = date ? date : `${start},${end}`;
 
       this.appliedFilters[columnName]['date'] = {
         label: `Дата ${value}`,
@@ -1248,14 +1256,26 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       };
 
       this.saveFilters();
+
+      if (this.openFilterColumn === columnName) {
+        this.openFilterColumn = null;
+      }
+
       this.loadData(1, this.limit());
     } else {
       if (this.appliedFilters[columnName]) {
         delete this.appliedFilters[columnName]['date'];
+
+        if (!Object.keys(this.appliedFilters[columnName]).length) {
+          delete this.appliedFilters[columnName];
+        }
+
         this.saveFilters();
+        this.loadData(1, this.limit());
       }
     }
   }
+
 
   onInputFilterChange(columnName: string,
                       filterType: string,
@@ -1431,7 +1451,11 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.openFilterColumn = null;
+    if (this.openFilterColumn) {
+      this.confirmMultiSearch(this.openFilterColumn);
+    } else {
+      this.openFilterColumn = null;
+    }
   }
 
 
@@ -1450,6 +1474,61 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     if (this.autoRefreshSub) {
       this.autoRefreshSub.unsubscribe();
     }
+  }
+
+  confirmMultiSearch(columnName: string): void {
+    const pending = this.pendingMultiSearch[columnName];
+    if (!pending) {
+      this.openFilterColumn = null;
+      return;
+    }
+
+    const value = pending.ids.map(String);
+
+    this.onFilterChange(
+      columnName,
+      'multi-search',
+      pending.labels,
+      value,
+      pending.callback,
+      pending.options
+    );
+
+    delete this.pendingMultiSearch[columnName];
+    this.openFilterColumn = null;
+  }
+
+
+  onMultiSearchSelectionChange(
+    columnName: string,
+    selectedIds: number[],
+    filter: { callback?: (columnName: string, filterType: string, value: string | number | string[]) => void; multiSearchOptions?: MultiSearchOptions | null }
+  ): void {
+    const labels = this.getSelectedLabelsSearch(selectedIds);
+
+    this.pendingMultiSearch[columnName] = {
+      ids: selectedIds,
+      labels,
+      callback: filter.callback,
+      options: filter.multiSearchOptions ?? null
+    };
+  }
+
+  @HostListener('document:keydown.enter', ['$event'])
+  onDocumentEnter(event: KeyboardEvent): void {
+    if (!this.openFilterColumn) {
+      return;
+    }
+
+    const pending = this.pendingMultiSearch[this.openFilterColumn];
+    if (!pending) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.confirmMultiSearch(this.openFilterColumn);
   }
 
 

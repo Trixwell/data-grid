@@ -105,7 +105,7 @@
                           matInput
                           (click)="$event.stopPropagation()"
                           (keydown.space)="$event.stopPropagation()"
-                          (keydown.enter)="openFilterColumn = null"
+                          (keydown.enter)="applySearchAndClose(column.name)"
                           (input)="onSearch(column.name, $event)"
                           [(ngModel)]="searchValues[column.name]">
                       </mat-form-field>

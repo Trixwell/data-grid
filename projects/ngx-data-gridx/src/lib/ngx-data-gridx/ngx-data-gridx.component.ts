@@ -1563,24 +1563,46 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   @HostListener('document:keydown.enter', ['$event'])
-  @HostListener('document:keydown.enter', ['$event'])
   onDocumentEnter(event: KeyboardEvent): void {
-    if (!this.openFilterColumn) {
-      return;
-    }
+    if (!this.openFilterColumn) return;
 
     const col = this.openFilterColumn;
     const hasPendingMulti = !!this.pendingMultiSearch[col];
     const hasPendingCheckbox = this.pendingCheckboxColumns.has(col);
 
-    if (!hasPendingMulti && !hasPendingCheckbox) {
-      return;
-    }
-
     event.preventDefault();
     event.stopPropagation();
 
-    this.confirmFilters(col);
+    if (hasPendingMulti || hasPendingCheckbox) {
+      this.confirmFilters(col);
+      return;
+    }
+
+    const column = this.data().find(c => c.name === col);
+    if (column?.search) {
+      this.applySearchAndClose(col);
+      return;
+    }
+
+    this.openFilterColumn = null;
+  }
+
+
+
+  applySearchAndClose(columnName: string): void {
+    const value = (this.searchValues[columnName] ?? '').trim();
+
+    if (value) {
+      this.searchValues[columnName] = value;
+    } else {
+      delete this.searchValues[columnName];
+    }
+
+    this.saveFilters();
+
+    this.loadData(1, this.limit());
+
+    this.openFilterColumn = null;
   }
 
 

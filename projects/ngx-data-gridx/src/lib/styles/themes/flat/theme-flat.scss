@@ -34,11 +34,18 @@
 
   .grid__th {
     background: token.$violet-50 !important;
-    border: token.$border-1 solid token.$violet-100;
     color: token.$default-900;
     font: token.$font-subtitle-m;
     overflow: visible;
     position: relative;
+    border-right: token.$border-1 solid token.$violet-100;
+    border-top: token.$border-1 solid token.$violet-100;
+    border-left: none !important;
+    border-bottom-color: transparent;
+  }
+
+  .grid__th:first-child, .grid__th:last-child{
+    border-left: token.$border-1 solid token.$violet-100 !important;
   }
 
   .grid__checkbox {
@@ -90,7 +97,8 @@
   }
 
   .grid__td {
-    border-bottom: 1px solid token.$violet-100;
+    border-bottom: token.$border-1 solid token.$violet-100;
+    border-right: token.$border-1 solid token.$violet-100;
     background: transparent;
 
     .column-content span {

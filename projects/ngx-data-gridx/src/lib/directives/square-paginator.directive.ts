@@ -165,18 +165,18 @@ export class SquarePaginatorDirective implements AfterViewInit, OnChanges {
   }
 
   private buildButtons(): void {
-    const neededButtons = Math.ceil(
-      this.appCustomLength / this.matPag.pageSize
-    );
+    const pageSize = this.matPag.pageSize || 10;
 
+    const neededButtons = Math.ceil((this.appCustomLength ?? 0) / pageSize);
 
-    if (neededButtons < 1) {
+    if (neededButtons <= 1) {
       this.ren.setStyle(this.elementRef.nativeElement, 'display', 'none');
       return;
     }
 
-    this.buttonsRef = [this.createButton(0)];
+    this.ren.removeStyle(this.elementRef.nativeElement, 'display');
 
+    this.buttonsRef = [this.createButton(0)];
     this.dotsStartRef = this.createDotsElement();
 
     for (let index = 1; index < neededButtons - 1; index++) {
@@ -184,11 +184,7 @@ export class SquarePaginatorDirective implements AfterViewInit, OnChanges {
     }
 
     this.dotsEndRef = this.createDotsElement();
-
-    this.buttonsRef = [
-      ...this.buttonsRef,
-      this.createButton(neededButtons - 1),
-    ];
+    this.buttonsRef = [...this.buttonsRef, this.createButton(neededButtons - 1)];
   }
 
   private removeButtons(): void {

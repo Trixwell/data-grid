@@ -4,6 +4,12 @@
 .grid-theme-broad {
   @include common.grid-theme-common;
 
+  @media (max-width: 768px) {
+    .grid__container {
+      max-width: 380px;
+    }
+  }
+
   ::ng-deep {
     mat-form-field.mat-mdc-form-field:not(.mat-form-field-disabled):not(.mat-mdc-paginator-page-size-select)
     .mdc-text-field {
@@ -185,6 +191,7 @@
       gap: token.$space-1;
       color: token.$neutral-700;
       font: token.$font-sizes-font-button-m;
+      white-space: nowrap;
 
       ::ng-deep mat-icon{
         color: token.$neutral-500;

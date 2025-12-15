@@ -143,6 +143,7 @@
       gap: token.$space-4;
       color: token.$default-900;
       font: token.$font-body-m;
+      white-space: nowrap;
     }
 
     .grid__filter_option .mat-icon {

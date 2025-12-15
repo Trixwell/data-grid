@@ -459,3 +459,9 @@ mat-slider{
     max-height: none !important;
   }
 }
+
+@media (max-width: 768px) {
+  .grid__container {
+    max-width: max-content;
+  }
+}

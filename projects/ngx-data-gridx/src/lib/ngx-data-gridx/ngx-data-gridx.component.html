@@ -136,7 +136,7 @@
 
                         <!-- Select -->
                         @if(filter.type === 'select'){
-                          <mat-form-field appearance ="fill">
+                          <mat-form-field appearance ="fill" (click)="$event.stopPropagation()">
                             <mat-select
                               [(ngModel)]="filterInputValues[column.name]"
                               (selectionChange)="onFilterChange(column.name, filter.type, filter.label, $event.value, filter.callback)">
@@ -174,7 +174,7 @@
 
                         <!-- Multi-Select -->
                         @if(filter.type === 'multi-select'){
-                          <mat-form-field appearance ="fill">
+                          <mat-form-field appearance ="fill" (click)="$event.stopPropagation()">
                             <mat-select multiple
                                         [(ngModel)]="filterMultiSelectValues[column.name]"
                                         (selectionChange)="onFilterChange(
@@ -216,6 +216,7 @@
 
                           <mat-form-field (click)="$event.stopPropagation()" appearance="fill">
                             <mat-select
+                              (click)="$event.stopPropagation()"
                               (openedChange)="onSelectOpened($event)"
                               [formControl]="multiSearchControl"
                               [multiple]="!filter?.multiSearchOptions?.selectSingleOption"

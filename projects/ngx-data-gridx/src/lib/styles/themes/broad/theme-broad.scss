@@ -146,6 +146,8 @@
 
     .column-content span {
       color: token.$neutral-800;
+      word-break: break-all;
+      white-space: pre-wrap;
     }
   }
 
@@ -236,7 +238,7 @@
 
   .sub-grid-container {
     .grid__td {
-      background: token.$primary-50;
+      background: token.$neutral-100;
       border-bottom: 1px solid token.$primary-100;
     }
 

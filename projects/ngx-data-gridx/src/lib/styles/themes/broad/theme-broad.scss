@@ -146,6 +146,9 @@
 
     .column-content span {
       color: token.$neutral-800;
+    }
+
+    .column-content span:not(.custom-action) {
       word-break: break-all;
       white-space: pre-wrap;
     }

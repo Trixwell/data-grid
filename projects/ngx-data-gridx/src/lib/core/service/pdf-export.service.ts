@@ -22,11 +22,16 @@ export class PdfExportService {
     const headers = exportableCols.map(c => c.displayName ?? c.name);
 
     const body = [
-      headers.map(h => ({ text: h, bold: true })),
+      headers.map(h => ({ text: h, bold: true, noWrap: false })),
       ...rows.map(row =>
         exportableCols.map(col => {
           const raw = col.callback ? col.callback(row) : row?.[col.name];
-          return { text: raw != null ? String(raw) : '' };
+          const text = raw != null ? String(raw) : '';
+
+          return {
+            text: this.shouldBreakAll(text) ? this.breakAll(text, 28) : text,
+            noWrap: false,
+          };
         })
       ),
     ];
@@ -77,5 +82,18 @@ export class PdfExportService {
     } catch {
       return null;
     }
+  }
+
+  private breakAll(value: unknown, chunk = 28): string {
+    const s = value == null ? '' : String(value);
+    return s ? s.replace(new RegExp(`(.{${chunk}})`, 'g'), '$1\u200B') : '';
+  }
+
+  private shouldBreakAll(value: unknown, threshold = 35): boolean {
+    const s = value == null ? '' : String(value);
+    if (s.length < threshold) return false;
+
+    const hasNaturalBreakpoints = /[\s\-_.:,;/\\(){}\[\]]/.test(s);
+    return !hasNaturalBreakpoints;
   }
 }

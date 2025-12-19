@@ -394,7 +394,7 @@
                                 mat-icon-button
                                 (click)="action.action ? executeAction(action, row) : null"
                                 matTooltip="{{ action.tooltip }}">
-                                <span [innerHTML]="action.customHtml(row)"></span>
+                                <span class="custom-action" [innerHTML]="action.customHtml(row)"></span>
                               </button>
                             }
                           </ng-container>

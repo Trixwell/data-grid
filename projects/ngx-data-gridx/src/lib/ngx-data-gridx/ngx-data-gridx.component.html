@@ -199,7 +199,11 @@
                             <div class="multi-search-type-selector" (click)="$event.stopPropagation()">
                               <mat-radio-group
                                 [(ngModel)]="currentSearchType"
-                                (change)="onSearchTermChange(filter.multiSearchOptions)"
+                                (change)="onSearchTermChange(
+                                  filter.multiSearchOptions,
+                                  column.name,
+                                  currentSearchType
+                                )"
                                 [ngModelOptions]="{standalone: true}"
                               >
                                 @for(type of filter.multiSearchOptions?.searchTypes ?? []; track type.value){

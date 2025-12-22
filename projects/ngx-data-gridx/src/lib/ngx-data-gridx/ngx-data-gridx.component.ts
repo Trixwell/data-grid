@@ -1,7 +1,7 @@
 import {
   AfterViewInit, ChangeDetectorRef,
   Component, ContentChild, effect, ElementRef, HostListener, input,
-  model, OnDestroy, OnInit, QueryList, TemplateRef, Type,
+  model, OnDestroy, OnInit, QueryList, signal, TemplateRef, Type,
   ViewChild, ViewChildren, ViewContainerRef
 } from '@angular/core';
 import {GridProperty, GridPropertyType, MultiSearchOptions} from '../core/entity/grid-property';
@@ -151,6 +151,11 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     options: MultiSearchOptions | null;
   }> = {};
   private pendingCheckboxColumns = new Set<string>();
+
+  searchType = signal<{
+    column: string,
+    value: string,
+  } | null>(null);
 
   constructor(private http: HttpClient,
               private cdr: ChangeDetectorRef,
@@ -524,11 +529,18 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       name: string;
       label: string;
       value: string;
-    }[]; } | undefined): void {
+    }[]; } | undefined, columnName?:string, value?: string | null): void {
     if (!multiSearch) return;
 
     if (multiSearch) {
       this.searchTermSubject.next({term: this.searchTerm, multiSearch: multiSearch});
+
+      if(columnName && value) {
+        this.searchType.set({
+          column: columnName,
+          value: value ?? '',
+        });
+      }
     }
   }
 

@@ -109,8 +109,16 @@
       overflow: scroll;
     }
 
+    .multi-search-type-selector{
+      margin-bottom: 8px;
+    }
+
     mat-form-field {
       width: 100%;
+    }
+
+    mat-form-field:not(:last-child) {
+      margin-bottom: 12px;
     }
 
     .filter-options {

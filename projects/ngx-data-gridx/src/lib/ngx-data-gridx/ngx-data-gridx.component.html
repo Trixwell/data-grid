@@ -103,6 +103,7 @@
                         <mat-icon matPrefix (click)="$event.stopPropagation()">search</mat-icon>
                         <input
                           matInput
+                          [placeholder]="column.displayName + '...'"
                           (click)="$event.stopPropagation()"
                           (keydown.space)="$event.stopPropagation()"
                           (keydown.enter)="applySearchAndClose(column.name)"
@@ -138,6 +139,7 @@
                         @if(filter.type === 'select'){
                           <mat-form-field appearance ="fill" (click)="$event.stopPropagation()">
                             <mat-select
+                              [placeholder]="filter.label"
                               [(ngModel)]="filterInputValues[column.name]"
                               (selectionChange)="onFilterChange(column.name, filter.type, filter.label, $event.value, filter.callback)">
                               @for(item of column.filterValues?.[$index]; track $index){
@@ -177,6 +179,7 @@
                           <mat-form-field appearance ="fill" (click)="$event.stopPropagation()">
                             <mat-select multiple
                                         [(ngModel)]="filterMultiSelectValues[column.name]"
+                                        [placeholder]="filter.label"
                                         (selectionChange)="onFilterChange(
                                                         column.name,
                                                         filter.type,
@@ -194,7 +197,6 @@
                         }
                         <!-- Multi-search -->
                         @if(filter.type === 'multi-search'){
-
                           @if(filter.multiSearchOptions?.searchTypes?.length){
                             <div class="multi-search-type-selector" (click)="$event.stopPropagation()">
                               <mat-radio-group
@@ -223,6 +225,7 @@
                               (click)="$event.stopPropagation()"
                               (openedChange)="onSelectOpened($event)"
                               [formControl]="multiSearchControl"
+                              [placeholder]="filter.label"
                               [multiple]="!filter?.multiSearchOptions?.selectSingleOption"
                               (selectionChange)="
                                 filter?.multiSearchOptions?.selectSingleOption
@@ -242,10 +245,12 @@
                               ">
                               <mat-option class="no-checkbox">
                                 <div>
+                                  <mat-icon class="search-icon">search</mat-icon>
                                   <input
                                     #searchField
                                     matInput
                                     [(ngModel)]="searchTerm"
+                                    [placeholder]="filter.label"
                                     (input)="onSearchTermChange(filter?.multiSearchOptions)"
                                     (ngModelChange)="onSearchTermChange(filter?.multiSearchOptions)"
                                     [ngModelOptions]="{standalone: true}"
@@ -329,6 +334,7 @@
                         @if(filter.type === 'input'){
                           <mat-form-field appearance ="fill">
                           <input matInput [(ngModel)]="filterInputValues[column.name]"
+                                 [placeholder]="filter.label"
                                  (input)="onInputFilterChange(column.name,
                                                               filter.type,
                                                               filter.label,

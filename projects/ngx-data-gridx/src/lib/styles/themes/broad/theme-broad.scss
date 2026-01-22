@@ -312,6 +312,13 @@
     }
   }
 
+
+  .filter-dropdown{
+    .filter-options{
+      font-family: Inter, sans-serif;
+    }
+  }
+
   ::ng-deep .mdc-data-table__header-row{
     height: 100%;
     max-height: 40px;

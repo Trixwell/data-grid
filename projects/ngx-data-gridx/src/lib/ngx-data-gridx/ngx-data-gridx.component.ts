@@ -529,19 +529,20 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       name: string;
       label: string;
       value: string;
-    }[]; } | undefined, columnName?:string, value?: string | null): void {
+    }[]; } | undefined, columnName?: string, value?: string | null): void {
     if (!multiSearch) return;
 
-    if (multiSearch) {
-      this.searchTermSubject.next({term: this.searchTerm, multiSearch: multiSearch});
+    if (columnName && value) {
+      this.searchTerm = '';
+      this.searchData = [];
 
-      if(columnName && value) {
-        this.searchType.set({
-          column: columnName,
-          value: value ?? '',
-        });
-      }
+      this.searchType.set({
+        column: columnName,
+        value: value ?? '',
+      });
     }
+
+    this.searchTermSubject.next({term: this.searchTerm, multiSearch: multiSearch});
   }
 
   private initCustomFilterSearch(): void {

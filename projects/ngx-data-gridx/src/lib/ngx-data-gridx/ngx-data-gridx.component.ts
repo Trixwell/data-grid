@@ -898,12 +898,23 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   toggleFilter(columnName: string, event: Event) {
-    event.stopPropagation()
+    event.stopPropagation();
+
+    if (this.openFilterColumn !== columnName) {
+      this.resetMultiSearchState();
+    }
+
     this.openFilterColumn = this.openFilterColumn === columnName ? null : columnName;
 
     this.setInputFocus(event);
   }
 
+  private resetMultiSearchState(): void {
+    this.searchTerm = '';
+    this.searchData = [];
+    this.multiSearchControl.setValue([], { emitEvent: false });
+    this.currentSearchType = null;
+  }
 
   private setInputFocus(event: Event) {
     setTimeout(() => {

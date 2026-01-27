@@ -141,7 +141,7 @@
                             <mat-select
                               [placeholder]="filter.label"
                               [(ngModel)]="filterInputValues[column.name]"
-                              (selectionChange)="onFilterChange(column.name, filter.type, filter.label, $event.value, filter.callback)">
+                              (selectionChange)="onFilterChange(column.name, filter.type, getSelectedLabels(column.filterValues?.[$index], $event.value)[0] || filter.label, $event.value, filter.callback)">
                               @for(item of column.filterValues?.[$index]; track $index){
                                 <mat-option [value]="item.value">
                                   {{ item.label }}

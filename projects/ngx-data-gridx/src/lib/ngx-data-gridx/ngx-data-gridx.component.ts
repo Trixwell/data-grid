@@ -712,6 +712,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       );
     }
 
+    if (filterType === 'select' && columnName) {
+      delete this.filterInputValues[columnName];
+    }
+
     this.uncheckedCheckbox(column, filterType, optionValue);
     this.saveFilters();
     this.loadData(1, this.limit());
@@ -793,6 +797,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       this.dateFilters[key].patchValue({start: null, end: null, date: null});
       this.dateFilters[key].reset();
     });
+
+    this.filterInputValues = {};
 
     this.saveFilters();
     this.loadData();

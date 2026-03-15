@@ -53,21 +53,13 @@ export class GridProperty{
   }
 
   setRangeOptions(params: GridPropertiesDTO) {
-    this.filter = (params.filter || []).map(f => {
-      const rangeMax = f.rangeOptions?.max ?? 0;
-      const rangeMin = f.rangeOptions?.min ?? 0;
+    this.filter = (this.filter || []).map((f, i) => {
+      const raw = params.filter?.[i];
+      const rangeMax = raw?.rangeOptions?.max ?? 0;
+      const rangeMin = raw?.rangeOptions?.min ?? 0;
 
       return {
-        label: f.label,
-        type: f.type,
-        callback: f.callback,
-        multiSearchOptions: {
-          selectSingleOption: f.multiSearchOptions?.selectSingleOption ?? false,
-          url: f.multiSearchOptions?.url ?? '',
-          id: f.multiSearchOptions?.id ?? '',
-          label: f.multiSearchOptions?.label ?? '',
-          searchTypes: f.multiSearchOptions?.searchTypes ?? []
-        },
+        ...f,
         rangeOptions: { min: rangeMin, max: rangeMax }
       };
     });

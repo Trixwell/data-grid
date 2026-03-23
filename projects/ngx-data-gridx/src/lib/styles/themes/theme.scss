@@ -290,13 +290,13 @@
     max-height: 40px;
   }
 
-  @media screen and (max-width: 700px) {
-    .grid__container__wrapper {
-      overflow-x: scroll;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
+  .grid__container__wrapper {
+    overflow-x: scroll;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
 
+  @media screen and (max-width: 970px) {
     .grid__footer{
       max-height: 100% !important;
     }

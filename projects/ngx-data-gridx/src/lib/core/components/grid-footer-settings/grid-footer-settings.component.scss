@@ -23,7 +23,7 @@
 
   .grid__footer__settings_element:hover { opacity: .7; }
 
-  @media (max-width: 700px) {
+  @media (max-width: 970px) {
     justify-content: flex-start;
     margin-top: $mt-mobile;
   }

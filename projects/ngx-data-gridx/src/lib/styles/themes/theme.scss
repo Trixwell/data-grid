@@ -240,6 +240,10 @@
   .grid__container__wrapper {
     padding-top: 0;
     position: relative;
+
+    &:has(.filter-dropdown) {
+      overflow: visible;
+    }
   }
 
   .grid__row__tr__loader{
@@ -292,6 +296,7 @@
 
   .grid__container__wrapper {
     overflow-x: scroll;
+    overflow-y: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -299,6 +304,10 @@
   @media screen and (max-width: 970px) {
     .grid__footer{
       max-height: 100% !important;
+    }
+
+    .grid__container__wrapper {
+      overflow-y: scroll;
     }
 
     .grid__table {

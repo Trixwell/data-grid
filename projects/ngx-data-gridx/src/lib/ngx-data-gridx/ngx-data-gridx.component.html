@@ -279,7 +279,6 @@
                         @if(filter.type==='date' && filter.dateOptions?.range){
                           <div class="date-range" [formGroup]="dateFilters[column.name]">
                           <mat-form-field appearance="fill">
-                            <mat-label>From</mat-label>
                             <input
                               matInput
                               type="date"
@@ -294,7 +293,6 @@
                           </mat-form-field>
 
                           <mat-form-field appearance="fill">
-                            <mat-label>To</mat-label>
                             <input
                               matInput
                               type="date"

@@ -120,6 +120,16 @@
     }
   }
 
+  ::ng-deep .grid__paginator .mat-mdc-paginator-page-size-label  {
+    font: token.$font-caption-m-400 !important;
+    color: token.$neutral-950;
+  }
+
+  ::ng-deep .grid__paginator .mat-mdc-option .mdc-list-item__primary-text {
+    font: token.$font-caption-m-400 !important;
+    color: token.$neutral-950;
+  }
+
   .grid__checkbox {
     width: 56px;
   }

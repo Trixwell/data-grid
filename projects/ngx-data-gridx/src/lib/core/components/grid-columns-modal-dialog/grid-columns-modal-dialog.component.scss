@@ -19,7 +19,7 @@
     }
 
     h2{
-      font: 600 tokens.$font-h3;
+      font: tokens.$font-h3-600;
       margin: tokens.$margin-0;
     }
   }
@@ -62,7 +62,7 @@
         p{
           margin: tokens.$margin-0;
           color: tokens.$neutral-950;
-          font: tokens.$font-body-m-bold;
+          font: tokens.$font-body-m-400;
         }
 
         .columns{
@@ -99,7 +99,7 @@
 
             span{
               color: tokens.$neutral-900;
-              font: tokens.$font-body-s;
+              font: tokens.$font-body-m-400;
               user-select: none;
             }
           }
@@ -128,7 +128,7 @@
         transition: background-color 180ms ease, color 180ms ease;
 
         .mdc-button__label{
-          font: tokens.$font-button-m;
+          font: tokens.$font-sizes-font-button-m;
           font-weight: 600;
         }
       }
@@ -148,7 +148,7 @@
     background-color: tokens.$neutral-100 !important;
     box-shadow: 0 2px 4px tokens.$shadow-medium;
     color: tokens.$neutral-800 !important;
-    font: tokens.$font-caption-s !important;
+    font: tokens.$font-caption-m-400 !important;
   }
 }
 
@@ -173,7 +173,7 @@
 
   span {
     color: tokens.$neutral-900;
-    font: tokens.$font-body-s;
+    font: tokens.$font-body-m-400;
   }
 
   mat-icon{

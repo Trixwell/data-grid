@@ -59,7 +59,8 @@
         @if(multiselect()){
           <ng-container matColumnDef="select">
             <th class="grid__th grid__checkbox no-print"
-                mat-header-cell *matHeaderCellDef>
+                mat-header-cell *matHeaderCellDef
+            >
               <mat-checkbox (change)="$event ? toggleAllRows() : null"
                             [checked]="selection.hasValue() && isAllSelected()"
                             [indeterminate]="selection.hasValue() && !isAllSelected()">
@@ -80,6 +81,8 @@
           <ng-container [matColumnDef]="column.name">
             <th mat-header-cell *matHeaderCellDef
                 class="grid__th"
+                [resizeColumn]="column.columnResizable === true"
+                [index]="multiselect() ? $index + 1 : $index"
                 mat-sort-header
                 [disabled]="!column.sort"
                 [style.width]="column.width"
@@ -350,7 +353,8 @@
             </th>
             <td class="grid__td" [ngClass]="getAllClasses(column, row)" mat-cell
                 *matCellDef="let row;"
-                [style.width]="column.width">
+                [style.width]="column.width"
+                >
               <ng-container>
                 <div class="column-content">
                     @switch (column.type){

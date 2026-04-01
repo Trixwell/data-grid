@@ -8,6 +8,8 @@ export class GridProperty{
   type: GridPropertyType;
   search?: boolean;
   width?: string;
+  /** When true, the column shows a drag handle to resize width. Default false. */
+  columnResizable?: boolean;
   visible?: boolean;
   columnIndex?: number;
   filter?: FilterDTO[] | undefined;
@@ -33,6 +35,7 @@ export class GridProperty{
     this.type = params.type;
     this.search = params.search || false;
     this.width = params.width || "auto";
+    this.columnResizable = params.columnResizable ?? false;
     this.filter = params.filter;
     this.sort = params.sort || false;
     this.classes = params.classes || "";
@@ -104,6 +107,7 @@ export interface GridPropertiesDTO{
   type: GridPropertyType;
   search?: boolean;
   width?: string;
+  columnResizable?: boolean;
   visible?: boolean;
   component?: Type<any>;
   filter?: FilterDTO[] | undefined;

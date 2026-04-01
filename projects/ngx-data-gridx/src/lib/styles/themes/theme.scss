@@ -22,6 +22,49 @@
 @mixin grid-theme-common {
   .grid__table {
     background: transparent;
+
+    .resizing {
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      cursor: col-resize;
+    }
+
+    .grid__table.grid__table--col-resize {
+      table-layout: fixed;
+      width: 100%;
+    }
+
+    .mat-cell {
+      span {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    th.grid__th.mat-mdc-header-cell,
+    th.grid__th.mdc-data-table__header-cell {
+      position: relative;
+      overflow: visible;
+
+      .resize-holder {
+        cursor: col-resize;
+        width: 12px;
+        min-width: 12px;
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 50;
+        box-sizing: border-box;
+
+      }
+    }
+  }
+
+  .grid__name {
+    font: token.$font-h4-600;
   }
 
   ::ng-deep {

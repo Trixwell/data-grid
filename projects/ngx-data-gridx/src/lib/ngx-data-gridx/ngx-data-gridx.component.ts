@@ -34,6 +34,7 @@ import {GridCellHost} from '../core/components/grid-cell-host/grid-cell-host';
 import {MatSlider, MatSliderRangeThumb} from '@angular/material/slider';
 import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
 import { RouterLink } from '@angular/router';
+import {ResizeColumnDirective} from '../directives/resize-column.directive';
 
 @Component({
   selector: 'ngx-data-gridx',
@@ -64,6 +65,7 @@ import { RouterLink } from '@angular/router';
     MatRadioGroup,
     MatRadioButton,
     RouterLink,
+    ResizeColumnDirective,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './ngx-data-gridx.component.html',

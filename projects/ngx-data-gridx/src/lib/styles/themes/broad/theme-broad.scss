@@ -98,8 +98,19 @@
     height: 40px;
   }
 
-  tr.accordion:hover{
+  tr.example-element-row:hover{
     background: token.$primary-200;
+  }
+
+  tr.example-element-row {
+    td {
+      .column-content{
+        span{
+          font: token.$font-caption-m-400 !important;
+          color: token.$neutral-800;
+        }
+      }
+    }
   }
 
   .grid__th {

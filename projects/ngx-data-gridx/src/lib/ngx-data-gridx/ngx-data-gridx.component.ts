@@ -35,6 +35,7 @@ import {MatSlider, MatSliderRangeThumb} from '@angular/material/slider';
 import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
 import { RouterLink } from '@angular/router';
 import {ResizeColumnDirective} from '../directives/resize-column.directive';
+import {GridTextTruncateComponent} from '../core/components/grid-text-truncate/grid-text-truncate.component';
 
 @Component({
   selector: 'ngx-data-gridx',
@@ -66,6 +67,7 @@ import {ResizeColumnDirective} from '../directives/resize-column.directive';
     MatRadioButton,
     RouterLink,
     ResizeColumnDirective,
+    GridTextTruncateComponent,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './ngx-data-gridx.component.html',
@@ -1638,6 +1640,13 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
+
+  getCellText(column: GridProperty, row: any): string {
+    const raw = this.IsCustomCallbackExist(column)
+      ? (this.resolveColumn(column.name)?.callback?.(row) ?? row[column.name])
+      : row[column.name];
+    return raw != null ? String(raw) : '';
+  }
 
   protected readonly GridPropertyType = GridPropertyType;
   protected readonly GridTheme = GridTheme;

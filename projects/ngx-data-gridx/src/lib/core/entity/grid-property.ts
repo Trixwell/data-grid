@@ -29,6 +29,7 @@ export class GridProperty{
   callback?: (row: object | null | undefined) => string | undefined;
   columnSortIndex?: string;
   component?: Type<any> | null;
+  textLimit?: number;
   constructor(params: GridPropertiesDTO) {
     this.name = params.name;
     this.displayName = params.displayName;
@@ -50,6 +51,7 @@ export class GridProperty{
     this.visible = params.visible || true;
     this.columnIndex = params.columnIndex;
     this.component = params.component || null;
+    this.textLimit = params.textLimit;
 
     this.setDateOptionsByDefault(params);
     this.setRangeOptions(params);
@@ -123,6 +125,7 @@ export interface GridPropertiesDTO{
   subGridSettings?: SubGridSettings | null;
   columnSortIndex?: string;
   columnIndex?: number;
+  textLimit?: number;
 }
 
 export interface FilterDTO {

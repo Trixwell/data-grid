@@ -1,0 +1,17 @@
+@use '../../../styles/tokens' as tokens;
+
+grid-text-truncate {
+    display: inline;
+}
+
+.grid-text-truncate {
+    cursor: pointer;
+
+    .grid-text-truncate__chevron {
+        vertical-align: middle;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: tokens.$neutral-500;
+    }
+}

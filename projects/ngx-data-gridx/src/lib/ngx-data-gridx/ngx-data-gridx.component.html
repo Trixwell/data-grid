@@ -428,6 +428,8 @@
                       @default {
                         @if(resolveColumn(column.name)?.component){
                           <grid-cell-host [component]="resolveColumn(column.name)?.component!" [row]="row"></grid-cell-host>
+                        } @else if(column.textLimit && getCellText(column, row).length > column.textLimit) {
+                          <grid-text-truncate [text]="getCellText(column, row)" [limit]="column.textLimit" />
                         } @else {
                           <span [innerHTML]="IsCustomCallbackExist(column)
                                            ? ( resolveColumn(column.name)?.callback ? resolveColumn(column.name)?.callback?.(row) : row[column.name] )

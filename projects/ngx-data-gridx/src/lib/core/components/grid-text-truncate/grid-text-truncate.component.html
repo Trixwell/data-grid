@@ -1,0 +1,8 @@
+<span class="grid-text-truncate"
+      [class.grid-text-truncate--open]="expanded()"
+      (click)="toggle($event)">
+  {{ expanded() ? text() : text().substring(0, limit()) + '…' }}
+  <mat-icon class="grid-text-truncate__chevron" fontSet="material-symbols-outlined">
+    {{ expanded() ? 'expand_more' : 'chevron_right' }}
+  </mat-icon>
+</span>

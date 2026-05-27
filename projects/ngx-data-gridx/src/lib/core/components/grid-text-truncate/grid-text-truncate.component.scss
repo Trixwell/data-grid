@@ -6,6 +6,8 @@ grid-text-truncate {
 
 .grid-text-truncate {
     cursor: pointer;
+    font: tokens.$font-caption-m-400;
+    color: tokens.$neutral-800;
 
     .grid-text-truncate__chevron {
         vertical-align: middle;

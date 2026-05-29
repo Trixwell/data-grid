@@ -22,4 +22,17 @@
       </span>
     </button>
   }
+
+  @if(showExportCsv()){
+    <button type="button"
+            (click)="exportCsv.emit()"
+            class="grid__footer__settings_element">
+      <mat-icon fontSet="material-symbols-outlined">
+        arrow_downward
+      </mat-icon>
+      <span>
+        Експорт CSV
+      </span>
+    </button>
+  }
 </div>

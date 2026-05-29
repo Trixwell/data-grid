@@ -1,0 +1,7 @@
+<a class="grid-router-link" [routerLink]="link()">
+  @if (textLimit() && text().length > textLimit()!) {
+    <grid-text-truncate [text]="text()" [limit]="textLimit()!" />
+  } @else {
+    <span [innerHTML]="text()"></span>
+  }
+</a>

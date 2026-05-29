@@ -30,6 +30,7 @@ export class GridProperty{
   columnSortIndex?: string;
   component?: Type<any> | null;
   textLimit?: number;
+  routerLink?: (row: object | null | undefined) => string;
   constructor(params: GridPropertiesDTO) {
     this.name = params.name;
     this.displayName = params.displayName;
@@ -52,6 +53,7 @@ export class GridProperty{
     this.columnIndex = params.columnIndex;
     this.component = params.component || null;
     this.textLimit = params.textLimit;
+    this.routerLink = params.routerLink || undefined;
 
     this.setDateOptionsByDefault(params);
     this.setRangeOptions(params);
@@ -126,6 +128,7 @@ export interface GridPropertiesDTO{
   columnSortIndex?: string;
   columnIndex?: number;
   textLimit?: number;
+  routerLink?: (row: object | null | undefined) => string;
 }
 
 export interface FilterDTO {

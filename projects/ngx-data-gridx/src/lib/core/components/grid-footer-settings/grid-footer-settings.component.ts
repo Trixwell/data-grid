@@ -1,4 +1,4 @@
-import {Component, input, model} from '@angular/core';
+import {Component, input, model, output} from '@angular/core';
 import {MatIcon} from '@angular/material/icon';
 import {GridColumnsModalDialogComponent} from '../grid-columns-modal-dialog/grid-columns-modal-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
@@ -20,6 +20,8 @@ export class GridFooterSettingsComponent {
   mappedColumns = input<GridProperty[]>();
   rows = input<any[]>([]);
   showPrint = input<boolean>(true);
+  showExportCsv = input<boolean>(false);
+  exportCsv = output<void>();
   showColumnSettings = input<boolean>(true);
   storageKey = input<string>('');
   printData = input<(() => void) | null>(null);

@@ -36,6 +36,7 @@ import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
 import { RouterLink } from '@angular/router';
 import {ResizeColumnDirective} from '../directives/resize-column.directive';
 import {GridTextTruncateComponent} from '../core/components/grid-text-truncate/grid-text-truncate.component';
+import {GridRouterLinkComponent} from '../core/components/grid-router-link/grid-router-link.component';
 
 @Component({
   selector: 'ngx-data-gridx',
@@ -68,6 +69,7 @@ import {GridTextTruncateComponent} from '../core/components/grid-text-truncate/g
     RouterLink,
     ResizeColumnDirective,
     GridTextTruncateComponent,
+    GridRouterLinkComponent,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './ngx-data-gridx.component.html',

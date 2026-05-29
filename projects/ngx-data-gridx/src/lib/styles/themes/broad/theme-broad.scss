@@ -132,7 +132,8 @@
     }
   }
 
-  ::ng-deep .grid__paginator .mat-mdc-paginator-page-size-label  {
+  ::ng-deep .grid__paginator .mat-mdc-paginator-page-size-label,
+  ::ng-deep .grid__paginator .mat-mdc-paginator-range-label {
     font: token.$font-caption-m-400 !important;
     color: token.$neutral-950;
   }

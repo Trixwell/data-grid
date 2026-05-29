@@ -208,6 +208,11 @@
     }
   }
 
+  ::ng-deep .grid__paginator .mat-mdc-paginator-range-label {
+    font: token.$font-caption-m !important;
+    color: token.$default-800;
+  }
+
   ::ng-deep .grid__paginator .mdc-notched-outline > * {
     border: none !important;
   }

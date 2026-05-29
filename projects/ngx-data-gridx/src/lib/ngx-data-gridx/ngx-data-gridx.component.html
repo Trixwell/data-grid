@@ -29,12 +29,6 @@
             <button mat-icon-button (click)="loadData()">
               <mat-icon fontSet="material-symbols-outlined">autorenew</mat-icon>
             </button>
-
-            @if(exportCsvUrl()){
-              <button mat-icon-button (click)="exportCsvAction()">
-                <mat-icon fontSet="material-symbols-outlined">file_export</mat-icon>
-              </button>
-          }
           </div>
         }
       </div>
@@ -428,6 +422,11 @@
                       @default {
                         @if(resolveColumn(column.name)?.component){
                           <grid-cell-host [component]="resolveColumn(column.name)?.component!" [row]="row"></grid-cell-host>
+                        } @else if(resolveColumn(column.name)?.routerLink) {
+                          <grid-router-link
+                            [link]="resolveColumn(column.name)!.routerLink!(row)"
+                            [text]="getCellText(column, row)"
+                            [textLimit]="column.textLimit" />
                         } @else if(column.textLimit && getCellText(column, row).length > column.textLimit) {
                           <grid-text-truncate [text]="getCellText(column, row)" [limit]="column.textLimit" />
                         } @else {
@@ -543,6 +542,8 @@
                               [printData]="print()"
                               [rows]="rows.data"
                               [showPrint]="showPrint()"
+                              [showExportCsv]="!!exportCsvUrl()"
+                              (exportCsv)="exportCsvAction()"
                               [theme]="getCurrentTheme()"
                               [showColumnSettings]="showColumnSettings()"
                               [storageKey]="storageKey"></grid-footer-settings>

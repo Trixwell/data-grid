@@ -520,7 +520,9 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
     this.mappingCustomParams(params);
     this.mappingParentGridFiltersParams(params);
-    this.setFiltersValues(params, 1, 1);
+    const page = this.paginator?.pageIndex + 1 || 1;
+    const pageSize = this.paginator?.pageSize || this.limit();
+    this.setFiltersValues(params, page, pageSize);
 
     this.http.get(`${this.exportCsvUrl()}?${params}`, {
       responseType: 'blob',

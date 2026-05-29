@@ -5,6 +5,7 @@ grid-router-link {
 }
 
 .grid-router-link {
+  font: tokens.$font-caption-m-400;
   color: tokens.$primary-600;
   text-decoration: underline;
   cursor: pointer;

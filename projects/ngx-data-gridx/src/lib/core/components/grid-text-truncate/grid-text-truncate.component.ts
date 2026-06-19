@@ -12,10 +12,16 @@ import {MatIcon} from '@angular/material/icon';
 export class GridTextTruncateComponent {
     text = input.required<string>();
     limit = input.required<number>();
+    linked = input(false);
 
     expanded = signal(false);
 
     toggle(event: MouseEvent): void {
+        if (this.linked() && this.expanded()) {
+            return;
+        }
+
+        event.preventDefault();
         event.stopPropagation();
         this.expanded.set(!this.expanded());
     }

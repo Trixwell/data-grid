@@ -1,4 +1,4 @@
-import {Component, input, ViewEncapsulation} from '@angular/core';
+import { Component, input, ViewEncapsulation } from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {GridTextTruncateComponent} from '../grid-text-truncate/grid-text-truncate.component';
 

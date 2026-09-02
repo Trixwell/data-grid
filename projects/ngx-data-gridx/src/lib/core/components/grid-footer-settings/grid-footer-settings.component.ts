@@ -1,4 +1,4 @@
-import {Component, input, model, output} from '@angular/core';
+import { Component, input, model, output } from '@angular/core';
 import {MatIcon} from '@angular/material/icon';
 import {GridColumnsModalDialogComponent} from '../grid-columns-modal-dialog/grid-columns-modal-dialog.component';
 import {MatDialog} from '@angular/material/dialog';

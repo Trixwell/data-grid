@@ -1,12 +1,12 @@
 import {
-  Component,
-  ComponentRef,
-  input,
-  OnChanges,
-  OnDestroy,
-  SimpleChanges,
-  Type,
-  ViewContainerRef
+    Component,
+    ComponentRef,
+    input,
+    OnChanges,
+    OnDestroy,
+    SimpleChanges,
+    Type,
+    ViewContainerRef,
 } from '@angular/core';
 
 @Component({

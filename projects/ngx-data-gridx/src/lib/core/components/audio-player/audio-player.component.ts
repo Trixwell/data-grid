@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
@@ -8,12 +8,11 @@ import {MatButtonModule} from '@angular/material/button';
 @Component({
   selector: 'app-audio-player',
   imports: [
-    CommonModule,
     FormsModule,
     MatIconModule,
     MatMenuModule,
     MatButtonModule
-  ],
+],
   templateUrl: './audio-player.component.html',
   styleUrl: './audio-player.component.scss'
 })

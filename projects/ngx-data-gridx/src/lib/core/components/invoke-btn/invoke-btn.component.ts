@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import {NgClass, NgStyle} from '@angular/common';
 import {MatMenu, MatMenuTrigger} from "@angular/material/menu";
 import {Router, RouterLink} from "@angular/router";

@@ -1,8 +1,22 @@
 import {
-  AfterViewInit, ChangeDetectorRef,
-  Component, ContentChild, effect, ElementRef, HostListener, input,
-  model, OnDestroy, OnInit, QueryList, signal, TemplateRef, Type,
-  ViewChild, ViewChildren, ViewContainerRef
+    AfterViewInit,
+    ChangeDetectorRef,
+    Component,
+    ContentChild,
+    effect,
+    ElementRef,
+    HostListener,
+    input,
+    model,
+    OnDestroy,
+    OnInit,
+    QueryList,
+    signal,
+    TemplateRef,
+    Type,
+    ViewChild,
+    ViewChildren,
+    ViewContainerRef,
 } from '@angular/core';
 import {GridProperty, GridPropertyType, MultiSearchOptions} from '../core/entity/grid-property';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
@@ -1601,7 +1615,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   @HostListener('document:keydown.enter', ['$event'])
-  onDocumentEnter(event: KeyboardEvent): void {
+  onDocumentEnter(event: Event): void {
     if (!this.openFilterColumn) return;
 
     const col = this.openFilterColumn;

@@ -138,7 +138,7 @@
                             <mat-select
                               [placeholder]="filter.label"
                               [(ngModel)]="filterInputValues[column.name]"
-                              (selectionChange)="onFilterChange(column.name, filter.type, getSelectedLabels(column.filterValues?.[$index], $event.value)[0] || filter.label, $event.value, filter.callback)">
+                              (selectionChange)="onFilterChange(column.name, filter.type, getSelectedLabels($safeNavigationMigration(column.filterValues?.[$index]), $event.value)[0] || filter.label, $event.value, filter.callback)">
                               @for(item of column.filterValues?.[$index]; track $index){
                                 <mat-option [value]="item.value">
                                   {{ item.label }}
@@ -149,7 +149,7 @@
                         }
 
                         @if (filter.type === 'range') {
-                          <mat-slider [min]="filter.rangeOptions?.min" [max]="filter.rangeOptions?.max" discrete>
+                          <mat-slider [min]="$safeNavigationMigration(filter.rangeOptions?.min)" [max]="$safeNavigationMigration(filter.rangeOptions?.max)" discrete>
                             <input matSliderStartThumb #start
                                    [value]="getRangeMin(column.name, filter.rangeOptions)"
                                    (change)="onFilterChange(
@@ -180,7 +180,7 @@
                                         (selectionChange)="onFilterChange(
                                                         column.name,
                                                         filter.type,
-                                                        getSelectedLabels(column.filterValues?.[$index], $event.value),
+                                                        getSelectedLabels($safeNavigationMigration(column.filterValues?.[$index]), $event.value),
                                                         $event.value,
                                                         filter.callback
                                                      )">
@@ -248,8 +248,8 @@
                                     matInput
                                     [(ngModel)]="searchTerm"
                                     [placeholder]="filter.label"
-                                    (input)="onSearchTermChange(filter?.multiSearchOptions)"
-                                    (ngModelChange)="onSearchTermChange(filter?.multiSearchOptions)"
+                                    (input)="onSearchTermChange($safeNavigationMigration(filter?.multiSearchOptions))"
+                                    (ngModelChange)="onSearchTermChange($safeNavigationMigration(filter?.multiSearchOptions))"
                                     [ngModelOptions]="{standalone: true}"
                                     (click)="$event.stopPropagation()"
                                   >
@@ -378,7 +378,7 @@
                                 <a
                                   class="action-btn"
                                   mat-icon-button
-                                  [routerLink]="action?.routerLink ? action?.routerLink(row) : null"
+                                  [routerLink]="action.routerLink?.(row) ?? null"
                                   matTooltip="{{ action.tooltip }}">
                                   @if(!isPath(action.icon)){
                                     <mat-icon class="material-icons-outlined">
@@ -415,13 +415,13 @@
 
                       @case(GridPropertyType.Audio){
                         <app-audio-player #audioPlayer
-                                          [src]="resolveColumn(column.name)?.callback ? resolveColumn(column.name)?.callback?.(row[column.name]) : row[column.name]">
+                                          [src]="resolveColumn(column.name)?.callback ? $safeNavigationMigration(resolveColumn(column.name)?.callback?.(row[column.name])) : row[column.name]">
                         </app-audio-player>
                       }
 
                       @default {
                         @if(resolveColumn(column.name)?.component){
-                          <grid-cell-host [component]="resolveColumn(column.name)?.component!" [row]="row"></grid-cell-host>
+                          <grid-cell-host [component]="$safeNavigationMigration(resolveColumn(column.name)?.component)!" [row]="row"></grid-cell-host>
                         } @else if(resolveColumn(column.name)?.routerLink) {
                           <grid-router-link
                             [link]="resolveColumn(column.name)!.routerLink!(row)"
@@ -431,7 +431,7 @@
                           <grid-text-truncate [text]="getCellText(column, row)" [limit]="column.textLimit" />
                         } @else {
                           <span [innerHTML]="IsCustomCallbackExist(column)
-                                           ? ( resolveColumn(column.name)?.callback ? resolveColumn(column.name)?.callback?.(row) : row[column.name] )
+                                           ? ( resolveColumn(column.name)?.callback ? $safeNavigationMigration(resolveColumn(column.name)?.callback?.(row)) : row[column.name] )
                                            : row[column.name]">
                           </span>
                         }
@@ -442,7 +442,7 @@
                     <button mat-mini-fab
                             type="button"
                             class="sub-grid-accordion-btn"
-                            (click)="setCurrentGridColumn(column?.name, row)">
+                            (click)="setCurrentGridColumn($safeNavigationMigration(column?.name), row)">
                       <mat-icon>{{ isColumnExpanded(column, row) ? 'arrow_drop_up' : 'arrow_drop_down' }}</mat-icon>
                     </button>
                   }
@@ -463,17 +463,17 @@
                 <ng-container>
                   @for(o of [currentGridColumn]; track trackByKey($index, o)){
                     <ngx-data-gridx
-                      [url]="currentGridColumn?.subGridSettings?.suburl"
+                      [url]="$safeNavigationMigration(currentGridColumn?.subGridSettings?.suburl)"
                       [data]="currentGridColumn?.subGridPropertyList || []"
                       [theme]="getCurrentTheme()"
-                      [subUrlParams]="currentGridColumn?.subGridSettings?.subUrlParams"
+                      [subUrlParams]="$safeNavigationMigration(currentGridColumn?.subGridSettings?.subUrlParams)"
                       [currentRow]  = "expandedElement()"
                       [parentGridFilters] = "{ filters: appliedFilters, search: searchValues}"
                       [expandedElement] = "expandedElement()"
                       [autoRefreshIntervalSec]="currentGridColumn?.subGridSettings?.autoRefreshIntervalSec || null"
                       [limit]="currentGridColumn?.subGridSettings?.subGridProps?.limit || 10"
                       [showFilters] = "currentGridColumn?.subGridSettings?.subGridProps?.showFilters || false"
-                      [detailComponent]="currentGridColumn?.subGridSettings?.detailComponent"
+                      [detailComponent]="$safeNavigationMigration(currentGridColumn?.subGridSettings?.detailComponent)"
                       [multiselect] = "currentGridColumn?.subGridSettings?.subGridProps?.multiselect ?? false">
                     </ngx-data-gridx>
                   }

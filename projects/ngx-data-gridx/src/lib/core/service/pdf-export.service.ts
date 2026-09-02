@@ -116,7 +116,7 @@ export class PdfExportService {
       const nodes = Array.isArray(parsed.content) ? parsed.content : [parsed.content];
       const cell: Content = nodes.length === 1 ? nodes[0] : { stack: nodes };
 
-      this.breakAllDeep(cell);
+      this.normalizeDeep(cell);
 
       return cell;
     } catch {
@@ -147,13 +147,26 @@ export class PdfExportService {
     return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
-  private breakAllDeep(node: any): void {
+  private toAbsoluteLink(link: string): string | null {
+    const raw = link.trim();
+
+    if (!raw) return null;
+    if (/^javascript:/i.test(raw)) return null;
+    if (/^[a-z][a-z0-9+.-]*:/i.test(raw)) return raw;
+
+    const origin = window.location.origin.replace(/\/+$/, '');
+    const path = raw.replace(/^\/+/, '');
+
+    return `${origin}/${path}`;
+  }
+
+  private normalizeDeep(node: any): void {
     if (Array.isArray(node)) {
       node.forEach((item, i) => {
         if (typeof item === 'string') {
           if (this.shouldBreakAll(item)) node[i] = this.breakAll(item, 28);
         } else {
-          this.breakAllDeep(item);
+          this.normalizeDeep(item);
         }
       });
       return;
@@ -161,17 +174,24 @@ export class PdfExportService {
 
     if (!node || typeof node !== 'object') return;
 
+    if (typeof node.link === 'string') {
+      const absolute = this.toAbsoluteLink(node.link);
+
+      if (absolute) node.link = absolute;
+      else delete node.link;
+    }
+
     if (typeof node.text === 'string') {
       if (this.shouldBreakAll(node.text)) node.text = this.breakAll(node.text, 28);
     } else if (node.text) {
-      this.breakAllDeep(node.text);
+      this.normalizeDeep(node.text);
     }
 
     for (const key of ['stack', 'ul', 'ol', 'columns']) {
-      if (node[key]) this.breakAllDeep(node[key]);
+      if (node[key]) this.normalizeDeep(node[key]);
     }
 
-    if (node.table?.body) this.breakAllDeep(node.table.body);
+    if (node.table?.body) this.normalizeDeep(node.table.body);
   }
 
   private getGridSettings(key: string): GridProperty[] | null {

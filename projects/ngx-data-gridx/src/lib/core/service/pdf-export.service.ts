@@ -1,11 +1,36 @@
 import {Injectable} from '@angular/core';
-import {TDocumentDefinitions} from 'pdfmake/interfaces';
+import {Content, StyleDictionary, TDocumentDefinitions} from 'pdfmake/interfaces';
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+import htmlToPdfmake from 'html-to-pdfmake';
 import {GridProperty, GridPropertyType} from '../entity/grid-property';
+
+interface HtmlCellResult {
+  content: Content | Content[];
+  images?: Record<string, string>;
+}
 
 @Injectable({ providedIn: 'root' })
 export class PdfExportService {
+  private static readonly CELL_STYLES: StyleDictionary = {
+    p: { margin: [0, 0, 0, 0] },
+    ul: { marginBottom: 0, marginLeft: 8 },
+    ol: { marginBottom: 0, marginLeft: 8 },
+    table: { marginBottom: 0 },
+    h1: { fontSize: 13, bold: true, marginBottom: 0 },
+    h2: { fontSize: 12, bold: true, marginBottom: 0 },
+    h3: { fontSize: 11, bold: true, marginBottom: 0 },
+    h4: { fontSize: 10, bold: true, marginBottom: 0 },
+    h5: { fontSize: 10, bold: true, marginBottom: 0 },
+    h6: { fontSize: 10, bold: true, marginBottom: 0 },
+    a: { color: '#0d6efd', decoration: 'underline' },
+  };
+
+  private static readonly HTML_PATTERN =
+    /<\/?[a-z][^>]*>|&(?:[a-z][a-z0-9]{1,9}|#\d{1,6}|#x[0-9a-f]{1,6});/i;
+  private static readonly IMG_TAG_PATTERN = /<img\b[^>]*>/gi;
+  private static readonly IMG_SRC_PATTERN = /\ssrc\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i;
+
   export(rows: any[], columns: GridProperty[], key: string): void {
     const stored = this.getGridSettings(key);
     const base = stored ?? columns;
@@ -21,17 +46,15 @@ export class PdfExportService {
 
     const headers = exportableCols.map(c => c.displayName ?? c.name);
 
-    const body = [
+    const images: Record<string, string> = {};
+
+    const body: Content[][] = [
       headers.map(h => ({ text: h, bold: true, noWrap: false })),
       ...rows.map(row =>
         exportableCols.map(col => {
           const raw = col.callback ? col.callback(row) : row?.[col.name];
-          const text = raw != null ? String(raw) : '';
 
-          return {
-            text: this.shouldBreakAll(text) ? this.breakAll(text, 28) : text,
-            noWrap: false,
-          };
+          return this.toCell(raw != null ? String(raw) : '', images);
         })
       ),
     ];
@@ -39,6 +62,7 @@ export class PdfExportService {
     const widths = Array(exportableCols.length).fill('auto');
     this.createPdf({
       pageMargins: [5, 20, 5, 20],
+      ...(Object.keys(images).length ? { images } : {}),
       content: [
         {
           columns: [
@@ -73,6 +97,81 @@ export class PdfExportService {
 
   createPdf(data: TDocumentDefinitions){
     pdfMake.createPdf(data, undefined, undefined, pdfFonts.vfs).open();
+  }
+
+  private toCell(value: string, images: Record<string, string>): Content {
+    if (!PdfExportService.HTML_PATTERN.test(value)) return this.textCell(value);
+
+    if (typeof window === 'undefined') return this.textCell(this.stripTags(value));
+
+    try {
+      const parsed = htmlToPdfmake(`<div>${this.stripUnsupportedImages(value)}</div>`, {
+        imagesByReference: true,
+        removeExtraBlanks: true,
+        defaultStyles: PdfExportService.CELL_STYLES,
+      }) as unknown as HtmlCellResult;
+
+      Object.assign(images, parsed.images ?? {});
+
+      const nodes = Array.isArray(parsed.content) ? parsed.content : [parsed.content];
+      const cell: Content = nodes.length === 1 ? nodes[0] : { stack: nodes };
+
+      this.breakAllDeep(cell);
+
+      return cell;
+    } catch {
+      return this.textCell(this.stripTags(value));
+    }
+  }
+
+  private textCell(value: string): Content {
+    return {
+      text: this.shouldBreakAll(value) ? this.breakAll(value, 28) : value,
+      noWrap: false,
+    };
+  }
+
+  private stripUnsupportedImages(html: string): string {
+    return html.replace(PdfExportService.IMG_TAG_PATTERN, tag => {
+      const match = PdfExportService.IMG_SRC_PATTERN.exec(tag);
+      const src = (match?.[1] ?? match?.[2] ?? match?.[3] ?? '').trim();
+
+      if (!src) return '';
+      if (/^data:image\/svg/i.test(src)) return '';
+
+      return /\.svg(?:[?#].*)?$/i.test(src) ? '' : tag;
+    });
+  }
+
+  private stripTags(html: string): string {
+    return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  private breakAllDeep(node: any): void {
+    if (Array.isArray(node)) {
+      node.forEach((item, i) => {
+        if (typeof item === 'string') {
+          if (this.shouldBreakAll(item)) node[i] = this.breakAll(item, 28);
+        } else {
+          this.breakAllDeep(item);
+        }
+      });
+      return;
+    }
+
+    if (!node || typeof node !== 'object') return;
+
+    if (typeof node.text === 'string') {
+      if (this.shouldBreakAll(node.text)) node.text = this.breakAll(node.text, 28);
+    } else if (node.text) {
+      this.breakAllDeep(node.text);
+    }
+
+    for (const key of ['stack', 'ul', 'ol', 'columns']) {
+      if (node[key]) this.breakAllDeep(node[key]);
+    }
+
+    if (node.table?.body) this.breakAllDeep(node.table.body);
   }
 
   private getGridSettings(key: string): GridProperty[] | null {

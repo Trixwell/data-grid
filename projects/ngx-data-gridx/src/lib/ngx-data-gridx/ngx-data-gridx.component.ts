@@ -287,10 +287,12 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
   showLoader() {
     this.loading = true;
+    this.cdr.markForCheck();
   }
 
   hideLoader() {
     this.loading = false;
+    this.cdr.markForCheck();
   }
 
   get storageKey(): string {

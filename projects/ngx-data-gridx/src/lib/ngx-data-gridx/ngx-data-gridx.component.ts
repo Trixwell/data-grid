@@ -118,6 +118,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   lazyLoad = input<boolean>(false);
   detailComponent = input<Type<any> | undefined>();
   openAllToggleDetails = input<boolean>(false);
+  expandableAll = input<boolean>(false);
   showPrint = input<boolean>(true);
   showColumnSettings = input<boolean>(true);
   print = input<(() => void) | null>(null);
@@ -142,6 +143,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   private autoRefreshSub: Subscription | null = null;
   private autoRefreshDestroy$ = new Subject<void>();
   private expandedDetailIds = new Set<string>();
+  private expandedSubGrids = new Map<object, GridProperty>();
 
   total: number = 0;
   displayedColumns: string[] = [];
@@ -1187,6 +1189,24 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   rollbackExpandedElement() {
+    if (this.expandableAll() && this.expandedSubGrids.size) {
+      const sidx = this.sidx() as keyof object;
+      const repointed = new Map<object, GridProperty>();
+
+      this.expandedSubGrids.forEach((column, oldRow) => {
+        const openId = oldRow[sidx];
+        if (openId === undefined) {
+          repointed.set(oldRow, column);
+          return;
+        }
+
+        const updatedRow = this.rows.data.find((row) => row[sidx] === openId);
+        if (updatedRow) repointed.set(updatedRow, column);
+      });
+
+      this.expandedSubGrids = repointed;
+    }
+
     const expandedElement = this.expandedElement();
     if (expandedElement) {
       const openId = expandedElement[this.sidx() as keyof typeof expandedElement];
@@ -1447,7 +1467,22 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   setCurrentGridColumn(name: string | undefined | null, row: object): void {
     const column = this.data().find(col => col.name === name);
     if (!column) {
-      console.log(`not found ${column}`);
+      console.log(`not found ${name}`);
+      return;
+    }
+
+    if (this.expandableAll()) {
+      if (this.expandedSubGrids.get(row)?.name === column.name) {
+        this.expandedSubGrids.delete(row);
+        if (this.expandedElement() === row) {
+          this.expandedElement.set(null);
+          this.currentGridColumn = null;
+        }
+      } else {
+        this.expandedSubGrids.set(row, column);
+        this.expandedElement.set(row);
+        this.currentGridColumn = column;
+      }
       return;
     }
 
@@ -1465,7 +1500,18 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   isColumnExpanded(column: GridProperty, row: object): boolean {
-    return this.currentGridColumn?.name === column.name && this.expandedElement() === row;
+    return this.getExpandedColumn(row)?.name === column.name;
+  }
+
+  getExpandedColumn(row: object): GridProperty | null {
+    if (this.expandableAll()) {
+      return this.expandedSubGrids.get(row) ?? null;
+    }
+    return this.expandedElement() === row ? this.currentGridColumn : null;
+  }
+
+  isRowExpanded(row: object): boolean {
+    return !!this.getExpandedColumn(row);
   }
 
   checkIsCurrentColumnSubGrid(column = this.currentGridColumn): boolean {

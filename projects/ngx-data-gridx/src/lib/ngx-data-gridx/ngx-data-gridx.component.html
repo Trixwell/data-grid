@@ -456,25 +456,25 @@
         <ng-container matColumnDef="expandedDetail">
           <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
             <div class="sub-grid-container"
-                 [class.expanded]="expandedElement() === element"
-                 [class.collapsed]="expandedElement() !== element"
-                 [@detailExpand]="expandedElement() === element ? 'expanded' : 'collapsed'">
-              @if(expandedElement() === element){
+                 [class.expanded]="isRowExpanded(element)"
+                 [class.collapsed]="!isRowExpanded(element)"
+                 [@detailExpand]="isRowExpanded(element) ? 'expanded' : 'collapsed'">
+              @if(getExpandedColumn(element); as col){
                 <ng-container>
-                  @for(o of [currentGridColumn]; track trackByKey($index, o)){
+                  @for(o of [col]; track trackByKey($index, o)){
                     <ngx-data-gridx
-                      [url]="currentGridColumn?.subGridSettings?.suburl"
-                      [data]="currentGridColumn?.subGridPropertyList || []"
+                      [url]="col.subGridSettings?.suburl"
+                      [data]="col.subGridPropertyList || []"
                       [theme]="getCurrentTheme()"
-                      [subUrlParams]="currentGridColumn?.subGridSettings?.subUrlParams"
-                      [currentRow]  = "expandedElement()"
+                      [subUrlParams]="col.subGridSettings?.subUrlParams"
+                      [currentRow]  = "element"
                       [parentGridFilters] = "{ filters: appliedFilters, search: searchValues}"
-                      [expandedElement] = "expandedElement()"
-                      [autoRefreshIntervalSec]="currentGridColumn?.subGridSettings?.autoRefreshIntervalSec || null"
-                      [limit]="currentGridColumn?.subGridSettings?.subGridProps?.limit || 10"
-                      [showFilters] = "currentGridColumn?.subGridSettings?.subGridProps?.showFilters || false"
-                      [detailComponent]="currentGridColumn?.subGridSettings?.detailComponent"
-                      [multiselect] = "currentGridColumn?.subGridSettings?.subGridProps?.multiselect ?? false">
+                      [expandedElement] = "element"
+                      [autoRefreshIntervalSec]="col.subGridSettings?.autoRefreshIntervalSec || null"
+                      [limit]="col.subGridSettings?.subGridProps?.limit || 10"
+                      [showFilters] = "col.subGridSettings?.subGridProps?.showFilters || false"
+                      [detailComponent]="col.subGridSettings?.detailComponent"
+                      [multiselect] = "col.subGridSettings?.subGridProps?.multiselect ?? false">
                     </ngx-data-gridx>
                   }
                 </ng-container>
@@ -512,7 +512,7 @@
             class="example-element-row"
             [class.detail-expanded]="isDetailExpanded(element)"
             [class.accordion]="detailComponent()"
-            [class.example-expanded-row]="expandedElement() === element">
+            [class.example-expanded-row]="isRowExpanded(element)">
         </tr>
 
         <!-- expand row -->

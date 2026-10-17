@@ -56,6 +56,7 @@ export class AppModule {}
 | `currentRow`         | `object`                                      | Parent row context for sub-grid data.                  |
 | `showHistoryFilters` | `boolean`                                     | Display history of applied filters.                    |
 | `expandedElement`    | `object`                                      | Row currently expanded to show sub-grid.               |
+| `expandableAll`      | `boolean`                                     | Allow several open sub-grids (default: one at a time). |
 | `noDataPlaceholder`  | `string`                                      | Message to display when no data is found.              |
 | `parentGridFilters`  | `object`                                      | Filters from a parent grid to apply in a sub-grid context. |
 
@@ -68,7 +69,7 @@ export class AppModule {}
 * `onDateRangeChange(column, formGroup)` — Applies date range filtering.
 * `clearAllFilters()` — Resets all applied filters.
 * `exportCsvAction()` — Initiates export of filtered data to CSV.
-* `setCurrentGridColumn(column, row)` — Toggles sub-grid view for a row.
+* `setCurrentGridColumn(column, row)` — Toggles sub-grid view for a row. By default opening a sub-grid on another row closes the open one; with `expandableAll` other open rows stay open.
 
 ---
 
@@ -179,8 +180,11 @@ export class AppComponent {
   sort="desc"
   [multiselect]="true"
   [showFilters]="true"
+  [expandableAll]="true"
   grid_name="ExampleGrid">
 </ngx-data-gridx>
 ```
+
+`[expandableAll]="true"` lets several rows keep their `details` sub-grid open at once; omit it (default `false`) to allow only one open sub-grid at a time.
 
 ---

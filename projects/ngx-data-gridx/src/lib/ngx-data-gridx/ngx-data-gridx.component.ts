@@ -775,9 +775,11 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     ).subscribe({
       next: (response) => {
         if (response && Array.isArray(response.response.list)) {
+          this.collapseAll();
           this.rows.data = response.response.list;
           this.total = response?.response?.total || 0;
         } else if (response && Array.isArray(response.response)) {
+          this.collapseAll();
           this.rows.data = response.response;
           this.total = response?.response.length || 0;
         }
@@ -1192,11 +1194,12 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     if (this.expandableAll() && this.expandedSubGrids.size) {
       const sidx = this.sidx() as keyof object;
       const repointed = new Map<object, GridProperty>();
+      const currentRows = new Set<object>(this.rows.data);
 
       this.expandedSubGrids.forEach((column, oldRow) => {
         const openId = oldRow[sidx];
         if (openId === undefined) {
-          repointed.set(oldRow, column);
+          if (currentRows.has(oldRow)) repointed.set(oldRow, column);
           return;
         }
 
@@ -1218,6 +1221,12 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
         this.expandedElement.set(updatedRow || null);
       }
+    }
+
+    const stillOpen = this.expandedElement();
+    if (stillOpen && !this.rows.data.includes(stillOpen)) {
+      this.expandedElement.set(null);
+      this.currentGridColumn = null;
     }
   }
 
@@ -1495,6 +1504,17 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  collapseAll(): void {
+    this.expandedSubGrids.clear();
+    this.expandedElement.set(null);
+    this.currentGridColumn = null;
+  }
+
+  trackRow = (index: number, row: object): unknown => {
+    const id = row ? (row as Record<string, unknown>)['id'] : undefined;
+    return id !== null && id !== undefined ? id : row;
+  };
+
   trackByKey(index: number, item: GridProperty | null): string {
     return item?.name || index.toString();
   }
@@ -1527,10 +1547,9 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     return data && typeof data.callback === 'function';
   }
 
-  getAllClasses(column: GridProperty, row: object): Record<string, boolean> {
+  getAllClasses(column: GridProperty, row: object, rowIndex = 0): Record<string, boolean> {
     const classes: Record<string, boolean> = {};
 
-    const rowIndex = this.rows?.data.findIndex(r => r === row) ?? 0;
     if (column?.style_formatter) {
       const styleClass = column.style_formatter(row, rowIndex);
       if (styleClass) {

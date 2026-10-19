@@ -45,6 +45,7 @@
       <table mat-table
              id="printArea"
              multiTemplateDataRows
+             [trackBy]="trackRow"
              [dataSource]="rows"
              [class.loading]="loading"
              matSort (matSortChange)="onSortChange($event)"
@@ -345,8 +346,8 @@
               </div>
               }
             </th>
-            <td class="grid__td" [ngClass]="getAllClasses(column, row)" mat-cell
-                *matCellDef="let row;"
+            <td class="grid__td" [ngClass]="getAllClasses(column, row, i)" mat-cell
+                *matCellDef="let row; let i = dataIndex"
                 [style.width]="column.width"
                 >
               <ng-container>

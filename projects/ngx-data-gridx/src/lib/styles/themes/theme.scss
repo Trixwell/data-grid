@@ -327,6 +327,11 @@
       .grid__footer{
         margin-bottom: token.$space-4;
       }
+
+      .grid__filters:has(.grid__name){
+        max-width: 100%;
+        overflow-x: hidden;
+      }
     }
   }
 

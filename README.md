@@ -61,6 +61,7 @@ export class AppModule {}
 | `expandableAll`      | `boolean`                                     | Allow several open sub-grids (default: one at a time). |
 | `noDataPlaceholder`  | `string`                                      | Message to display when no data is found.              |
 | `parentGridFilters`  | `object`                                      | Filters from a parent grid to apply in a sub-grid context. |
+| `gridTitle`          | `string \| null`                              | Title shown in the grid header when `grid_name` is not set. Set automatically for sub-grids from `SubGridSettings.title`. |
 
 ---
 
@@ -147,6 +148,7 @@ export class AppComponent {
       subGridSettings: new SubGridSettings({
         suburl: '/api/items/details',
         subUrlParams: [{ paramName: 'item_id', columnName: 'id' }],
+        title: (row) => `Details for item ${(row as any).id}`,
         subGridProps: {
           multiselect: false,
           limit: 5,
@@ -170,6 +172,8 @@ export class AppComponent {
   ];
 }
 ```
+
+`SubGridSettings.title` accepts a string or a function `(row) => string` and is shown in the header of the nested grid.
 
 ### Template
 

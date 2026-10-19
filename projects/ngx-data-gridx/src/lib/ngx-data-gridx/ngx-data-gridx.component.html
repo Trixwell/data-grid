@@ -1,12 +1,12 @@
 <div class="grid__container" [ngClass]="'grid-theme-' + theme()">
-  @if(showHistoryFilters() || grid_name()){
+  @if(showHistoryFilters() || grid_name() || gridTitle()){
     <div class="grid__header no-print">
       <div class="grid__filters" [ngClass]="{'sub__grid_filter': isSubGrid()}">
         <ng-content select=".grid__filter_option"></ng-content>
 
         <div class="grid-title">
-          @if(grid_name()){
-            <span class="grid__name">{{ grid_name() }}</span>
+          @if(grid_name() || gridTitle()){
+            <span class="grid__name">{{ grid_name() || gridTitle() }}</span>
           }
         </div>
 
@@ -464,6 +464,7 @@
                 <ng-container>
                   @for(o of [col]; track trackByKey($index, o)){
                     <ngx-data-gridx
+                      [gridTitle]="getSubGridTitle(col, element)"
                       [url]="col.subGridSettings?.suburl"
                       [data]="col.subGridPropertyList || []"
                       [theme]="getCurrentTheme()"

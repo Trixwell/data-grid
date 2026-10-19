@@ -97,6 +97,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   limit = model<number>(10);
   sort = model<string>('asc');
   grid_name = model<string | undefined>();
+  gridTitle = input<string | null | undefined>();
   sidx = model<string | undefined>();
   multiselect = model<boolean>(false);
   showFilters = model<boolean>(true);
@@ -1731,6 +1732,12 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       ? (this.resolveColumn(column.name)?.callback?.(row) ?? row[column.name])
       : row[column.name];
     return raw != null ? String(raw) : '';
+  }
+
+  getSubGridTitle(col: GridProperty, row: object): string | null {
+    const t = col.subGridSettings?.title;
+    const v = typeof t === 'function' ? t(row) : t;
+    return v ? String(v) : null;
   }
 
   protected readonly GridPropertyType = GridPropertyType;

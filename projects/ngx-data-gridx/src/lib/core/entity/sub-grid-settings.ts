@@ -8,6 +8,7 @@ export class SubGridSettings{
   autoRefreshIntervalSec?: number | null;
   detailComponent?: Type<any>;
   title?: string | ((row: object) => string | null | undefined);
+  summary?: SubGridSummary;
   constructor(params: SubGridPropertiesDTO) {
     this.subUrlParams = params.subUrlParams || null;
     this.subGridProps = params.subGridProps || {};
@@ -16,6 +17,7 @@ export class SubGridSettings{
     this.detailComponent         = params.detailComponent;
     this.autoRefreshIntervalSec = params.autoRefreshIntervalSec || null;
     this.title = params.title;
+    this.summary = params.summary;
   }
 }
 
@@ -28,6 +30,13 @@ export interface SubGridPropertiesDTO{
   autoRefreshIntervalSec?: number | null;
   detailComponent?: Type<any>;
   title?: string | ((row: object) => string | null | undefined);
+  summary?: SubGridSummary;
+}
+
+export interface SubGridSummary {
+  url: string;
+  filterColumns: string[];
+  label?: (values: Record<string, string>) => string;
 }
 
 export interface subGridPropsDTO {

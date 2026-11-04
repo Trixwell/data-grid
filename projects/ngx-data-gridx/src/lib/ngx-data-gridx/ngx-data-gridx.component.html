@@ -70,6 +70,10 @@
             </td>
             <td class="grid__footer-cell no-print" mat-footer-cell *matFooterCellDef></td>
           </ng-container>
+
+          <ng-container matColumnDef="summary_select">
+            <td class="grid__footer-cell grid__summary-cell no-print" mat-cell *matCellDef="let row"></td>
+          </ng-container>
         }
 
         <!-- primary cols -->
@@ -456,6 +460,17 @@
                 [style.width]="column.width"
                 [innerHTML]="getTotalsCell(column)"></td>
           </ng-container>
+
+          <ng-container [matColumnDef]="'summary_' + column.name">
+            <td class="grid__footer-cell grid__summary-cell" mat-cell *matCellDef="let row"
+                [class.grid__footer-cell--filled]="getSummaryCell(column, summaryState(row)) !== ''"
+                [style.width]="column.width">
+              <span class="grid__summary-value" [innerHTML]="getSummaryCell(column, summaryState(row))"></span>
+              @if(getSummaryLabel(column, summaryState(row)); as label){
+                <span class="grid__summary-label">{{ label }}</span>
+              }
+            </td>
+          </ng-container>
         }
 
         <!-- expand table -->
@@ -482,6 +497,7 @@
                       [showFilters] = "col.subGridSettings?.subGridProps?.showFilters || false"
                       [detailComponent]="col.subGridSettings?.detailComponent"
                       [totalsUrl]="col.subGridSettings?.subTotalsUrl ?? null"
+                      (filtersChange)="onSubGridFiltersChange(element, col, $event)"
                       [multiselect] = "col.subGridSettings?.subGridProps?.multiselect ?? false">
                     </ngx-data-gridx>
                   }
@@ -521,6 +537,11 @@
             [class.detail-expanded]="isDetailExpanded(element)"
             [class.accordion]="detailComponent()"
             [class.example-expanded-row]="isRowExpanded(element)">
+        </tr>
+
+        <tr mat-row *matRowDef="let element; columns: summaryColumns;"
+            class="grid__summary-row"
+            [class.grid__summary-row--hidden]="!summaryState(element)">
         </tr>
 
         <!-- expand row -->

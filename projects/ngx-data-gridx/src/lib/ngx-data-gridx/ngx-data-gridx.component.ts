@@ -8,10 +8,12 @@ import {
     HostListener,
     input,
     model,
+    output,
     OnDestroy,
     OnInit,
     QueryList,
     signal,
+    computed,
     TemplateRef,
     Type,
     ViewChild,
@@ -19,6 +21,8 @@ import {
     ViewContainerRef,
 } from '@angular/core';
 import {GridProperty, GridPropertyType, MultiSearchOptions} from '../core/entity/grid-property';
+import {SubGridSummary} from '../core/entity/sub-grid-settings';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {MatTableModule} from '@angular/material/table';
 import {CommonModule} from '@angular/common';
@@ -96,6 +100,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   data = model<GridProperty[]>([]);
   limit = model<number>(10);
   listKey = input<string>('list');
+  totalsUrl = input<string | null>(null);
   sort = model<string>('asc');
   grid_name = model<string | undefined>();
   gridTitle = input<string | null | undefined>();
@@ -125,6 +130,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   showColumnSettings = input<boolean>(true);
   print = input<(() => void) | null>(null);
   currentSearchType: string | null = null;
+  readonly filtersChange = output<Record<string, string>>();
 
   /** detail accordion (dblclick) */
   detailExpandedElement: any | null = null;
@@ -143,12 +149,21 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   currentGridColumn: GridProperty | null = null;
 
   private autoRefreshSub: Subscription | null = null;
+  private totalsSub: Subscription | null = null;
+  private readonly responseTotals = signal<Record<string, number> | null>(null);
+  private readonly fetchedTotals = signal<Record<string, number> | null>(null);
+  readonly totals = computed(() => this.fetchedTotals() ?? this.responseTotals());
+  private readonly filtersChanged$ = new Subject<void>();
+  private readonly summaryRequests = new Map<string, SummaryRequest>();
+  private readonly summarySubs = new Map<string, Subscription>();
+  private readonly summaryStates = signal<Record<string, SummaryState>>({});
   private autoRefreshDestroy$ = new Subject<void>();
   private expandedDetailIds = new Set<string>();
   private expandedSubGrids = new Map<object, GridProperty>();
 
   total: number = 0;
   displayedColumns: string[] = [];
+  summaryColumns: string[] = [];
 
   searchValues: Record<string, string> = {};
   openFilterColumn: string | null = null;
@@ -185,6 +200,11 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
               private cdr: ChangeDetectorRef,
               private elementRef: ElementRef
   ) {
+    this.filtersChanged$.pipe(
+      debounceTime(300),
+      takeUntilDestroyed()
+    ).subscribe(() => this.filtersChange.emit(this.getActiveFilterValues()));
+
     effect(() => {
       const data = this.data();
       const incoming = this.data();
@@ -235,6 +255,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     this.restoreFilters();
     this.initCustomFilterSearch();
     this.startAutoRefresh();
+
+    if (this.isSubGrid()) this.filtersChanged$.next();
   }
 
   ngAfterViewInit() {
@@ -251,7 +273,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
     this.paginator?.page.subscribe((event) => {
       this.limit.set(event.pageSize);
-      this.loadData(event.pageIndex + 1, event.pageSize);
+      this.loadData(event.pageIndex + 1, event.pageSize, false);
 
       if (this.openAllToggleDetails()) {
         this.cdr.detectChanges();
@@ -684,6 +706,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     if (filterType === 'input' && columnName && this.searchValues[columnName]) {
       delete this.searchValues[columnName];
       this.saveFilters();
+      this.filtersChanged$.next();
       this.searchSubject.next({...this.searchValues});
     }
 
@@ -746,6 +769,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
     this.uncheckedCheckbox(column, filterType, optionValue);
     this.saveFilters();
+    this.filtersChanged$.next();
     this.loadData(1, this.limit());
   }
 
@@ -780,10 +804,14 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
           this.collapseAll();
           this.rows.data = response.response[this.listKey()];
           this.total = response?.response?.total || 0;
+          this.responseTotals.set(response.response.totals ?? null);
+          this.loadTotals();
         } else if (response && Array.isArray(response.response)) {
           this.collapseAll();
           this.rows.data = response.response;
           this.total = response?.response.length || 0;
+          this.responseTotals.set(null);
+          this.loadTotals();
         }
       },
       error: (error: HttpErrorResponse) => {
@@ -831,6 +859,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     this.filterInputValues = {};
 
     this.saveFilters();
+    this.filtersChanged$.next();
     this.loadData();
   }
 
@@ -930,6 +959,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.saveFilters();
+    this.filtersChanged$.next();
     this.searchSubject.next({...this.searchValues});
   }
 
@@ -966,8 +996,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setDisplayedColumns() {
-    this.displayedColumns = [...new Set(this.data().map(col => col.name))];
-    if (this.multiselect()) this.displayedColumns.unshift('select');
+    const names = [...new Set(this.data().map(col => col.name))];
+    this.updateDisplayedColumns(this.multiselect() ? ['select', ...names] : names);
   }
 
   getRequestUrl(page = 1, pageSize = this.limit()): string {
@@ -984,19 +1014,198 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     return `${baseUrl}?${params.toString()}`;
   }
 
+  getTotalsRequestUrl(): string {
+    const url = this.totalsUrl();
+    if (!url) return '';
+
+    const [baseUrl, queryString] = url.split('?');
+    const params = new URLSearchParams(queryString || '');
+
+    this.mappingCustomParams(params);
+    this.mappingParentGridFiltersParams(params);
+    this.appendFilterParams(params);
+
+    return `${baseUrl}?${params.toString()}`;
+  }
+
+  private loadTotals(): void {
+    this.totalsSub?.unsubscribe();
+    this.totalsSub = null;
+
+    const url = this.getTotalsRequestUrl();
+    if (!url) {
+      this.fetchedTotals.set(null);
+      return;
+    }
+
+    this.totalsSub = this.http.get<{ response?: { totals?: Record<string, number> } }>(url).subscribe({
+      next: (data) => this.fetchedTotals.set(data.response?.totals ?? null),
+      error: (error: HttpErrorResponse) => {
+        console.error(error.message);
+        this.fetchedTotals.set(null);
+      }
+    });
+  }
+
+  getTotalsCell(column: GridProperty): string {
+    const totals = this.totals();
+    if (!totals || totals[column.name] === undefined) return '';
+    const value = column.callback ? column.callback(totals) : totals[column.name];
+    return value == null ? '' : String(value);
+  }
+
+  onSubGridFiltersChange(row: object, column: GridProperty, filters: Record<string, string>): void {
+    const summary = column.subGridSettings?.summary;
+    if (!summary) return;
+
+    const rowId = this.getRowId(row);
+    const values: Record<string, string> = {};
+    summary.filterColumns.forEach(name => {
+      if (filters[name]) values[name] = filters[name];
+    });
+
+    if (!Object.keys(values).length) {
+      this.clearSummary(rowId);
+      return;
+    }
+
+    this.summaryRequests.set(rowId, {column, values});
+    this.loadSummary(rowId, row);
+  }
+
+  private getSummaryRequestUrl(row: object, column: GridProperty, summary: SubGridSummary, values: Record<string, string>): string {
+    const [baseUrl, queryString] = summary.url.split('?');
+    const params = new URLSearchParams(queryString || '');
+
+    this.appendFilterParams(params);
+    this.mapRowParams(params, row, column.subGridSettings?.subUrlParams);
+    Object.entries(values).forEach(([name, value]) => params.set(name, value));
+
+    return `${baseUrl}?${params.toString()}`;
+  }
+
+  private loadSummary(rowId: string, row: object): void {
+    this.summarySubs.get(rowId)?.unsubscribe();
+    this.summarySubs.delete(rowId);
+
+    const request = this.summaryRequests.get(rowId);
+    const summary = request?.column.subGridSettings?.summary;
+    if (!request || !summary) return;
+
+    const url = this.getSummaryRequestUrl(row, request.column, summary, request.values);
+
+    this.summarySubs.set(rowId, this.http.get<{ response?: unknown }>(url).subscribe({
+      next: (data) => {
+        const summaryRow = this.extractSummaryRow(data?.response);
+        this.summarySubs.delete(rowId);
+        if (!summaryRow) {
+          this.setSummaryState(rowId, null);
+          return;
+        }
+        this.setSummaryState(rowId, {label: summary.label?.(request.values) ?? '', row: summaryRow});
+      },
+      error: (error: HttpErrorResponse) => {
+        console.error(error.message);
+        this.summarySubs.delete(rowId);
+        this.setSummaryState(rowId, null);
+      }
+    }));
+  }
+
+  private extractSummaryRow(response: unknown): Record<string, unknown> | null {
+    const first = (value: unknown): Record<string, unknown> | null => {
+      const item = Array.isArray(value) ? value[0] : undefined;
+      return this.isRecord(item) ? item : null;
+    };
+
+    if (Array.isArray(response)) return first(response);
+    if (!this.isRecord(response)) return null;
+
+    const list = response[this.listKey()];
+    return Array.isArray(list) ? first(list) : response;
+  }
+
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+  }
+
+  private setSummaryState(rowId: string, state: SummaryState | null): void {
+    this.summaryStates.update(states => {
+      if (!state) {
+        if (!(rowId in states)) return states;
+        const {[rowId]: _removed, ...rest} = states;
+        return rest;
+      }
+      return {...states, [rowId]: state};
+    });
+  }
+
+  private clearSummary(rowId: string): void {
+    this.summarySubs.get(rowId)?.unsubscribe();
+    this.summarySubs.delete(rowId);
+    this.summaryRequests.delete(rowId);
+    this.setSummaryState(rowId, null);
+  }
+
+  private clearAllSummaries(): void {
+    this.summarySubs.forEach(sub => sub.unsubscribe());
+    this.summarySubs.clear();
+    this.summaryRequests.clear();
+    this.summaryStates.set({});
+  }
+
+  private refreshSummaries(): void {
+    const rowsById = new Map(this.rows.data.map(row => [this.getRowId(row), row]));
+
+    [...this.summaryRequests.keys()].forEach(rowId => {
+      const row = rowsById.get(rowId);
+      if (row) {
+        this.loadSummary(rowId, row);
+      } else {
+        this.clearSummary(rowId);
+      }
+    });
+  }
+
+  summaryState(row: object): SummaryState | null {
+    if (!this.isRowExpanded(row)) return null;
+    return this.summaryStates()[this.getRowId(row)] ?? null;
+  }
+
+  getSummaryCell(column: GridProperty, state: SummaryState | null): string {
+    if (!state || state.row[column.name] === undefined) return '';
+    const callback = this.resolveColumn(column.name)?.callback ?? column.callback;
+    const value = callback ? callback(state.row) : state.row[column.name];
+    return value == null ? '' : String(value);
+  }
+
+  getSummaryLabel(column: GridProperty, state: SummaryState | null): string {
+    if (!state) return '';
+    const labelColumn = this.displayedColumns.find(name => name !== 'select' && state.row[name] === undefined);
+    if (labelColumn !== column.name) return '';
+    return state.label;
+  }
+
   isSubGrid(): boolean {
     return !!this.currentRow();
   }
 
   private mappingCustomParams(params: URLSearchParams) {
-    const subUrlParams = this.subUrlParams();
-    if (!this.currentRow() || !this.subUrlParams()) {
+    this.mapRowParams(params, this.currentRow(), this.subUrlParams());
+  }
+
+  private mapRowParams(
+    params: URLSearchParams,
+    row: object | null | undefined,
+    subUrlParams: { paramName: string; columnName: string }[] | null | undefined
+  ) {
+    if (!row || !subUrlParams) {
       return;
     }
 
-    const rowData = this.currentRow() as Record<string, unknown>;
+    const rowData = row as Record<string, unknown>;
 
-    subUrlParams?.forEach(({paramName, columnName}) => {
+    subUrlParams.forEach(({paramName, columnName}) => {
       if (Object.prototype.hasOwnProperty.call(rowData, columnName)) {
         const value = rowData[columnName];
 
@@ -1032,7 +1241,12 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       ...actions.map(c => c.name),
     ];
 
-    this.displayedColumns = this.multiselect() ? ['select', ...names] : names;
+    this.updateDisplayedColumns(this.multiselect() ? ['select', ...names] : names);
+  }
+
+  private updateDisplayedColumns(names: string[]): void {
+    this.displayedColumns = names;
+    this.summaryColumns = names.map(name => `summary_${name}`);
   }
 
 
@@ -1082,6 +1296,16 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       params.append('sort', sort.toString());
     }
 
+    this.appendFilterParams(params);
+  }
+
+  private getActiveFilterValues(): Record<string, string> {
+    const params = new URLSearchParams();
+    this.appendFilterParams(params);
+    return Object.fromEntries(params.entries());
+  }
+
+  private appendFilterParams(params: URLSearchParams) {
     Object.keys(this.searchValues).forEach(columnName => {
       const value = this.searchValues[columnName];
       if (value) {
@@ -1137,10 +1361,12 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     return filterType === type;
   }
 
-  loadData(page = 1, pageSize = this.limit()) {
+  loadData(page = 1, pageSize = this.limit(), refreshTotals = true) {
     this.showLoader();
 
     if (!this.url()) return;
+
+    if (refreshTotals) this.loadTotals();
 
     if (!this.destroy$.closed) {
       this.destroy$.next();
@@ -1159,8 +1385,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
         if (Array.isArray(resp)) {
           this.rows.data = resp;
           this.total = resp.length;
+          this.responseTotals.set(null);
         } else {
-          const {[this.listKey()]: list, total, ...singleObject} = resp;
+          const {[this.listKey()]: list, total, totals, ...singleObject} = resp;
+          this.responseTotals.set(totals ?? null);
 
           if (Array.isArray(list)) {
             this.rows.data = list;
@@ -1173,6 +1401,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
         this.selection.clear();
         this.hideLoader();
+        this.refreshSummaries();
 
         if (this.openAllToggleDetails()) {
           this.cdr.detectChanges();
@@ -1311,6 +1540,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       this.saveFilters();
     }
 
+    this.filtersChanged$.next();
     this.loadData(1, this.limit());
   }
 
@@ -1345,6 +1575,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       };
 
       this.saveFilters();
+      this.filtersChanged$.next();
 
       if (this.openFilterColumn === columnName) {
         this.openFilterColumn = null;
@@ -1360,6 +1591,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
         }
 
         this.saveFilters();
+        this.filtersChanged$.next();
         this.loadData(1, this.limit());
       }
     }
@@ -1389,6 +1621,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     if (callback) {
       callback(columnName, filterType, value);
     }
+
+    this.filtersChanged$.next();
   }
 
   isCheckboxChecked(columnName: string, value: string | number): boolean {
@@ -1484,6 +1718,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.expandableAll()) {
       if (this.expandedSubGrids.get(row)?.name === column.name) {
+        this.clearSummary(this.getRowId(row));
         this.expandedSubGrids.delete(row);
         if (this.expandedElement() === row) {
           this.expandedElement.set(null);
@@ -1498,15 +1733,18 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.expandedElement() === row && this.currentGridColumn?.name === column.name) {
+      this.clearSummary(this.getRowId(row));
       this.expandedElement.set(null);
       this.currentGridColumn = null;
     } else {
+      this.clearAllSummaries();
       this.expandedElement.set(row);
       this.currentGridColumn = column;
     }
   }
 
   collapseAll(): void {
+    this.clearAllSummaries();
     this.expandedSubGrids.clear();
     this.expandedElement.set(null);
     this.currentGridColumn = null;
@@ -1627,6 +1865,9 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     this.autoRefreshDestroy$.next();
     this.autoRefreshDestroy$.complete();
 
+    this.totalsSub?.unsubscribe();
+    this.clearAllSummaries();
+
     if (this.autoRefreshSub) {
       this.autoRefreshSub.unsubscribe();
     }
@@ -1661,6 +1902,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       this.pendingCheckboxColumns.delete(columnName);
       this.showLoader();
       this.saveFilters();
+      this.filtersChanged$.next();
       this.loadData(1, this.limit());
     }
 
@@ -1720,6 +1962,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.saveFilters();
+    this.filtersChanged$.next();
 
     this.loadData(1, this.limit());
 
@@ -1743,6 +1986,16 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
   protected readonly GridPropertyType = GridPropertyType;
   protected readonly GridTheme = GridTheme;
+}
+
+export interface SummaryState {
+  label: string;
+  row: Record<string, unknown>;
+}
+
+interface SummaryRequest {
+  column: GridProperty;
+  values: Record<string, string>;
 }
 
 export interface AppliedFiltersDTO {

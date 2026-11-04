@@ -20,6 +20,23 @@
 }
 
 @mixin grid-theme-common {
+  .grid__footer-row--hidden,
+  .grid__summary-row--hidden {
+    display: none;
+  }
+
+  .grid__summary-cell {
+    position: relative;
+  }
+
+  .grid__summary-label {
+    position: absolute;
+    top: 50%;
+    z-index: 1;
+    transform: translateY(-50%);
+    white-space: nowrap;
+  }
+
   .grid__table {
     background: transparent;
 

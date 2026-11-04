@@ -33,7 +33,7 @@ export class PdfExportService {
   private static readonly IMG_TAG_PATTERN = /<img\b[^>]*>/gi;
   private static readonly IMG_SRC_PATTERN = /\ssrc\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i;
 
-  export(rows: any[], columns: GridProperty[], key: string): void {
+  export(rows: any[], columns: GridProperty[], key: string, totals: Record<string, number> | null = null): void {
     const stored = this.getGridSettings(key);
     const base = stored ?? columns;
 
@@ -59,6 +59,7 @@ export class PdfExportService {
           return this.toCell(raw != null ? String(raw) : '', images);
         })
       ),
+      ...(totals && rows.length ? [this.totalsRow(exportableCols, totals, images)] : []),
     ];
 
     const widths = Array(exportableCols.length).fill('auto');
@@ -94,6 +95,21 @@ export class PdfExportService {
         },
       ],
       defaultStyle: { fontSize: 10 },
+    });
+  }
+
+  private totalsRow(
+    cols: (GridProperty & { callback?: (row: object | null | undefined) => string | undefined })[],
+    totals: Record<string, number>,
+    images: Record<string, string>,
+  ): Content[] {
+    return cols.map(col => {
+      if (totals[col.name] === undefined) return { text: '' };
+
+      const raw = col.callback ? col.callback(totals) : totals[col.name];
+      const cell = this.toCell(raw != null ? String(raw) : '', images);
+
+      return typeof cell === 'object' && cell !== null ? { ...cell, bold: true } : cell;
     });
   }
 

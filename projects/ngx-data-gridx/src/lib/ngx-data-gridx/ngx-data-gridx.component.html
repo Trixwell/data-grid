@@ -68,6 +68,11 @@
                             [checked]="selection.isSelected(row)">
               </mat-checkbox>
             </td>
+            <td class="grid__footer-cell no-print" mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <ng-container matColumnDef="summary_select">
+            <td class="grid__footer-cell grid__summary-cell no-print" mat-cell *matCellDef="let row"></td>
           </ng-container>
         }
 
@@ -450,6 +455,21 @@
                 </div>
               </ng-container>
             </td>
+            <td class="grid__footer-cell" mat-footer-cell *matFooterCellDef
+                [class.grid__footer-cell--filled]="getTotalsCell(column) !== ''"
+                [style.width]="column.width"
+                [innerHTML]="getTotalsCell(column)"></td>
+          </ng-container>
+
+          <ng-container [matColumnDef]="'summary_' + column.name">
+            <td class="grid__footer-cell grid__summary-cell" mat-cell *matCellDef="let row"
+                [class.grid__footer-cell--filled]="getSummaryCell(column, summaryState(row)) !== ''"
+                [style.width]="column.width">
+              <span class="grid__summary-value" [innerHTML]="getSummaryCell(column, summaryState(row))"></span>
+              @if(getSummaryLabel(column, summaryState(row)); as label){
+                <span class="grid__summary-label">{{ label }}</span>
+              }
+            </td>
           </ng-container>
         }
 
@@ -476,6 +496,8 @@
                       [limit]="col.subGridSettings?.subGridProps?.limit || 10"
                       [showFilters] = "col.subGridSettings?.subGridProps?.showFilters || false"
                       [detailComponent]="col.subGridSettings?.detailComponent"
+                      [totalsUrl]="col.subGridSettings?.subTotalsUrl ?? null"
+                      (filtersChange)="onSubGridFiltersChange(element, col, $event)"
                       [multiselect] = "col.subGridSettings?.subGridProps?.multiselect ?? false">
                     </ngx-data-gridx>
                   }
@@ -517,6 +539,11 @@
             [class.example-expanded-row]="isRowExpanded(element)">
         </tr>
 
+        <tr mat-row *matRowDef="let element; columns: summaryColumns;"
+            class="grid__summary-row"
+            [class.grid__summary-row--hidden]="!summaryState(element)">
+        </tr>
+
         <!-- expand row -->
         <tr mat-row *matRowDef="let element; columns: ['expandedDetail']"
             class="example-detail-row">
@@ -526,6 +553,10 @@
             *matRowDef="let row; columns: ['detailRow']"
             class="detail-row">
         </tr>
+
+        <tr mat-footer-row *matFooterRowDef="displayedColumns"
+            class="grid__footer-row"
+            [class.grid__footer-row--hidden]="!totals() || !rows.data.length"></tr>
 
         <tr class="mat-row" *matNoDataRow>
           <td class="mat-cell" [attr.colspan]="displayedColumns.length">
@@ -543,6 +574,7 @@
         <grid-footer-settings [(columns)]="data"
                               [printData]="print()"
                               [rows]="rows.data"
+                              [totals]="totals()"
                               [showPrint]="showPrint()"
                               [showExportCsv]="!!exportCsvUrl()"
                               (exportCsv)="exportCsvAction()"

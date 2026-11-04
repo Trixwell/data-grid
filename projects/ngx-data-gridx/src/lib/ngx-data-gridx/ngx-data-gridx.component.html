@@ -68,6 +68,7 @@
                             [checked]="selection.isSelected(row)">
               </mat-checkbox>
             </td>
+            <td class="grid__footer-cell no-print" mat-footer-cell *matFooterCellDef></td>
           </ng-container>
         }
 
@@ -450,6 +451,10 @@
                 </div>
               </ng-container>
             </td>
+            <td class="grid__footer-cell" mat-footer-cell *matFooterCellDef
+                [class.grid__footer-cell--filled]="getTotalsCell(column) !== ''"
+                [style.width]="column.width"
+                [innerHTML]="getTotalsCell(column)"></td>
           </ng-container>
         }
 
@@ -476,6 +481,7 @@
                       [limit]="col.subGridSettings?.subGridProps?.limit || 10"
                       [showFilters] = "col.subGridSettings?.subGridProps?.showFilters || false"
                       [detailComponent]="col.subGridSettings?.detailComponent"
+                      [totalsUrl]="col.subGridSettings?.subTotalsUrl ?? null"
                       [multiselect] = "col.subGridSettings?.subGridProps?.multiselect ?? false">
                     </ngx-data-gridx>
                   }
@@ -527,6 +533,10 @@
             class="detail-row">
         </tr>
 
+        <tr mat-footer-row *matFooterRowDef="displayedColumns"
+            class="grid__footer-row"
+            [class.grid__footer-row--hidden]="!totals() || !rows.data.length"></tr>
+
         <tr class="mat-row" *matNoDataRow>
           <td class="mat-cell" [attr.colspan]="displayedColumns.length">
             @if(!loading){
@@ -543,6 +553,7 @@
         <grid-footer-settings [(columns)]="data"
                               [printData]="print()"
                               [rows]="rows.data"
+                              [totals]="totals()"
                               [showPrint]="showPrint()"
                               [showExportCsv]="!!exportCsvUrl()"
                               (exportCsv)="exportCsvAction()"

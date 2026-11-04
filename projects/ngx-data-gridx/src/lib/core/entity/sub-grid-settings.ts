@@ -2,6 +2,7 @@ import {Type} from '@angular/core';
 
 export class SubGridSettings{
   suburl?:string;
+  subTotalsUrl?: string;
   subUrlParams?: { paramName: string; columnName: string }[] | null;
   subGridProps?: subGridPropsDTO;
   autoRefreshIntervalSec?: number | null;
@@ -11,6 +12,7 @@ export class SubGridSettings{
     this.subUrlParams = params.subUrlParams || null;
     this.subGridProps = params.subGridProps || {};
     this.suburl = params.suburl || '';
+    this.subTotalsUrl = params.subTotalsUrl;
     this.detailComponent         = params.detailComponent;
     this.autoRefreshIntervalSec = params.autoRefreshIntervalSec || null;
     this.title = params.title;
@@ -20,6 +22,7 @@ export class SubGridSettings{
 
 export interface SubGridPropertiesDTO{
   suburl?:string;
+  subTotalsUrl?: string;
   subUrlParams?: { paramName: string; columnName: string }[] | null;
   subGridProps?: subGridPropsDTO
   autoRefreshIntervalSec?: number | null;

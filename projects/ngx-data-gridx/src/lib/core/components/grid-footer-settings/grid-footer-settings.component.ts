@@ -19,6 +19,7 @@ export class GridFooterSettingsComponent {
   columns = model<GridProperty[]>();
   mappedColumns = input<GridProperty[]>();
   rows = input<any[]>([]);
+  totals = input<Record<string, number> | null>(null);
   showPrint = input<boolean>(true);
   showExportCsv = input<boolean>(false);
   exportCsv = output<void>();
@@ -53,7 +54,7 @@ export class GridFooterSettingsComponent {
     if (print) {
       print();
     } else {
-      this.pdfExportService.export(this.rows(), this.columns()!, this.storageKey())
+      this.pdfExportService.export(this.rows(), this.columns()!, this.storageKey(), this.totals())
     }
   }
 }

@@ -12,6 +12,7 @@ import {
     OnInit,
     QueryList,
     signal,
+    computed,
     TemplateRef,
     Type,
     ViewChild,
@@ -96,6 +97,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   data = model<GridProperty[]>([]);
   limit = model<number>(10);
   listKey = input<string>('list');
+  totalsUrl = input<string | null>(null);
   sort = model<string>('asc');
   grid_name = model<string | undefined>();
   gridTitle = input<string | null | undefined>();
@@ -143,6 +145,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   currentGridColumn: GridProperty | null = null;
 
   private autoRefreshSub: Subscription | null = null;
+  private totalsSub: Subscription | null = null;
+  private readonly responseTotals = signal<Record<string, number> | null>(null);
+  private readonly fetchedTotals = signal<Record<string, number> | null>(null);
+  readonly totals = computed(() => this.fetchedTotals() ?? this.responseTotals());
   private autoRefreshDestroy$ = new Subject<void>();
   private expandedDetailIds = new Set<string>();
   private expandedSubGrids = new Map<object, GridProperty>();
@@ -251,7 +257,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
     this.paginator?.page.subscribe((event) => {
       this.limit.set(event.pageSize);
-      this.loadData(event.pageIndex + 1, event.pageSize);
+      this.loadData(event.pageIndex + 1, event.pageSize, false);
 
       if (this.openAllToggleDetails()) {
         this.cdr.detectChanges();
@@ -780,10 +786,14 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
           this.collapseAll();
           this.rows.data = response.response[this.listKey()];
           this.total = response?.response?.total || 0;
+          this.responseTotals.set(response.response.totals ?? null);
+          this.loadTotals();
         } else if (response && Array.isArray(response.response)) {
           this.collapseAll();
           this.rows.data = response.response;
           this.total = response?.response.length || 0;
+          this.responseTotals.set(null);
+          this.loadTotals();
         }
       },
       error: (error: HttpErrorResponse) => {
@@ -984,6 +994,46 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     return `${baseUrl}?${params.toString()}`;
   }
 
+  getTotalsRequestUrl(): string {
+    const url = this.totalsUrl();
+    if (!url) return '';
+
+    const [baseUrl, queryString] = url.split('?');
+    const params = new URLSearchParams(queryString || '');
+
+    this.mappingCustomParams(params);
+    this.mappingParentGridFiltersParams(params);
+    this.setFiltersValues(params, 1, this.limit(), false);
+
+    return `${baseUrl}?${params.toString()}`;
+  }
+
+  private loadTotals(): void {
+    this.totalsSub?.unsubscribe();
+    this.totalsSub = null;
+
+    const url = this.getTotalsRequestUrl();
+    if (!url) {
+      this.fetchedTotals.set(null);
+      return;
+    }
+
+    this.totalsSub = this.http.get<{ response?: { totals?: Record<string, number> } }>(url).subscribe({
+      next: (data) => this.fetchedTotals.set(data.response?.totals ?? null),
+      error: (error: HttpErrorResponse) => {
+        console.error(error.message);
+        this.fetchedTotals.set(null);
+      }
+    });
+  }
+
+  getTotalsCell(column: GridProperty): string {
+    const totals = this.totals();
+    if (!totals || totals[column.name] === undefined) return '';
+    const value = column.callback ? column.callback(totals) : totals[column.name];
+    return value == null ? '' : String(value);
+  }
+
   isSubGrid(): boolean {
     return !!this.currentRow();
   }
@@ -1069,17 +1119,19 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  private setFiltersValues(params: URLSearchParams, page = 1, pageSize = this.limit()) {
-    const sidx = this.sidx();
-    const sort = this.sort();
-    params.append('page', page.toString());
-    params.append('limit', pageSize.toString());
+  private setFiltersValues(params: URLSearchParams, page = 1, pageSize = this.limit(), includePaging = true) {
+    if (includePaging) {
+      const sidx = this.sidx();
+      const sort = this.sort();
+      params.append('page', page.toString());
+      params.append('limit', pageSize.toString());
 
-    if (sidx) {
-      params.append('sidx', sidx.toString());
-    }
-    if (sort) {
-      params.append('sort', sort.toString());
+      if (sidx) {
+        params.append('sidx', sidx.toString());
+      }
+      if (sort) {
+        params.append('sort', sort.toString());
+      }
     }
 
     Object.keys(this.searchValues).forEach(columnName => {
@@ -1137,10 +1189,12 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
     return filterType === type;
   }
 
-  loadData(page = 1, pageSize = this.limit()) {
+  loadData(page = 1, pageSize = this.limit(), refreshTotals = true) {
     this.showLoader();
 
     if (!this.url()) return;
+
+    if (refreshTotals) this.loadTotals();
 
     if (!this.destroy$.closed) {
       this.destroy$.next();
@@ -1159,8 +1213,10 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
         if (Array.isArray(resp)) {
           this.rows.data = resp;
           this.total = resp.length;
+          this.responseTotals.set(null);
         } else {
-          const {[this.listKey()]: list, total, ...singleObject} = resp;
+          const {[this.listKey()]: list, total, totals, ...singleObject} = resp;
+          this.responseTotals.set(totals ?? null);
 
           if (Array.isArray(list)) {
             this.rows.data = list;
@@ -1626,6 +1682,8 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
     this.autoRefreshDestroy$.next();
     this.autoRefreshDestroy$.complete();
+
+    this.totalsSub?.unsubscribe();
 
     if (this.autoRefreshSub) {
       this.autoRefreshSub.unsubscribe();

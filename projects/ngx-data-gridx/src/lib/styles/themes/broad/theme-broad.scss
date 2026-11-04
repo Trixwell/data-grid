@@ -156,6 +156,23 @@
     border-right: none !important;
   }
 
+  .grid__footer-cell {
+    background: token.$grid-footer-empty-bg;
+    border-bottom: token.$border-1 solid token.$primary-100;
+    border-right: token.$border-1 solid token.$primary-100;
+    color: token.$neutral-800;
+    font: token.$font-caption-m-400;
+
+    &:last-child {
+      border-right: none !important;
+    }
+
+    &.grid__footer-cell--filled {
+      background: token.$neutral-50;
+      font-weight: token.$font-weight-h;
+    }
+  }
+
   .grid__td {
     border-bottom: token.$border-1 solid token.$primary-100;
     border-right: token.$border-1 solid token.$primary-100;

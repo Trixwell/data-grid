@@ -49,6 +49,8 @@ export class AppModule {}
 | `exportCsvUrl`       | `string`                                      | URL to export the current filtered data in CSV format. |
 | `data`               | `GridProperty[]`                              | Configuration for grid columns.                        |
 | `limit`              | `number`                                      | Number of rows per page.                               |
+| `listKey`            | `string`                                      | Response key holding the rows (default `list`).        |
+| `totalsUrl`          | `string \| null`                              | Optional endpoint returning `{ response: { totals } }`; overrides totals from the list response. |
 | `sort`               | `string`                                      | Sort direction: `asc` or `desc`.                       |
 | `sidx`               | `string`                                      | Field name to sort by.                                 |
 | `grid_name`          | `string`                                      | Unique identifier for the grid.                        |
@@ -64,6 +66,20 @@ export class AppModule {}
 | `gridTitle`          | `string \| null`                              | Title shown in the grid header when `grid_name` is not set. Set automatically for sub-grids from `SubGridSettings.title`. |
 
 ---
+
+## Totals footer row
+
+The grid renders a bold, grey footer row when the list response contains `totals`. Totals are calculated by the server over the whole filtered set, so they ignore pagination.
+
+```json
+{ "response": { "list": [], "total": 120, "totals": { "quantity": 28, "amount": 73100 } } }
+```
+
+- Keys of `totals` are column names. A column without a key gets an empty footer cell.
+- Each cell is rendered with the column `callback`, which receives the `totals` object as the row.
+- The row is hidden when there are no rows. The PDF export appends it as the last bold row.
+- `totalsUrl`: when set, the grid requests it with the same filter params as the list request but without `page`, `limit`, `sidx` and `sort`, and expects `{ "response": { "totals": { ... } } }`. These totals override the ones from the list response. They are refetched on filter, search, refresh and auto-refresh, not on page change.
+- Sub-grids: set `subTotalsUrl` in `SubGridSettings`; it is passed to the sub-grid as `totalsUrl`.
 
 ## Key Methods
 

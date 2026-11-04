@@ -20,6 +20,10 @@
 }
 
 @mixin grid-theme-common {
+  .grid__footer-row--hidden {
+    display: none;
+  }
+
   .grid__table {
     background: transparent;
 

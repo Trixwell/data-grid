@@ -96,6 +96,27 @@
     top: 52px;
   }
 
+  .grid__footer-cell {
+    background: token.$grid-footer-empty-bg;
+    border-bottom: token.$border-1 solid token.$violet-100;
+    border-right: token.$border-1 solid token.$violet-100;
+    color: token.$default-800;
+    font: token.$font-body-m;
+
+    &:first-child {
+      border-left: token.$border-1 solid token.$violet-100;
+    }
+
+    &:last-child {
+      border-right: token.$border-1 solid token.$violet-100;
+    }
+
+    &.grid__footer-cell--filled {
+      background: token.$default-50;
+      font-weight: bold;
+    }
+  }
+
   .grid__td {
     border-bottom: token.$border-1 solid token.$violet-100;
     border-right: token.$border-1 solid token.$violet-100;

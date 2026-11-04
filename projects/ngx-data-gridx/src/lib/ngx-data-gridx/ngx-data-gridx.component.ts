@@ -95,6 +95,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
   exportCsvUrl = model<string | undefined>();
   data = model<GridProperty[]>([]);
   limit = model<number>(10);
+  listKey = input<string>('list');
   sort = model<string>('asc');
   grid_name = model<string | undefined>();
   gridTitle = input<string | null | undefined>();
@@ -775,9 +776,9 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
       })
     ).subscribe({
       next: (response) => {
-        if (response && Array.isArray(response.response.list)) {
+        if (response && Array.isArray(response.response[this.listKey()])) {
           this.collapseAll();
-          this.rows.data = response.response.list;
+          this.rows.data = response.response[this.listKey()];
           this.total = response?.response?.total || 0;
         } else if (response && Array.isArray(response.response)) {
           this.collapseAll();
@@ -1159,7 +1160,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
           this.rows.data = resp;
           this.total = resp.length;
         } else {
-          const {list, total, ...singleObject} = resp;
+          const {[this.listKey()]: list, total, ...singleObject} = resp;
 
           if (Array.isArray(list)) {
             this.rows.data = list;

@@ -104,7 +104,7 @@ export class PdfExportService {
     images: Record<string, string>,
   ): Content[] {
     return cols.map(col => {
-      if (totals[col.name] === undefined) return { text: '' };
+      if (totals[col.name] === undefined) return col.footerTitle ? { text: col.footerTitle, bold: true } : { text: '' };
 
       const raw = col.callback ? col.callback(totals) : totals[col.name];
       const cell = this.toCell(raw != null ? String(raw) : '', images);

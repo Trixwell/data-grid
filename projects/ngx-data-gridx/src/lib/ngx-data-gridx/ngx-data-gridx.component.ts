@@ -1029,7 +1029,7 @@ export class NgxDataGridx implements OnInit, AfterViewInit, OnDestroy {
 
   getTotalsCell(column: GridProperty): string {
     const totals = this.totals();
-    if (!totals || totals[column.name] === undefined) return '';
+    if (!totals || totals[column.name] === undefined) return column.footerTitle ?? '';
     const value = column.callback ? column.callback(totals) : totals[column.name];
     return value == null ? '' : String(value);
   }

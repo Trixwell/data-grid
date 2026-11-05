@@ -31,6 +31,7 @@ export class GridProperty{
   component?: Type<any> | null;
   textLimit?: number;
   routerLink?: (row: object | null | undefined) => string;
+  footerTitle?: string;
   constructor(params: GridPropertiesDTO) {
     this.name = params.name;
     this.displayName = params.displayName;
@@ -54,6 +55,7 @@ export class GridProperty{
     this.component = params.component || null;
     this.textLimit = params.textLimit;
     this.routerLink = params.routerLink || undefined;
+    this.footerTitle = params.footerTitle;
 
     this.setDateOptionsByDefault(params);
     this.setRangeOptions(params);
@@ -129,6 +131,7 @@ export interface GridPropertiesDTO{
   columnIndex?: number;
   textLimit?: number;
   routerLink?: (row: object | null | undefined) => string;
+  footerTitle?: string;
 }
 
 export interface FilterDTO {

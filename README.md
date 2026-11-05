@@ -81,6 +81,29 @@ The grid renders a bold, grey footer row when the list response contains `totals
 - `totalsUrl`: when set, the grid requests it with the same filter params as the list request but without `page`, `limit`, `sidx` and `sort`, and expects `{ "response": { "totals": { ... } } }`. These totals override the ones from the list response. They are refetched on filter, search, refresh and auto-refresh, not on page change.
 - Sub-grids: set `subTotalsUrl` in `SubGridSettings`; it is passed to the sub-grid as `totalsUrl`.
 
+## Sub-grid summary row
+
+A sub-grid can show a summary row for its parent row while it is filtered. The row sits between the parent row and the sub-grid, is aligned under the parent grid columns and uses the totals footer look. It is hidden while the sub-grid is not filtered by one of the configured columns, and when the row is collapsed.
+
+```ts
+new SubGridSettings({
+  suburl: '/api/movements',
+  subUrlParams: [{ paramName: 'spec_id', columnName: 'spec_id' }],
+  summary: {
+    url: '/api/specs',
+    filterColumns: ['manager_fio'],
+    label: (values) => `Data for manager filtered by ${values['manager_fio']}`,
+  },
+});
+```
+
+- `summary.url`: endpoint shaped like the parent list. It is requested with the parent grid filters, the `subUrlParams` mapping of the parent row and the active values of `filterColumns`, without paging. The first element of `response[listKey]` (or of `response` when it is an array) is used as the summary row.
+- `summary.filterColumns`: sub-grid columns (filter or search) that trigger the row. Changes to other columns do not touch it.
+- `summary.label`: text for the first cell of the row whose column has no value in the summary row. Return no value for the leading parent columns to make room for it.
+- Every other cell is rendered with the parent column `callback`, which receives the summary row; columns without a key stay empty.
+- The row is refetched when the parent reloads (refresh, auto-refresh, filters, paging) and requests that are superseded are cancelled.
+- The sub-grid emits `filtersChange` (`Record<string, string>` with its active filter params, debounced by 300 ms), also once after it is created. A sub-grid restores its filters from localStorage, and sub-grids with equal columns share one key, so a restored filter shows the summary for the parent row it is opened under, matching the rows the sub-grid displays.
+
 ## Key Methods
 
 * `loadData(page, limit)` — Fetches data from `url` with filters, sorting, and pagination applied.
